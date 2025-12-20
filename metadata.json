@@ -1,5 +1,0 @@
-{
-  "name": "Servo TV",
-  "description": "A high-performance React TV web application featuring IPTV playback, device binding security, and a comprehensive reseller dashboard with point management.",
-  "requestFramePermissions": []
-}
