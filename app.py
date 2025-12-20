@@ -46,6 +46,24 @@ def index():
     return render_template('landingpage.html')
 
 
+# معالج صحة التطبيق
+@app.route('/api/health')
+def health():
+    """فحص صحة التطبيق والاتصال بقاعدة البيانات"""
+    try:
+        # التحقق من الاتصال بقاعدة البيانات
+        db.session.execute('SELECT 1')
+        return jsonify({
+            'status': 'healthy',
+            'message': 'التطبيق يعمل بشكل طبيعي'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'message': str(e)
+        }), 503
+
+
 # معالج الأخطاء 404
 @app.errorhandler(404)
 def not_found(error):
@@ -66,7 +84,8 @@ if admin_bp:
 if reseller_bp:
     app.register_blueprint(reseller_bp, url_prefix='/reseller')
 if users_bp:
-    app.register_blueprint(users_bp, url_prefix='/users')
+    # تسجيل routes المستخدمين بدون prefix حتى تعمل الـ routes الأساسية
+    app.register_blueprint(users_bp)
 
 
 # ============================================================================

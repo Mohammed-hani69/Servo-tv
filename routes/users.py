@@ -4,7 +4,7 @@
 from functools import wraps
 from flask import Blueprint, redirect, render_template, jsonify, request, session, url_for
 from models import db, Device, DeviceActivationCode, ActivationCode, User
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import string
 import random
 import secrets
@@ -14,6 +14,28 @@ from audit_helper import log_user_action
 #=============================================================
 
 users_bp = Blueprint('users', __name__)
+
+
+def safe_datetime_compare(dt1, dt2):
+    """
+    مقارنة آمنة للتواريخ تتعامل مع naive و aware datetimes
+    dt1 > dt2 = True إذا كان dt1 أكبر من dt2
+    """
+    if dt1 is None or dt2 is None:
+        return False
+    
+    try:
+        # إذا كانت كلاهما naive أو كلاهما aware
+        return dt1 < dt2
+    except TypeError:
+        # إذا كانت واحدة naive والأخرى aware
+        # تحويل كلاهما إلى aware
+        if dt1.tzinfo is None:
+            dt1 = dt1.replace(tzinfo=timezone.utc)
+        if dt2.tzinfo is None:
+            dt2 = dt2.replace(tzinfo=timezone.utc)
+        return dt1 < dt2
+
 
 def generate_device_id():
     """توليد معرف جهاز فريد بصيغة DEV-XXXXXX"""
@@ -33,7 +55,43 @@ def user_login_required(f):
             return redirect(url_for('users.login'))
         return f(*args, **kwargs)
     return decorated_function
+
 #================================================================
+# 🔍 API Endpoints للفحص والتشخيص
+#================================================================
+
+@users_bp.route('/api/session-check', methods=['GET'])
+def session_check():
+    """التحقق من حالة الجلسة"""
+    try:
+        device_uid = session.get('device_uid')
+        
+        if not device_uid:
+            return jsonify({
+                'authenticated': False,
+                'message': 'لا توجد جلسة نشطة'
+            }), 401
+        
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({
+                'authenticated': False,
+                'message': 'الجهاز غير نشط'
+            }), 403
+        
+        return jsonify({
+            'authenticated': True,
+            'device_uid': device_uid,
+            'device_name': device.device_name,
+            'user_id': device.user_id,
+            'is_active': device.is_active
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في فحص الجلسة: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 #================================================================
 #================================================================
 
@@ -213,8 +271,27 @@ def dashboard():
 @users_bp.route('/player')
 @user_login_required
 def player():
-    """صفحة مشغل الفيديو"""
-    return render_template('user/player.html')
+    """صفحة مشغل الفيديو المتقدمة"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return redirect(url_for('users.login'))
+        
+        # التحقق من الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return render_template('user/player.html', error='Subscription expired')
+        
+        log_user_action(device.user_id, 'PLAYER_OPENED', 'فتح مشغل الفيديو')
+        
+        return render_template('user/player.html')
+    
+    except Exception as e:
+        print(f"❌ خطأ في صفحة Player: {str(e)}")
+        return render_template('user/player.html', error=str(e))
 
 @users_bp.route('/profile')
 @user_login_required
@@ -235,11 +312,6 @@ def movies():
     """صفحة الأفلام"""
     return render_template('user/movies.html')
 
-@users_bp.route('/live-tv')
-@user_login_required
-def live_tv():
-    """صفحة البث المباشر"""
-    return render_template('user/live-tv.html')
 
 @users_bp.route('/settings')
 @user_login_required
@@ -432,3 +504,827 @@ def device_login():
             'success': False,
             'message': f'Error: {str(e)}'
         }), 500
+
+
+# ============================================================================
+# 🎬 نظام IPTV/M3U - جلب وتحليل المحتوى
+# ============================================================================
+
+@users_bp.route('/api/stream/token', methods=['POST'])
+def get_stream_token():
+    """
+    المرحلة 1: إصدار توكن Stream للجهاز
+    
+    📝 الطلب:
+    {
+        "device_id": "DEV-XXXXX"
+    }
+    
+    ✅ الرد:
+    {
+        "status": "active",
+        "playlist_url": "https://api.yoursite.com/stream/playlist?token=XXXX"
+    }
+    """
+    try:
+        data = request.get_json() or {}
+        device_uid = data.get('device_id') or session.get('device_uid')
+        
+        if not device_uid:
+            return jsonify({'success': False, 'message': 'Device ID required'}), 400
+        
+        # ✅ التحقق من الجهاز والاشتراك
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device or not device.user_id:
+            return jsonify({'success': False, 'message': 'Device not found or inactive'}), 403
+        
+        user = User.query.get(device.user_id)
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        # التحقق من صلاحية الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return jsonify({'success': False, 'message': 'Subscription expired'}), 403
+        
+        # 🔐 توليد توكن Stream (صلاحية 24 ساعة)
+        stream_token = secrets.token_urlsafe(32)
+        
+        # حفظ التوكن في Session (أو يمكن استخدام Redis)
+        session[f'stream_token_{device_uid}'] = stream_token
+        session.permanent = True
+        
+        return jsonify({
+            'success': True,
+            'status': 'active',
+            'playlist_url': f"{request.host_url.rstrip('/')}/stream/playlist?token={stream_token}",
+            'token': stream_token,
+            'token_expires': 86400  # 24 hours
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في إصدار stream token: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/stream/playlist', methods=['GET'])
+def stream_playlist():
+    """
+    المرحلة 2: جلب ملف M3U من Device.media_link بأمان
+    
+    🔐 التحقق من:
+    1. التوكن صحيح
+    2. الجهاز مفعل
+    3. الاشتراك ساري
+    
+    🎯 العملية:
+    1. جلب Device.media_link من DB
+    2. تحميل ملف M3U
+    3. إعادته مباشرة للتطبيق (Proxy)
+    """
+    try:
+        token = request.args.get('token')
+        
+        if not token:
+            return jsonify({'success': False, 'message': 'Token required'}), 401
+        
+        # 🔍 البحث عن الجهاز المرتبط بالتوكن
+        # (في حالة الإنتاج، استخدم Redis أو DB للتوكنات)
+        device = None
+        for key in session:
+            if key.startswith('stream_token_') and session.get(key) == token:
+                device_uid = key.replace('stream_token_', '')
+                device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+                break
+        
+        if not device or not device.media_link:
+            return jsonify({'success': False, 'message': 'Invalid token or no media link'}), 403
+        
+        # التحقق من صلاحية الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return jsonify({'success': False, 'message': 'Subscription expired'}), 403
+        
+        # ✅ جلب ملف M3U من الرابط الأصلي
+        import requests
+        try:
+            response = requests.get(device.media_link, timeout=10)
+            response.raise_for_status()
+            
+            # إرجاع ملف M3U مباشرة
+            from flask import Response
+            return Response(
+                response.content,
+                mimetype='application/vnd.apple.mpegurl',
+                headers={'Content-Disposition': 'attachment; filename=playlist.m3u8'}
+            )
+        
+        except requests.RequestException as e:
+            print(f"❌ خطأ في جلب M3U من {device.media_link}: {str(e)}")
+            return jsonify({'success': False, 'message': 'Failed to fetch playlist'}), 500
+    
+    except Exception as e:
+        print(f"❌ خطأ في stream playlist: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/stream/m3u-info', methods=['POST'])
+@user_login_required
+def get_m3u_info():
+    """
+    المرحلة 3: معلومات M3U المحللة (عدد القنوات، الفئات، إلخ)
+    
+    يُستخدم لإظهار معلومات سريعة في Dashboard دون تحميل كامل الملف
+    """
+    try:
+        import requests
+        import re
+        
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid).first()
+        
+        if not device or not device.media_link:
+            return jsonify({'success': False, 'message': 'No media link'}), 404
+        
+        # جلب ملف M3U
+        response = requests.get(device.media_link, timeout=10)
+        response.raise_for_status()
+        
+        lines = response.text.split('\n')
+        
+        # إحصائيات سريعة
+        stats = {
+            'total_channels': 0,
+            'categories': {},
+            'has_tvg_id': 0,
+            'has_logo': 0
+        }
+        
+        for line in lines:
+            if line.startswith('#EXTINF'):
+                stats['total_channels'] += 1
+                
+                # استخراج group-title
+                group_match = re.search(r'group-title="([^"]+)"', line)
+                if group_match:
+                    group = group_match.group(1)
+                    stats['categories'][group] = stats['categories'].get(group, 0) + 1
+                
+                # تحقق من tvg-id و logo
+                if 'tvg-id=' in line:
+                    stats['has_tvg_id'] += 1
+                if 'tvg-logo=' in line:
+                    stats['has_logo'] += 1
+        
+        return jsonify({
+            'success': True,
+            'data': stats
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في تحليل M3U: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+#=============================================================
+#  🎬 صفحات عرض IPTV
+#=============================================================
+
+@users_bp.route('/iptv-player', methods=['GET'])
+@user_login_required
+def iptv_player():
+    """
+    صفحة مشغل IPTV الرئيسية
+    
+    تتطلب:
+    - المستخدم مسجل دخول (session['device_uid'])
+    - جهاز نشط مع اشتراك سارٍ
+    
+    المتطلبات:
+    1. التحقق من صحة الجهاز
+    2. التحقق من صحة الاشتراك
+    3. عرض صفحة التطبيق
+    """
+    try:
+        device_uid = session.get('device_uid')
+        
+        # 1️⃣ جلب بيانات الجهاز
+        device = Device.query.filter_by(
+            device_uid=device_uid,
+            is_active=True
+        ).first()
+        
+        if not device:
+            print(f"⚠️ جهاز غير نشط: {device_uid}")
+            return redirect(url_for('users.login'))
+        
+        # 2️⃣ التحقق من صحة الاشتراك
+        activation_code = ActivationCode.query.get(device.activation_code_id)
+        now = datetime.now(timezone.utc)
+        
+        if not activation_code or (activation_code.expiration_date and safe_datetime_compare(activation_code.expiration_date, now)):
+            print(f"⚠️ اشتراك منتهي: {device_uid}")
+            return jsonify({
+                'error': 'اشتراكك منتهي الصلاحية'
+            }), 403
+        
+        # 3️⃣ التحقق من وجود ملف M3U
+        if not device.media_link:
+            print(f"⚠️ لا يوجد رابط M3U للجهاز: {device_uid}")
+            return jsonify({
+                'error': 'لم يتم تكوين مصدر البث للجهاز'
+            }), 400
+        
+        # ✅ السماح بالدخول
+        print(f"✅ دخول صفحة IPTV Player: {device_uid}")
+        log_user_action(device.user_id, 'IPTV_PAGE_VIEWED', 'دخول صفحة مشغل IPTV')
+        
+        return render_template('user/iptv-player.html', device_name=device.device_name)
+        
+    except Exception as e:
+        print(f"❌ خطأ في صفحة IPTV: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+#=============================================================
+#  ▶️ تشغيل المحتوى (Streaming Play)
+#=============================================================
+
+@users_bp.route('/api/stream/play', methods=['POST'])
+@user_login_required
+def stream_play():
+    """
+    🎬 تشغيل محتوى (قناة، فيلم، مسلسل)
+    
+    ✅ الطريقة الصحيحة:
+    - لا نحاول جلب البث من Backend
+    - نرسل الرابط مباشرة للجهاز
+    - الجهاز (Browser) يشغله مع headers صحيحة
+    
+    لماذا؟
+    - Server-side requests تحجبها معظم CDNs
+    - Browser requests لها headers صحيحة (User-Agent, Referer, etc)
+    
+    الطلب:
+    {
+        "stream_url": "https://cdn.example.com/hls/channel.m3u8",
+        "content_id": "ar-one",
+        "content_name": "AR One"
+    }
+    
+    الاستجابة:
+    {
+        "success": true,
+        "play_url": "https://cdn.example.com/hls/channel.m3u8"  ← نفس الرابط
+    }
+    """
+    try:
+        data = request.get_json()
+        device_uid = session.get('device_uid')
+        stream_url = data.get('stream_url')
+        content_id = data.get('content_id', 'unknown')
+        content_name = data.get('content_name', 'Unknown')
+        
+        if not device_uid:
+            return jsonify({'success': False, 'message': 'Device not authenticated'}), 401
+        
+        if not stream_url:
+            return jsonify({'success': False, 'message': 'Stream URL required'}), 400
+        
+        # ✅ التحقق من الجهاز
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device or not device.user_id:
+            return jsonify({'success': False, 'message': 'Device not found'}), 403
+        
+        # ✅ التحقق من الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            print(f"⚠️ محاولة تشغيل مع اشتراك منتهي: {device_uid}")
+            return jsonify({
+                'success': False,
+                'message': 'الاشتراك غير مفعل أو منتهي الصلاحية',
+                'error_code': 'SUBSCRIPTION_INVALID'
+            }), 403
+        
+        # 📝 تحديث نشاط الجهاز
+        device.last_login_at = now
+        device.last_ip = request.remote_addr
+        db.session.commit()
+        
+        # 📝 تسجيل النشاط
+        log_user_action(
+            device.user_id,
+            'STREAM_PLAY',
+            f'تشغيل: {content_name} (ID: {content_id})'
+        )
+        
+        print(f"✅ تم توليد توكن تشغيل: {content_name} على جهاز {device_uid}")
+        
+        # 🎫 توليد play token جديد (تفويض مؤقت للتشغيل)
+        play_token = secrets.token_urlsafe(32)
+        token_expiry = now + timedelta(minutes=30)  # التوكن يصلح 30 دقيقة
+        
+        # حفظ بيانات التشغيل في session مع التوكن
+        session[f'play_token_{device_uid}'] = {
+            'token': play_token,
+            'stream_url': stream_url,
+            'content_name': content_name,
+            'content_id': content_id,
+            'expires_at': token_expiry,
+            'user_id': device.user_id
+        }
+        session.modified = True
+        
+        # ✅ إرجاع التوكن فقط (بدون الرابط)
+        return jsonify({
+            'success': True,
+            'play_token': play_token,  # ← التوكن للخطوة التالية
+            'message': 'Play token generated. Use /stream/live?token=... to get the URL'
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في تشغيل المحتوى: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/stream/live', methods=['GET'])
+def stream_live():
+    """
+    🎬 API لإرجاع رابط البث (بدون streaming)
+    
+    الدور:
+    ✅ التحقق من التوكن والصلاحيات
+    ✅ تسجيل المشاهدة
+    ✅ إرجاع الرابط فقط
+    
+    ❌ لا نجلب الفيديو
+    ❌ لا proxy
+    ❌ لا requests.get
+    """
+    try:
+        token = request.args.get('token')
+        
+        if not token:
+            return jsonify({'success': False, 'error': 'Token required'}), 401
+        
+        # 🔍 البحث عن البيانات المرتبطة بالتوكن
+        play_data = None
+        device_uid = None
+        
+        for key in list(session.keys()):
+            if key.startswith('play_token_') and session.get(key, {}).get('token') == token:
+                device_uid = key.replace('play_token_', '')
+                play_data = session.get(key)
+                break
+        
+        if not play_data or not device_uid:
+            return jsonify({'success': False, 'error': 'Invalid token'}), 401
+        
+        # التحقق من صلاحية التوكن
+        now = datetime.now(timezone.utc)
+        expires_at = play_data.get('expires_at')
+        if expires_at and expires_at < now:
+            return jsonify({'success': False, 'error': 'Token expired'}), 403
+        
+        # ✅ التحقق من الجهاز
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        if not device:
+            return jsonify({'success': False, 'error': 'Device not found'}), 403
+        
+        # ✅ التحقق من الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return jsonify({'success': False, 'error': 'Subscription expired'}), 403
+        
+        # 📡 الرابط بدون جلب
+        stream_url = play_data.get('stream_url')
+        content_name = play_data.get('content_name', 'Stream')
+        
+        # ✅ تسجيل المشاهدة
+        device.last_login_at = now
+        device.last_ip = request.remote_addr
+        db.session.commit()
+        
+        # 📊 تسجيل في audit
+        log_user_action(
+            device.user_id,
+            'view_stream',
+            f'Viewed: {content_name}',
+            request.remote_addr
+        )
+        
+        print(f"✅ تصريح البث: {content_name} → {stream_url}")
+        
+        # ❌ لا نجلب، نرسل الرابط فقط
+        return jsonify({
+            'success': True,
+            'play_url': stream_url,
+            'type': 'hls',  # ← معلومة للفرونتند
+            'content_name': content_name,
+            'message': 'Stream authorized'
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في /stream/live: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+#=============================================================
+#  📊 صفحات العرض (Live TV, Movies, Series)
+#=============================================================
+
+@users_bp.route('/live-tv', methods=['GET'])
+@user_login_required
+def live_tv_page():
+    """صفحة Live TV مع تكامل IPTV"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return redirect(url_for('users.login'))
+        
+        # التحقق من الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return render_template('user/live-tv.html', error='Subscription expired')
+        
+        log_user_action(device.user_id, 'LIVE_TV_VIEWED', 'فتح صفحة Live TV')
+        
+        return render_template('user/live-tv.html')
+    
+    except Exception as e:
+        print(f"❌ خطأ في صفحة Live TV: {str(e)}")
+        return render_template('user/live-tv.html', error=str(e))
+
+
+@users_bp.route('/movies', methods=['GET'])
+@user_login_required
+def movies_page():
+    """صفحة Movies مع تكامل IPTV"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return redirect(url_for('users.login'))
+        
+        # التحقق من الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return render_template('user/movies.html', error='Subscription expired')
+        
+        log_user_action(device.user_id, 'MOVIES_VIEWED', 'فتح صفحة Movies')
+        
+        return render_template('user/movies.html')
+    
+    except Exception as e:
+        print(f"❌ خطأ في صفحة Movies: {str(e)}")
+        return render_template('user/movies.html', error=str(e))
+
+
+@users_bp.route('/series', methods=['GET'])
+@user_login_required
+def series_page():
+    """صفحة Series مع تكامل IPTV"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return redirect(url_for('users.login'))
+        
+        # التحقق من الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            return render_template('user/series.html', error='Subscription expired')
+        
+        log_user_action(device.user_id, 'SERIES_VIEWED', 'فتح صفحة Series')
+        
+        return render_template('user/series.html')
+    
+    except Exception as e:
+        print(f"❌ خطأ في صفحة Series: {str(e)}")
+        return render_template('user/series.html', error=str(e))
+
+
+#=============================================================
+#  🛑 STEP 3.9: إدارة الأجهزة والاشتراكات
+#=============================================================
+
+@users_bp.route('/api/device/disable', methods=['POST'])
+def disable_device():
+    """
+    🛑 إيقاف جهاز (من الأدمن أو الموزع)
+    
+    الطلب:
+    {
+        "device_id": "DEV-XXXXX",
+        "reason": "اشتراك منتهي" | "انتهاك الشروط"
+    }
+    
+    النتيجة:
+    - devices.is_active = False
+    - التطبيق يفشل في جلب Playlist
+    - يعرض "الاشتراك غير مفعل"
+    """
+    try:
+        data = request.get_json()
+        device_id = data.get('device_id')
+        reason = data.get('reason', 'Admin action')
+        
+        if not device_id:
+            return jsonify({'success': False, 'message': 'device_id required'}), 400
+        
+        # جلب الجهاز
+        device = Device.query.filter_by(device_uid=device_id).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # إيقاف الجهاز
+        device.is_active = False
+        device.disabled_at = datetime.utcnow()
+        device.disabled_reason = reason
+        db.session.commit()
+        
+        # تسجيل النشاط
+        log_user_action(
+            device.user_id,
+            'DEVICE_DISABLED',
+            f'تم تعطيل الجهاز: {reason}'
+        )
+        
+        print(f"🛑 تم تعطيل الجهاز: {device_id} - السبب: {reason}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'تم تعطيل الجهاز: {device_id}',
+            'device_id': device_id,
+            'disabled_at': device.disabled_at.isoformat()
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في تعطيل الجهاز: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/device/enable', methods=['POST'])
+def enable_device():
+    """
+    ✅ تفعيل جهاز معطّل
+    """
+    try:
+        data = request.get_json()
+        device_id = data.get('device_id')
+        
+        if not device_id:
+            return jsonify({'success': False, 'message': 'device_id required'}), 400
+        
+        # جلب الجهاز
+        device = Device.query.filter_by(device_uid=device_id).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # تفعيل الجهاز
+        device.is_active = True
+        device.disabled_at = None
+        device.disabled_reason = None
+        db.session.commit()
+        
+        # تسجيل النشاط
+        log_user_action(
+            device.user_id,
+            'DEVICE_ENABLED',
+            'تم تفعيل الجهاز'
+        )
+        
+        print(f"✅ تم تفعيل الجهاز: {device_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'تم تفعيل الجهاز: {device_id}',
+            'device_id': device_id
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في تفعيل الجهاز: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/subscription/disable', methods=['POST'])
+def disable_subscription():
+    """
+    🛑 إيقاف اشتراك (من الموزع)
+    
+    الطلب:
+    {
+        "user_id": 123 | "activation_code_id": 456
+    }
+    """
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        activation_code_id = data.get('activation_code_id')
+        reason = data.get('reason', 'Subscription cancelled')
+        
+        # جلب كود التفعيل
+        if user_id:
+            activation = ActivationCode.query.filter_by(assigned_user_id=user_id).first()
+        elif activation_code_id:
+            activation = ActivationCode.query.get(activation_code_id)
+        else:
+            return jsonify({'success': False, 'message': 'user_id or activation_code_id required'}), 400
+        
+        if not activation:
+            return jsonify({'success': False, 'message': 'Subscription not found'}), 404
+        
+        # إيقاف الاشتراك (تعيين تاريخ انتهاء في الماضي)
+        activation.expiration_date = datetime.utcnow()
+        db.session.commit()
+        
+        # إيقاف جميع أجهزة المستخدم
+        if user_id:
+            devices = Device.query.filter_by(user_id=user_id).all()
+            for device in devices:
+                device.is_active = False
+                device.disabled_reason = reason
+            db.session.commit()
+        
+        print(f"🛑 تم إيقاف الاشتراك - السبب: {reason}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم إيقاف الاشتراك',
+            'affected_devices': len(devices) if user_id else 0
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في إيقاف الاشتراك: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/device/status', methods=['GET'])
+def get_device_status():
+    """
+    📊 الحصول على حالة الجهاز
+    
+    المعلومات المُرجعة:
+    - is_active
+    - disabled_reason
+    - last_login_at
+    - last_ip
+    - subscription status
+    """
+    try:
+        device_uid = request.args.get('device_uid') or session.get('device_uid')
+        
+        if not device_uid:
+            return jsonify({'success': False, 'message': 'device_uid required'}), 400
+        
+        device = Device.query.filter_by(device_uid=device_uid).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # جلب معلومات الاشتراك
+        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        
+        subscription_status = 'unknown'
+        if activation:
+            if activation.expiration_date > datetime.utcnow():
+                subscription_status = 'active'
+            else:
+                subscription_status = 'expired'
+        else:
+            subscription_status = 'none'
+        
+        return jsonify({
+            'success': True,
+            'device': {
+                'device_uid': device.device_uid,
+                'device_name': device.device_name,
+                'is_active': device.is_active,
+                'disabled_reason': device.disabled_reason,
+                'last_login_at': device.last_login_at.isoformat() if device.last_login_at else None,
+                'last_ip': device.last_ip,
+                'created_at': device.created_at.isoformat() if device.created_at else None
+            },
+            'subscription': {
+                'status': subscription_status,
+                'expiration_date': activation.expiration_date.isoformat() if activation else None,
+                'days_remaining': (activation.expiration_date - datetime.utcnow()).days if activation and subscription_status == 'active' else 0
+            }
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في جلب حالة الجهاز: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+
+#================================================================
+# 🎬 HLS Player Route
+#================================================================
+
+@users_bp.route('/hls-player', methods=['GET'])
+def hls_player():
+    """عرض مشغل HLS للبث المباشر والفيديو"""
+    try:
+        return render_template('hls-player.html')
+    except Exception as e:
+        print(f"❌ خطأ في تحميل مشغل HLS: {str(e)}")
+        return render_template('error.html', error='فشل تحميل مشغل HLS'), 500
+
+
+#================================================================
+# 🔍 Device Type Detection API
+#================================================================
+
+@users_bp.route('/api/device/type', methods=['GET'])
+def detect_device_type():
+    """الكشف عن نوع الجهاز (متصفح أم شاشة/Roku)"""
+    try:
+        user_agent = request.headers.get('User-Agent', '').lower()
+        
+        # الكشف عن نوع الجهاز من User-Agent
+        is_browser = detect_browser_request(user_agent)
+        
+        return jsonify({
+            'success': True,
+            'device_type': 'browser' if is_browser else 'screen',
+            'is_browser': is_browser,
+            'user_agent': request.headers.get('User-Agent', '')
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في الكشف عن نوع الجهاز: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+def detect_browser_request(user_agent):
+    """
+    الكشف عن ما إذا كان الطلب من متصفح ويب حقيقي
+    
+    العودة: True إذا كان متصفح ويب، False إذا كان شاشة/Roku
+    """
+    user_agent = user_agent.lower()
+    
+    # المتصفحات الشهيرة
+    browser_indicators = [
+        'chrome',
+        'firefox',
+        'safari',
+        'edge',
+        'opera',
+        'brave',
+        'vivaldi',
+        'whale',
+        'googlebot',  # بعض الـ bots تعتبر متصفح
+    ]
+    
+    # مؤشرات الشاشات والأجهزة المختصة
+    screen_indicators = [
+        'roku',
+        'android tv',
+        'smarttv',
+        'appletv',
+        'webos',
+        'tizen',
+        'orsay',
+        'hbbtv',
+        'gvf',
+        'smarttvservice',
+        'bml',
+        'dlnadoc',
+        'cordova',
+        'electron',  # قد تكون تطبيق سطح المكتب
+    ]
+    
+    # التحقق من مؤشرات الشاشات أولاً (الأولوية)
+    for indicator in screen_indicators:
+        if indicator in user_agent:
+            return False
+    
+    # التحقق من مؤشرات المتصفح
+    for indicator in browser_indicators:
+        if indicator in user_agent:
+            return True
+    
+    # إذا كان موبايل أو تابلت = متصفح
+    if 'mobile' in user_agent or 'tablet' in user_agent:
+        return True
+    
+    # بشكل افتراضي، اعتبره متصفح (للأمان والأفضلية)
+    return True

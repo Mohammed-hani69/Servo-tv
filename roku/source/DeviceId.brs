@@ -103,7 +103,7 @@ function RegisterDeviceWithBackend(backendUrl as string, deviceId as string) as 
     try
         ' إنشاء Request HTTP
         http = CreateObject("roUrlTransfer")
-        http.SetUrl(backendUrl + "/users/api/device/register")
+        http.SetUrl(backendUrl + "/api/device/register")
         http.SetCertificatesFile("common:/certs/ca-bundle.crt")
         http.InitClientCertificates()
         

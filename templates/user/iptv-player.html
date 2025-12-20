@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📺 تطبيق IPTV - Servo TV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                         sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* ✅ Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        /* ✅ Loading Animation */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #334155;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 1rem;
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: #cbd5e1;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* ✅ IPTV Main Layout */
+        #iptv-container {
+            display: flex;
+            height: 100vh;
+            background: #0f172a;
+        }
+
+        /* ✅ Categories Sidebar */
+        .iptv-categories {
+            width: 22%;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid #334155;
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .category-header-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .category-btn {
+            padding: 0.85rem 1rem;
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid #475569;
+            border-radius: 0.5rem;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: right;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .category-btn:hover {
+            background: rgba(71, 85, 105, 0.8);
+            color: white;
+            border-color: #64748b;
+            transform: translateX(-4px);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #1d4ed8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateX(-4px);
+        }
+
+        .channels-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        /* ✅ Channel Item */
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+
+        .channel-item:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+            transform: translateX(-4px);
+        }
+
+        .channel-item.active {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: #3b82f6;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .channel-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.35rem;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.25rem;
+            flex-shrink: 0;
+        }
+
+        .channel-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .channel-name {
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 14px;
+        }
+
+        .channel-group {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        .channel-type {
+            font-size: 11px;
+            padding: 0.25rem 0.5rem;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 0.25rem;
+            color: #93c5fd;
+            flex-shrink: 0;
+        }
+
+        /* ✅ Player Section */
+        .iptv-player {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            position: relative;
+        }
+
+        .video-player {
+            width: 100%;
+            flex: 1;
+            background: #000;
+        }
+
+        .now-playing {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            min-width: 280px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .now-playing-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .now-playing-group {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .now-playing-stat {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* ✅ Player Controls */
+        .player-controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .control-btn {
+            padding: 0.75rem 1rem;
+            background: rgba(59, 130, 246, 0.9);
+            border: 1px solid #3b82f6;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 150ms ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .control-btn:hover {
+            background: rgba(59, 130, 246, 1);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .control-btn.secondary {
+            background: rgba(71, 85, 105, 0.8);
+            border-color: #64748b;
+            color: #cbd5e1;
+        }
+
+        .control-btn.secondary:hover {
+            background: rgba(71, 85, 105, 1);
+        }
+
+        /* ✅ Error Message */
+        .iptv-error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #0f172a;
+            color: #ef4444;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .error-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .error-icon {
+            font-size: 48px;
+        }
+
+        .error-message {
+            max-width: 400px;
+        }
+
+        .retry-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 150ms ease;
+        }
+
+        .retry-btn:hover {
+            background: #2563eb;
+        }
+
+        /* ✅ Stats Box */
+        .stats-box {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .stat-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .stat-row + .stat-row {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        /* ✅ Responsive Design */
+        @media (max-width: 1024px) {
+            .iptv-categories {
+                width: 30%;
+            }
+
+            .category-btn {
+                padding: 0.75rem;
+            }
+
+            .channel-logo {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #iptv-container {
+                flex-direction: column;
+            }
+
+            .iptv-categories {
+                width: 100%;
+                height: auto;
+                max-height: 35vh;
+                border-right: none;
+                border-bottom: 1px solid #334155;
+            }
+
+            .category-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .category-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .channels-list {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .iptv-player {
+                height: 65vh;
+            }
+
+            .now-playing {
+                bottom: 1rem;
+                left: 1rem;
+                min-width: auto;
+                max-width: 200px;
+                padding: 0.75rem;
+            }
+
+            .now-playing-title {
+                font-size: 14px;
+            }
+
+            .now-playing-group {
+                font-size: 11px;
+            }
+
+            .stats-box {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .category-buttons {
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .category-btn {
+                min-width: 100px;
+                font-size: 12px;
+            }
+
+            .channels-list {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .channel-item {
+                flex-direction: column;
+                padding: 0.5rem;
+            }
+
+            .channel-logo {
+                width: 36px;
+                height: 36px;
+            }
+
+            .channel-name {
+                font-size: 12px;
+            }
+
+            .channel-group {
+                font-size: 10px;
+            }
+
+            .player-controls {
+                bottom: 1rem;
+                right: 1rem;
+                flex-direction: column;
+            }
+
+            .control-btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ Loading State -->
+    <div id="loading-state" class="loading-container" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">🎬 جاري تحميل IPTV...</div>
+    </div>
+
+    <!-- ✅ IPTV Container -->
+    <div id="iptv-container" style="display: none;"></div>
+
+    <!-- ✅ Scripts -->
+    <!-- Device Detector (must be before IPTV Player) -->
+    <script src="{{ url_for('static', filename='js/device-detector.js') }}"></script>
+    <script>
+        // عرض شاشة التحميل
+        document.getElementById('loading-state').style.display = 'flex';
+    </script>
+    <script src="{{ url_for('static', filename='js/iptv-player.js') }}"></script>
+    <script>
+        // إخفاء شاشة التحميل بعد تحميل التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const loading = document.getElementById('loading-state');
+                const container = document.getElementById('iptv-container');
+                if (loading && container) {
+                    loading.style.display = 'none';
+                    container.style.display = 'flex';
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

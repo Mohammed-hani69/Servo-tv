@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Video Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: #fff;
+        }
+
+        .player-container {
+            width: 90%;
+            max-width: 1000px;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #video-player {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: #000;
+        }
+
+        .controls {
+            padding: 20px;
+            background-color: #222;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #1a1a1a;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #e50914;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #c00812;
+        }
+
+        button:active {
+            background-color: #a00610;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status-message.error {
+            background-color: #3d1515;
+            color: #ff6b6b;
+            display: block;
+        }
+
+        .status-message.success {
+            background-color: #153d1f;
+            color: #51cf66;
+            display: block;
+        }
+
+        .status-message.info {
+            background-color: #1a3a3f;
+            color: #74c0fc;
+            display: block;
+        }
+
+        .info-text {
+            font-size: 12px;
+            color: #999;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <video id="video-player" controls></video>
+        <div class="controls">
+            <div id="status-message" class="status-message"></div>
+            
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="stream-url" 
+                    placeholder="Enter .m3u8 stream URL (e.g., https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8)"
+                    value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+                >
+                <button id="play-btn">Play Stream</button>
+            </div>
+
+            <div class="info-text">
+                <p>✓ This player supports HLS (.m3u8) streams only</p>
+                <p>✓ Enter a valid .m3u8 URL and click "Play Stream"</p>
+                <p>✗ M3U, TS, and RTMP formats are not supported</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoPlayer = document.getElementById('video-player');
+        const streamUrlInput = document.getElementById('stream-url');
+        const playBtn = document.getElementById('play-btn');
+        const statusMessage = document.getElementById('status-message');
+
+        // Check if browser supports HLS
+        function isHLSSupported() {
+            // Check if native HLS support exists (Safari)
+            if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                return true;
+            }
+            // Check if hls.js is available
+            return typeof Hls !== 'undefined';
+        }
+
+        // Load hls.js library
+        function loadHLSLibrary() {
+            return new Promise((resolve, reject) => {
+                if (typeof Hls !== 'undefined') {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load hls.js library'));
+                document.head.appendChild(script);
+            });
+        }
+
+        // Show status message
+        function showMessage(text, type = 'info') {
+            statusMessage.textContent = text;
+            statusMessage.className = `status-message ${type}`;
+            setTimeout(() => {
+                statusMessage.className = 'status-message';
+            }, 5000);
+        }
+
+        // Validate URL format
+        function isValidM3U8URL(url) {
+            try {
+                const urlObj = new URL(url);
+                return url.toLowerCase().endsWith('.m3u8');
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Play HLS stream
+        async function playHLSStream(streamUrl) {
+            try {
+                // Validate URL format
+                if (!isValidM3U8URL(streamUrl)) {
+                    showMessage('❌ Invalid URL! Must be a valid .m3u8 link', 'error');
+                    return;
+                }
+
+                // Check browser support
+                if (!isHLSSupported()) {
+                    showMessage('❌ Your browser does not support HLS streaming', 'error');
+                    return;
+                }
+
+                showMessage('⏳ Loading stream...', 'info');
+
+                // Load hls.js if needed
+                await loadHLSLibrary();
+
+                // Clear previous video
+                videoPlayer.src = '';
+
+                // Check if native HLS support (Safari)
+                if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoPlayer.src = streamUrl;
+                    videoPlayer.play().then(() => {
+                        showMessage('✓ Stream loaded successfully', 'success');
+                    }).catch(err => {
+                        showMessage('❌ Failed to play stream: ' + err.message, 'error');
+                    });
+                } else if (typeof Hls !== 'undefined') {
+                    // Use hls.js for other browsers
+                    const hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: false,
+                        backBufferLength: 90
+                    });
+
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(videoPlayer);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        videoPlayer.play().then(() => {
+                            showMessage('✓ Stream loaded successfully', 'success');
+                        }).catch(err => {
+                            showMessage('❌ Failed to play stream: ' + err.message, 'error');
+                        });
+                    });
+
+                    hls.on(Hls.Events.ERROR, (event, data) => {
+                        if (data.fatal) {
+                            showMessage('❌ Fatal error: ' + data.response?.statusText || data.type, 'error');
+                        }
+                    });
+                }
+            } catch (error) {
+                showMessage('❌ Error: ' + error.message, 'error');
+                console.error('HLS Player Error:', error);
+            }
+        }
+
+        // Event listeners
+        playBtn.addEventListener('click', () => {
+            const streamUrl = streamUrlInput.value.trim();
+            if (!streamUrl) {
+                showMessage('❌ Please enter a stream URL', 'error');
+                return;
+            }
+            playHLSStream(streamUrl);
+        });
+
+        // Allow Enter key to play
+        streamUrlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                playBtn.click();
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check if HLS is supported
+            if (!isHLSSupported()) {
+                showMessage('⚠️ Warning: Your browser may not support HLS streaming. Please use a modern browser.', 'error');
+            } else {
+                showMessage('✓ HLS support detected. Ready to play!', 'success');
+            }
+
+            // Pre-load hls.js library in background
+            loadHLSLibrary().catch(err => {
+                console.warn('Could not pre-load hls.js:', err);
+            });
+        });
+    </script>
+</body>
+</html>

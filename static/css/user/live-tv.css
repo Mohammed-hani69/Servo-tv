@@ -300,6 +300,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+}
+
+.category-item .count {
+    font-size: 0.75rem;
+    background: rgba(59, 130, 246, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    color: #93c5fd;
+    font-weight: 600;
 }
 
 .category-item:hover {
@@ -366,6 +376,24 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
     padding-bottom: 6rem;
+}
+
+.channels-grid .channel-card {
+    width: 100%;
+}
+
+.channels-grid .loading-container {
+    grid-column: 1 / -1;
+}
+
+.channels-grid .empty-state {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 1200px) {
+    .channels-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
 }
 
 @media (max-width: 768px) {
@@ -498,6 +526,67 @@ body {
 }
 
 .channel-favorite:hover {
+    color: var(--primary-color);
+    opacity: 1;
+}
+
+.channel-favorite.active {
+    color: #fbbf24;
+    opacity: 1;
+    fill: currentColor;
+}
+
+.channel-favorite svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Play Overlay & Button */
+.play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all var(--transition-normal);
+}
+
+.channel-card:hover .play-overlay {
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 1;
+}
+
+.play-btn {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-normal);
+    padding: 0;
+}
+
+.play-btn:hover {
+    background: rgba(59, 130, 246, 1);
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
+}
+
+.play-btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 0.25rem;
+}
     color: rgb(234, 179, 8);
 }
 

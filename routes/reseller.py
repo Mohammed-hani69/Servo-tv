@@ -3,7 +3,7 @@
 """
 from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, flash
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from models import SupportTicket, db, Reseller, User, ActivationCode, Device, DeviceActivationCode
 import uuid
 import re
@@ -16,6 +16,28 @@ from audit_helper import log_reseller_action, log_user_action
 
 reseller_bp = Blueprint('reseller', __name__)
 
+
+def safe_datetime_compare(dt1, dt2):
+    """
+    مقارنة آمنة للتواريخ تتعامل مع naive و aware datetimes
+    dt1 < dt2 = True إذا كان dt1 أصغر من dt2
+    """
+    if dt1 is None or dt2 is None:
+        return False
+    
+    try:
+        # إذا كانت كلاهما naive أو كلاهما aware
+        return dt1 < dt2
+    except TypeError:
+        # إذا كانت واحدة naive والأخرى aware
+        # تحويل كلاهما إلى aware
+        if dt1.tzinfo is None:
+            dt1 = dt1.replace(tzinfo=timezone.utc)
+        if dt2.tzinfo is None:
+            dt2 = dt2.replace(tzinfo=timezone.utc)
+        return dt1 < dt2
+
+
 # ============================================================================
 # 🟢 دوال مساعدة لحساب الإحصائيات
 # ============================================================================
@@ -24,7 +46,7 @@ def get_dashboard_stats(reseller_id):
     """
     حساب إحصائيات لوحة التحكم للموزع
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     yesterday_start = today_start - timedelta(days=1)
     
@@ -54,17 +76,17 @@ def get_dashboard_stats(reseller_id):
         daily_change_percent = 100  # زيادة من 0 إلى رقم موجب
     
     # 🔴 الاشتراكات المنتهية الصلاحية
-    expired_subscriptions = ActivationCode.query.filter(
-        ActivationCode.reseller_id == reseller_id,
-        ActivationCode.expiration_date < now
-    ).count()
+    all_codes = ActivationCode.query.filter_by(reseller_id=reseller_id).all()
+    expired_subscriptions = sum(1 for code in all_codes if code.expiration_date and safe_datetime_compare(code.expiration_date, now))
     
     # 🔴 الاشتراكات النشطة (المفعلة وغير منتهية)
     active_subscriptions = ActivationCode.query.filter(
         ActivationCode.reseller_id == reseller_id,
-        ActivationCode.activated_at != None,
-        ActivationCode.expiration_date >= now
-    ).count()
+        ActivationCode.activated_at != None
+    ).all()
+    
+    # عد الاشتراكات العاملة بعد مقارنة آمنة
+    active_subscriptions = sum(1 for code in active_subscriptions if not (code.expiration_date and safe_datetime_compare(code.expiration_date, now)))
     
     # حساب نسبة التغير للاشتراكات النشطة
     # (مقارنة مع أسبوع ماضي)
@@ -258,8 +280,8 @@ def get_activation_codes():
         user = User.query.get(code.assigned_user_id) if code.assigned_user_id else None
         
         # حساب الحالة
-        now = datetime.utcnow()
-        if code.expiration_date and code.expiration_date < now:
+        now = datetime.now(timezone.utc)
+        if code.expiration_date and safe_datetime_compare(code.expiration_date, now):
             status = "Expired"
         elif code.activated_at:
             status = "Active"
@@ -417,12 +439,12 @@ def export_codes():
     ws.row_dimensions[1].height = 25
     
     # Write data
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     for row_idx, code in enumerate(activation_codes, 2):
         user = User.query.get(code.assigned_user_id) if code.assigned_user_id else None
         
         # حساب الحالة
-        if code.expiration_date and code.expiration_date < now:
+        if code.expiration_date and safe_datetime_compare(code.expiration_date, now):
             status = "Expired"
         elif code.activated_at:
             status = "Active"
@@ -606,7 +628,8 @@ def activate_code_api():
         return jsonify({'success': False, 'message': '❌ Activation code has already been used'}), 400
     
     # التحقق: منتهي الصلاحية
-    if device_activation_code.expires_at and datetime.utcnow() > device_activation_code.expires_at:
+    now = datetime.now(timezone.utc)
+    if device_activation_code.expires_at and safe_datetime_compare(device_activation_code.expires_at, now):
         return jsonify({'success': False, 'message': '❌ Activation code has expired'}), 400
     
     # ============================================================================
@@ -647,12 +670,13 @@ def activate_code_api():
         # 🟢 المرحلة 6: تفعيل الاشتراك
         # ============================================================================
         
-        # حساب تاريخ انتهاء الاشتراك
+        now = datetime.now(timezone.utc)
         if is_lifetime:
             # لمدى الحياة: لا يوجد تاريخ انتهاء (أو سنة 2099)
-            expiration_date = datetime.utcnow() + timedelta(days=365*100)  # 100 سنة
+            expiration_date = now + timedelta(days=365*100)  # 100 سنة
         else:
             # سنة واحدة: 12 شهر
+            expiration_date = now
             expiration_date = datetime.utcnow() + timedelta(days=365)
         
         new_activation_code = ActivationCode(
@@ -748,7 +772,7 @@ def get_analytics():
     reseller_id = session['reseller_id']
     period = request.args.get('period', 'daily')  # daily, weekly, monthly, yearly
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     
     try:
         if period == 'daily':

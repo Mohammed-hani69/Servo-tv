@@ -8,8 +8,38 @@
     <title>Servo - Player</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../static/css/user/player.css">
+    <link rel="stylesheet" href="../../static/css/user/player_streaming.css">
+    <style>
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            display: none;
+        }
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 8px;
+            display: none;
+            z-index: 999;
+        }
+    </style>
 </head>
 <body>
+    <div class="error-message" id="errorMessage"></div>
+    <div class="loading-spinner" id="loadingSpinner">
+        <p>Loading stream...</p>
+    </div>
+    
     <div class="container">
         <!-- Video Player -->
         <div class="player-wrapper" id="playerWrapper">
@@ -22,7 +52,7 @@
                 loop 
                 poster="https://picsum.photos/1920/1080"
             >
-                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                <source src="" type="video/mp2t" />
                 Your browser does not support the video tag.
             </video>
 
@@ -37,7 +67,7 @@
                         <path d="M8 12h13"></path>
                         <path d="M8 19h13"></path>
                     </svg>
-                    <span>Quick Switch</span>
+                    <span>Channels</span>
                 </div>
 
                 <div class="channels-list" id="channelsList">
@@ -48,6 +78,262 @@
             <!-- Player Controls -->
             <div class="player-controls" id="playerControls">
                 <div class="control-info">
+                    <div class="channel-name" id="channelName">Loading...</div>
+                    <div class="channel-info" id="channelInfo">Please wait...</div>
+                </div>
+
+                <div class="controls-bar">
+                    <!-- Progress Bar -->
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar">
+                            <div class="progress-fill" id="progressFill"></div>
+                            <input 
+                                type="range" 
+                                id="progressSlider" 
+                                class="progress-slider" 
+                                min="0" 
+                                max="100" 
+                                value="0"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="controls-buttons">
+                        <!-- Play/Pause Button -->
+                        <button class="control-btn" id="playPauseBtn" title="Play/Pause">
+                            <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            <svg id="pauseIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" style="display:none;">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+
+                        <!-- Rewind Button -->
+                        <button class="control-btn" id="rewindBtn" title="Rewind 10s">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Forward Button -->
+                        <button class="control-btn" id="forwardBtn" title="Forward 10s">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9h-4v-6h-1v7h5z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Volume Button -->
+                        <button class="control-btn" id="volumeBtn" title="Mute/Unmute">
+                            <svg id="volumeIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Fullscreen Button -->
+                        <button class="control-btn" id="fullscreenBtn" title="Fullscreen">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                                <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+                                <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Controls Legend -->
+                    <div class="controls-legend">
+                        <span class="legend-item">
+                            <span class="key-badge">UP</span>
+                            Channel List
+                        </span>
+                        <span class="legend-item">
+                            <span class="key-badge">OK</span>
+                            Pause/Play
+                        </span>
+                        <span class="legend-item">
+                            <span class="key-badge">BACK</span>
+                            Exit
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HLS.js for HLS/M3U8 streaming support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <script>
+        // Simple HLS Player
+        const video = document.getElementById('videoPlayer');
+        const channelName = document.getElementById('channelName');
+        const channelInfo = document.getElementById('channelInfo');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const channelsList = document.getElementById('channelsList');
+
+        let channels = [];
+        let hls = null;
+
+        // Show error message
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load channels from server
+        async function loadChannels() {
+            try {
+                loadingSpinner.style.display = 'block';
+                const response = await fetch('/api/stream/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                
+                // Fetch playlist
+                const playlistResp = await fetch(data.playlist_url);
+                const playlistText = await playlistResp.text();
+                
+                // Parse M3U
+                const lines = playlistText.split('\n');
+                channels = [];
+                
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].startsWith('#EXTINF')) {
+                        const name = lines[i].match(/,(.+)$/)?.[1]?.trim() || 'Unknown';
+                        const logo = lines[i].match(/tvg-logo="([^"]*)"/)?.[1] || '';
+                        const group = lines[i].match(/group-title="([^"]+)"/)?.[1] || 'Other';
+                        const url = lines[i + 1]?.trim();
+                        
+                        if (url && url.startsWith('http')) {
+                            channels.push({ name, logo, group, url });
+                        }
+                    }
+                }
+
+                // Render channels list
+                channelsList.innerHTML = channels.map((ch, idx) => `
+                    <div class="channel-item" onclick="playChannel(${idx})" title="${ch.name}">
+                        <img src="${ch.logo}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Crect fill=%22%23333%22 width=%2240%22 height=%2240%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-size=%2210%22 fill=%22%23999%22%3E${encodeURIComponent(ch.name.substring(0,2))}%3C/text%3E%3C/svg%3E'">
+                        <span>${ch.name}</span>
+                    </div>
+                `).join('');
+
+                // Play first channel
+                if (channels.length > 0) {
+                    playChannel(0);
+                }
+
+                loadingSpinner.style.display = 'none';
+            } catch (err) {
+                showError('Failed to load channels: ' + err.message);
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Play channel
+        function playChannel(index) {
+            const channel = channels[index];
+            if (!channel) return;
+
+            channelName.textContent = channel.name;
+            channelInfo.textContent = channel.group;
+
+            // 🎬 Step 1: اطلب play token من السيرفر
+            fetch('/api/stream/play', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    stream_url: channel.url,
+                    content_id: channel.name.replace(/\s+/g, '_'),
+                    content_name: channel.name
+                })
+            }).then(r => r.json()).then(data => {
+                if (data.success && data.play_token) {
+                    // 🎬 Step 2: اطلب الرابط النهائي من /stream/live مع التوكن
+                    fetch(`/stream/live?token=${data.play_token}`)
+                        .then(r => r.json())
+                        .then(streamData => {
+                            if (streamData.success) {
+                                playStream(streamData.play_url);
+                            } else {
+                                showError(streamData.error || 'Failed to authorize stream');
+                            }
+                        })
+                        .catch(err => showError('Error: ' + err.message));
+                } else {
+                    showError(data.message || 'Failed to get play token');
+                }
+            }).catch(err => {
+                showError('Error: ' + err.message);
+            });
+        }
+
+        // Play stream with HLS.js
+        function playStream(streamUrl) {
+            console.log('Playing:', streamUrl);
+
+            // Destroy previous HLS instance
+            if (hls) {
+                hls.destroy();
+            }
+
+            // Check browser support
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play();
+                });
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        showError('Stream error: ' + data.type);
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari native HLS support
+                video.src = streamUrl;
+                video.play();
+            } else {
+                showError('HLS not supported in your browser');
+            }
+        }
+
+        // Player controls
+        document.getElementById('playPauseBtn')?.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+
+        document.getElementById('volumeBtn')?.addEventListener('click', () => {
+            video.muted = !video.muted;
+        });
+
+        document.getElementById('fullscreenBtn')?.addEventListener('click', () => {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', loadChannels);
+    </script>
+</body>
+</html>
                     <span class="live-badge">LIVE</span>
                     <h1 class="channel-name" id="channelName">News 24/7</h1>
                     <p class="channel-info" id="channelInfo">News • 1080p</p>

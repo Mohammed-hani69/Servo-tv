@@ -9,7 +9,7 @@ from functools import wraps
 import random
 import string
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from audit_helper import log_admin_action, log_reseller_action
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -845,10 +845,10 @@ def update_ticket_status(ticket_id):
             return jsonify({'success': False, 'message': 'Invalid status'}), 400
         
         ticket.status = new_status
-        ticket.updated_at = datetime.utcnow()
+        ticket.updated_at = datetime.now(timezone.utc)
         
         if new_status == 'closed':
-            ticket.resolved_at = datetime.utcnow()
+            ticket.resolved_at = datetime.now(timezone.utc)
         
         db.session.commit()
         
@@ -898,7 +898,7 @@ def add_admin_message(ticket_id):
         )
         
         db.session.add(message)
-        ticket.updated_at = datetime.utcnow()
+        ticket.updated_at = datetime.now(timezone.utc)
         db.session.commit()
         
         # تسجيل العملية
