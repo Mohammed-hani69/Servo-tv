@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0f172a; /* Fallback */
+        background-image: url('https://images.unsplash.com/photo-1540224871915-bc8ffb782bdf?q=80&w=2560&auto=format&fit=crop'); 
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        color: #f8fafc; /* Slate 50 */
+        overflow: hidden; /* Prevent scrolling on TV interfaces */
+        user-select: none;
+        -webkit-font-smoothing: antialiased;
+      }
+      
+      /* Reset Focus */
+      *:focus {
+        outline: none;
+      }
+
+      /* TV Specific Focus Styles */
+      .tv-focus {
+        transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
+      }
+
+      .tv-focus:focus {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.9), 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        transform: scale(1.05);
+        z-index: 50;
+        background-color: rgba(30, 41, 59, 1); /* Slate 800 solid */
+        border-color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Input Fields Focus */
+      input.tv-focus:focus {
+        transform: scale(1.02);
+        background-color: rgba(15, 23, 42, 1);
+      }
+
+      /* Hide Scrollbar but allow functionality */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+      
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
