@@ -1,0 +1,40 @@
+ 
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0f172a;
+        background-image: url("https://images.unsplash.com/photo-1540224871915-bc8ffb782bdf?q=80&w=2560&auto=format&fit=crop");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        color: #f8fafc;
+        overflow: hidden;
+        user-select: none;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      *:focus { outline: none; }
+
+      .tv-focus {
+        transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease;
+      }
+
+      .tv-focus:focus {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.9), 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        transform: scale(1.05);
+        z-index: 50;
+        background-color: rgba(30, 41, 59, 1);
+        border-color: rgba(255, 255, 255, 0.8);
+      }
+
+      input.tv-focus:focus {
+        transform: scale(1.02);
+        background-color: rgba(15, 23, 42, 1);
+      }
+
+      ::-webkit-scrollbar { width: 0px; background: transparent; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }

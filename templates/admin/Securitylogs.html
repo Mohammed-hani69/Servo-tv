@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Security & Audit Logs - Servo Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../static/css/admin/securitylogs.css" />
+</head>
+<body>
+  <div class="container-main">
+    <!-- Sidebar -->
+    {% include 'admin/components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+      <main class="animate-fade-in">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1>Security & Audit Logs</h1>
+          <p>Track every action within the system for compliance and security</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                <path d="M12 9v4"></path>
+                <path d="M12 17h.01"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h3>{{ failed_logins }}</h3>
+              <p>Failed Login Attempts</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h3>Admin</h3>
+              <p>Highest Privilege Level</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon emerald">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                <path d="M2 12h20"></path>
+              </svg>
+            </div>
+            <div class="stat-content">
+              <h3>{{ top_locations }}</h3>
+              <p>Top Login Locations</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+          <div class="table-header">
+            <div class="search-wrapper">
+              <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m21 21-4.34-4.34"></path>
+                <circle cx="11" cy="11" r="8"></circle>
+              </svg>
+              <input type="text" class="search-input" placeholder="Search by actor, IP or action..." />
+            </div>
+            <div class="action-buttons">
+              <button class="btn-action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"></path>
+                </svg>
+                Filter
+              </button>
+              <button class="btn-action">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path>
+                  <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
+                  <path d="M10 9H8"></path>
+                  <path d="M16 13H8"></path>
+                  <path d="M16 17H8"></path>
+                </svg>
+                Export Logs
+              </button>
+            </div>
+          </div>
+
+          <!-- Logs Table -->
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Actor</th>
+                <th>Actions</th>
+                <th>Target</th>
+                <th>IP Address</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if audit_logs %}
+                {% for log in audit_logs %}
+                  <tr>
+                    <td class="timestamp">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="actor">{{ log.actor_type }} #{{ log.actor_id }}</td>
+                    <td class="action-cell">
+                      {% if 'FAILED' in log.action %}
+                        <span class="badge badge-red">{{ log.action }}</span>
+                      {% elif 'UPDATE' in log.action or 'CREATE' in log.action %}
+                        <span class="badge badge-blue">{{ log.action }}</span>
+                      {% elif 'DELETE' in log.action or 'SUSPEND' in log.action %}
+                        <span class="badge badge-red">{{ log.action }}</span>
+                      {% else %}
+                        <span class="badge badge-default">{{ log.action }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="target">{{ log.resource_type or 'System' }}</td>
+                    <td class="ip-address">{{ log.ip_address or 'N/A' }}</td>
+                    <td class="details">{{ log.description or log.action }}</td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 20px; color: rgb(100, 116, 139);">
+                    No audit logs found
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // البحث والتصفية
+    document.querySelector('.search-input').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        if (row.textContent.toLowerCase().includes(searchTerm)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+
+    // تحميل CSV
+    document.querySelectorAll('.btn-action')[1].addEventListener('click', function() {
+      const rows = [];
+      const headers = ['Timestamp', 'Actor', 'Action', 'Target', 'IP Address', 'Details'];
+      rows.push(headers.join(','));
+      
+      document.querySelectorAll('tbody tr:not([style*="display: none"])').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = [];
+        cells.forEach(cell => {
+          rowData.push('"' + cell.textContent.trim() + '"');
+        });
+        rows.push(rowData.join(','));
+      });
+      
+      const csv = rows.join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit_logs_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

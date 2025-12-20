@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>System Settings - Admin Panel - Servo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/admin/settings.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        {% include 'admin/components/sidebar.html' %}
+        <!-- MAIN -->
+        <div class="main-container">
+            <main class="content animate-fade-in">
+                <!-- PAGE HEADER -->
+                <div class="page-header">
+                    <h1 class="page-title">System Settings</h1>
+                    <p class="page-subtitle">Configure platform behavior and preferences</p>
+                </div>
+
+                <!-- GENERAL SETTINGS -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+                        </div>
+                        <div>
+                            <div class="section-title">General Settings</div>
+                            <div class="section-description">Basic configuration for the platform</div>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Platform Name</div>
+                                <div class="setting-description">The name displayed across the application</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="text" class="text-input" placeholder="Servo TV" value="Servo TV">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Support Email</div>
+                                <div class="setting-description">Email for customer support inquiries</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="email" class="text-input" placeholder="support@tvapp.com" value="support@tvapp.com">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Time Zone</div>
+                                <div class="setting-description">Set the default time zone for reports</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="select-input">
+                                    <option>UTC/GMT</option>
+                                    <option>EST</option>
+                                    <option>CST</option>
+                                    <option>MST</option>
+                                    <option>PST</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBSCRIPTION SETTINGS -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon" style="background-color: rgba(168, 85, 247, 0.2); color: #a855f7;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path></svg>
+                        </div>
+                        <div>
+                            <div class="section-title">Subscription Settings</div>
+                            <div class="section-description">Configure subscription behaviors and defaults</div>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Default Plan Duration</div>
+                                <div class="setting-description">Default subscription period in days</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="select-input">
+                                    <option>30 Days</option>
+                                    <option>60 Days</option>
+                                    <option>90 Days</option>
+                                    <option>1 Year</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Allow Trial Period</div>
+                                <div class="setting-description">Permit users to start with free trial</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="toggle-switch active" onclick="this.classList.toggle('active')"></button>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Trial Duration (Days)</div>
+                                <div class="setting-description">Length of free trial period</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="number" class="text-input" placeholder="7" value="7" min="1" max="30">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Auto-Renewal</div>
+                                <div class="setting-description">Automatically renew expiring subscriptions</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="toggle-switch active" onclick="this.classList.toggle('active')"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECURITY SETTINGS -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon" style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                        </div>
+                        <div>
+                            <div class="section-title">Security Settings</div>
+                            <div class="section-description">Manage security and authentication options</div>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Two-Factor Authentication</div>
+                                <div class="setting-description">Require 2FA for admin accounts</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="toggle-switch" onclick="this.classList.toggle('active')"></button>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Session Timeout (Minutes)</div>
+                                <div class="setting-description">Auto-logout inactive admin sessions</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="number" class="text-input" placeholder="30" value="30" min="5" max="240">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Password Expiration</div>
+                                <div class="setting-description">Force password change interval</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="select-input">
+                                    <option>Never</option>
+                                    <option>30 Days</option>
+                                    <option>60 Days</option>
+                                    <option>90 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">IP Whitelist</div>
+                                <div class="setting-description">Restrict admin access by IP address</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="toggle-switch" onclick="this.classList.toggle('active')"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMAIL SETTINGS -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon" style="background-color: rgba(34, 197, 94, 0.2); color: #22c55e;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><path d="m2 7 10 5 10-5"></path></svg>
+                        </div>
+                        <div>
+                            <div class="section-title">Email Configuration</div>
+                            <div class="section-description">Setup SMTP and email templates</div>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">SMTP Server</div>
+                                <div class="setting-description">Email server address</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="text" class="text-input" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">SMTP Port</div>
+                                <div class="setting-description">Email server port (usually 587 or 465)</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="number" class="text-input" placeholder="587" value="587" min="1" max="65535">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">From Email Address</div>
+                                <div class="setting-description">Default sender email</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="email" class="text-input" placeholder="noreply@tvapp.com" value="noreply@tvapp.com">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Enable Email Notifications</div>
+                                <div class="setting-description">Send system notifications via email</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="toggle-switch active" onclick="this.classList.toggle('active')"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SYSTEM MAINTENANCE -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <div class="section-icon" style="background-color: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </div>
+                        <div>
+                            <div class="section-title">System Maintenance</div>
+                            <div class="section-description">Database and system optimization tools</div>
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Database Backup Status</div>
+                                <div class="setting-description">Last backup completed</div>
+                            </div>
+                            <div class="setting-control">
+                                <span class="status-badge active">
+                                    <span class="status-dot"></span>
+                                    Active • Dec 19, 2025 - 3:45 AM
+                                </span>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Auto Backup Frequency</div>
+                                <div class="setting-description">Automatic backup schedule</div>
+                            </div>
+                            <div class="setting-control">
+                                <select class="select-input">
+                                    <option>Daily</option>
+                                    <option>Weekly</option>
+                                    <option>Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Log Retention (Days)</div>
+                                <div class="setting-description">Keep system logs for this many days</div>
+                            </div>
+                            <div class="setting-control">
+                                <input type="number" class="text-input" placeholder="90" value="90" min="7" max="365">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Clear Cache</div>
+                                <div class="setting-description">Remove cached data and temporary files</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="btn btn-primary" onclick="alert('Cache cleared successfully!')">Clear Now</button>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="setting-label">
+                                <div class="setting-title">Run Database Optimization</div>
+                                <div class="setting-description">Optimize database indexes and tables</div>
+                            </div>
+                            <div class="setting-control">
+                                <button class="btn btn-primary" onclick="alert('Database optimization started...')">Optimize</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACTIONS SECTION -->
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="alert('Settings saved successfully!')">
+                        Save Changes
+                    </button>
+                    <button class="btn" style="background-color: #334155; color: #f8fafc;" onclick="alert('Settings reset to default values!')">
+                        Reset to Defaults
+                    </button>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Menu items
+        document.querySelectorAll('[data-menu]').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('[data-menu]').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

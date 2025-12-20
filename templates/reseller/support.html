@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Center - Servo TV Reseller</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/reseller/support.css">
+    <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        {% include 'reseller/components/sidebar.html' %}
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="search-container">
+                        <svg class="search-icon" viewBox="0 0 24 24">
+                            <path d="m21 21-4.34-4.34"/>
+                            <circle cx="11" cy="11" r="8"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="reseller_search_placeholder">
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <button class="notification-button">
+                        <svg class="notification-icon" viewBox="0 0 24 24">
+                            <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+                            <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
+                        </svg>
+                        <span class="notification-dot"></span>
+                    </button>
+
+                    <div class="divider"></div>
+
+                    <div class="user-info">
+                        <div class="user-details">
+                            <div class="user-name">demo@tvapp.com</div>
+                            <div class="user-id">ID: u-123</div>
+                        </div>
+                        <div class="user-avatar">D</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <!-- Header Section -->
+                <div class="content-header">
+                    <div class="header-info">
+                        <h1>Support Center</h1>
+                        <p>Get help directly from the administration team</p>
+                    </div>
+                    <button class="open-ticket-button">
+                        <svg class="plus-icon" viewBox="0 0 24 24">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5v14"/>
+                        </svg>
+                        Open Ticket
+                    </button>
+                </div>
+
+                <!-- Support Container -->
+                <div class="support-container">
+                    <!-- Tickets List -->
+                    <div class="tickets-list" id="tickets-list">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Chat Area (Empty State) -->
+                    <div class="chat-area" id="chat-area">
+                        <div class="empty-state">
+                            <svg class="empty-icon" viewBox="0 0 24 24">
+                                <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <p class="empty-text">Select a ticket to view the conversation</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Support Ticket Modal -->
+    {% include 'reseller/components/ticket_modal.html' %}
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // تهيئة Socket.IO
+        const socket = io();
+        
+        // بيانات التذاكر المرسلة من السيرفر
+        const initialTickets = {{ tickets|tojson|safe }};
+        console.log('📋 Loaded tickets from server:', initialTickets);
+        
+        let currentTicketId = null;
+
+        // الاتصال بـ Socket.IO
+        socket.on('connect', () => {
+            console.log('✓ متصل بـ Socket.IO');
+        });
+
+        // استقبال رسائل جديدة
+        socket.on('new_message', (data) => {
+            console.log('📨 رسالة جديدة:', data);
+            
+            // ✅ إذا كانت الرسالة لنفس التذكرة المفتوحة الآن
+            if (currentTicketId === data.ticket_id) {
+                const messagesContainer = document.getElementById('messages-container');
+                
+                if (!messagesContainer) return;
+                
+                const senderLabel = data.sender_type === 'admin' ? '👨‍💼 Support Team' : '👤 You';
+                const msgClass = data.sender_type === 'admin' ? 'message-admin' : 'message-user';
+                const createdTime = new Date(data.created_at).toLocaleString();
+                const bgColor = data.sender_type === 'admin' ? '#1e3a8a' : '#1e293b';
+                const borderColor = data.sender_type === 'admin' ? '#3b82f6' : '#64748b';
+                
+                const messageHTML = `
+                    <div class="chat-message ${msgClass}" style="display: flex; flex-direction: column; align-items: ${data.sender_type === 'admin' ? 'flex-start' : 'flex-end'}; animation: slideIn 0.3s ease-out;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; width: 100%; justify-content: ${data.sender_type === 'admin' ? 'flex-start' : 'flex-end'};">
+                            <span style="color: #cbd5e1; font-weight: 600; font-size: 0.875rem;">${senderLabel}</span>
+                            <span style="color: #64748b; font-size: 0.75rem;">•</span>
+                            <span style="color: #94a3b8; font-size: 0.8rem;">${createdTime}</span>
+                        </div>
+                        <div style="background: ${bgColor}; color: #f1f5f9; padding: 0.875rem 1rem; border-radius: 0.625rem; border-left: 4px solid ${borderColor}; max-width: 75%; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                            ${data.message}
+                        </div>
+                    </div>
+                `;
+                
+                // إضافة الرسالة مباشرة للـ DOM
+                messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+                
+                // التمرير تلقائياً للأسفل
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                console.log('✅ رسالة مضافة للـ DOM');
+            }
+        });
+
+        socket.on('error', (data) => {
+            console.error('❌ خطأ:', data.msg);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('✗ تم قطع الاتصال');
+        });
+
+        // جلب وعرض التذاكر
+        async function loadTickets() {
+            try {
+                console.log('📌 Loading tickets...');
+                console.log('📌 Total tickets:', initialTickets.length);
+                
+                const ticketsList = document.getElementById('tickets-list');
+                if (!ticketsList) {
+                    console.error('❌ tickets-list element not found');
+                    return;
+                }
+                
+                ticketsList.innerHTML = '';
+                
+                if (initialTickets.length === 0) {
+                    ticketsList.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;"><p>No tickets yet. Create one to get started!</p></div>';
+                    console.log('⚠️ No tickets to display');
+                    return;
+                }
+                
+                initialTickets.forEach(ticket => {
+                    const statusClass = `status-${ticket.status.replace('_', '-')}`;
+                    const createdDate = new Date(ticket.created_at).toLocaleDateString();
+                    
+                    const button = document.createElement('button');
+                    button.className = 'ticket-item';
+                    button.innerHTML = `
+                        <div class="ticket-header">
+                            <span class="ticket-id">#${ticket.ticket_number}</span>
+                            <span class="ticket-status ${statusClass}">${ticket.status}</span>
+                        </div>
+                        <div class="ticket-title">${ticket.subject}</div>
+                        <div class="ticket-date">${createdDate}</div>
+                    `;
+                    
+                    button.addEventListener('click', () => loadTicketDetails(ticket.id));
+                    ticketsList.appendChild(button);
+                });
+                
+                console.log('✅ Tickets loaded successfully');
+            } catch (error) {
+                console.error('❌ Error loading tickets:', error);
+            }
+        }
+        
+        // جلب تفاصيل التذكرة
+        async function loadTicketDetails(ticketId) {
+            try {
+                const ticket = initialTickets.find(t => t.id === ticketId);
+                
+                if (!ticket) {
+                    console.error('Ticket not found');
+                    return;
+                }
+                
+                currentTicketId = ticketId;
+                
+                // الانضمام إلى غرفة التذكرة
+                socket.emit('join_ticket', { ticket_id: ticketId });
+                
+                const chatArea = document.getElementById('chat-area');
+                
+                let messagesHTML = '';
+                if (ticket.messages && ticket.messages.length > 0) {
+                    messagesHTML = ticket.messages.map(msg => {
+                        const senderLabel = msg.sender_type === 'admin' ? '👨‍💼 Support Team' : '👤 You';
+                        const msgClass = msg.sender_type === 'admin' ? 'message-admin' : 'message-user';
+                        const createdTime = new Date(msg.created_at).toLocaleString();
+                        const bgColor = msg.sender_type === 'admin' ? '#1e3a8a' : '#1e293b';
+                        const borderColor = msg.sender_type === 'admin' ? '#3b82f6' : '#64748b';
+                        
+                        return `
+                            <div class="chat-message ${msgClass}" style="display: flex; flex-direction: column; align-items: ${msg.sender_type === 'admin' ? 'flex-start' : 'flex-end'}; animation: slideIn 0.3s ease-out;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; width: 100%; justify-content: ${msg.sender_type === 'admin' ? 'flex-start' : 'flex-end'};">
+                                    <span style="color: #cbd5e1; font-weight: 600; font-size: 0.875rem;">${senderLabel}</span>
+                                    <span style="color: #64748b; font-size: 0.75rem;">•</span>
+                                    <span style="color: #94a3b8; font-size: 0.8rem;">${createdTime}</span>
+                                </div>
+                                <div style="background: ${bgColor}; color: #f1f5f9; padding: 0.875rem 1rem; border-radius: 0.625rem; border-left: 4px solid ${borderColor}; max-width: 75%; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                    ${msg.message}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                chatArea.innerHTML = `
+                    <div style="display: flex; flex-direction: column; height: 100%; padding: 1.5rem; gap: 1rem;">
+                        <!-- Header -->
+                        <div style="padding-bottom: 1.5rem; border-bottom: 2px solid #334155;">
+                            <h3 style="color: #f1f5f9; margin: 0 0 0.5rem 0; font-size: 1.375rem; font-weight: 700;">${ticket.subject}</h3>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                <span style="color: #94a3b8; font-size: 0.875rem; background: #1e293b; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; font-weight: 600;">#${ticket.ticket_number}</span>
+                                <span style="color: #64748b;">•</span>
+                                <span style="color: #cbd5e1; font-size: 0.875rem; font-weight: 500;">Status: <strong style="color: #f1f5f9;">${ticket.status}</strong></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Messages Container -->
+                        <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 1rem; background: #0f172a; border: 2px solid #334155; border-radius: 0.75rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);">
+                            <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 0.75rem; border-bottom: 1px solid #334155;">
+                                💬 Conversation
+                            </div>
+                            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem;" id="messages-container">
+                                <div style="color: #94a3b8; padding: 1rem; background: rgba(255,255,255,0.02); border-radius: 0.5rem; border-left: 3px solid #2563eb; line-height: 1.7; font-size: 0.95rem;">
+                                    <strong style="color: #f1f5f9;">Description:</strong>
+                                    <p style="margin: 0.75rem 0 0 0; color: #cbd5e1;">${ticket.description}</p>
+                                </div>
+                                ${messagesHTML}
+                            </div>
+                        </div>
+                        
+                        <!-- Reply Section -->
+                        <div style="padding-top: 1.5rem; border-top: 2px solid #334155;">
+                            <label style="display: block; color: #f1f5f9; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Write your reply</label>
+                            <textarea id="reply-message" placeholder="Type your message here..." style="width: 100%; padding: 0.875rem 1rem; background-color: #0f172a; border: 2px solid #334155; border-radius: 0.5rem; color: #f1f5f9; font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 90px; transition: all 0.2s; outline: none;" onkeydown="this.style.borderColor = '#3b82f6';" onkeyup="this.style.borderColor = '#334155';"></textarea>
+                            <button onclick="sendReply(${ticket.id})" style="margin-top: 1rem; width: 100%; padding: 0.875rem 1rem; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(37,99,235,0.3); text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.boxShadow = '0 6px 12px rgba(37,99,235,0.5)';" onmouseout="this.style.boxShadow = '0 4px 6px rgba(37,99,235,0.3)';">✓ Send Reply</button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading ticket:', error);
+            }
+        }
+        
+        // إرسال رد على التذكرة باستخدام Socket.IO
+        async function sendReply(ticketId) {
+            const messageInput = document.getElementById('reply-message');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            try {
+                // حفظ الرسالة عبر API (للحفظ في DB)
+                const response = await fetch(`/reseller/api/tickets/${ticketId}/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageInput.value = '';
+                    
+                    // ✅ بث الرسالة عبر Socket.IO (للظهور الفوري عند جميع الأطراف)
+                    console.log('📤 Emitting send_message:', { ticket_id: ticketId, message });
+                    
+                    socket.emit('send_message', {
+                        ticket_id: ticketId,
+                        message: message,
+                        is_internal: false
+                    });
+                    
+                    console.log('✅ Message sent to API and broadcasted via Socket.IO');
+                } else {
+                    alert('Error sending message: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error sending message: ' + error.message);
+            }
+        }
+        
+        // تحميل التذاكر عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', loadTickets);
+    </script>
+</body>
+</html>

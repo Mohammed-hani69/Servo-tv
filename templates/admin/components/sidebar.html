@@ -1,0 +1,479 @@
+<style>
+  /* Sidebar */
+  .sidebar {
+    width: 256px;
+    background-color: rgb(15, 23, 42);
+    border-right: 1px solid rgb(30, 41, 59);
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  }
+
+  .sidebar-header {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon-wrapper {
+    background-color: rgba(220, 38, 38, 0.1);
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  .logo-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .logo-text {
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+  }
+
+  .logo-subtext {
+    font-size: 10px;
+    color: rgb(239, 68, 68);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+
+  .sidebar-menu {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+  }
+
+  .menu-section-label {
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgb(100, 116, 139);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: none;
+    border: none;
+    color: rgb(148, 163, 184);
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none; 
+  }
+
+  .menu-item:hover {
+    background-color: rgb(30, 41, 59);
+    color: #fff;
+  }
+
+  .menu-item.active {
+    background-color: rgb(220, 38, 38);
+    color: #fff;
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  }
+
+  .menu-item svg {
+    width: 18px;
+    height: 18px;
+    color: inherit;
+  }
+
+  .menu-item:hover svg {
+    color: #fff;
+  }
+
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid rgb(30, 41, 59);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgb(220, 38, 38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .user-details {
+    overflow: hidden;
+  }
+
+  .user-email {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-role {
+    font-size: 10px;
+    color: rgb(148, 163, 184);
+  }
+
+  .logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: rgb(148, 163, 184);
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .logout-btn:hover {
+    background-color: rgb(30, 41, 59);
+    color: #fff;
+  }
+
+  .sidebar-menu::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar-menu::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgb(55, 65, 81);
+    border-radius: 3px;
+  }
+</style>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-icon-wrapper">
+      <svg
+        class="logo-icon"
+        viewBox="0 0 200 200"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="logoGradient2" x1="0" y1="0" x2="200" y2="200">
+            <stop offset="0%" stop-color="#3B82F6"></stop>
+            <stop offset="100%" stop-color="#2563EB"></stop>
+          </linearGradient>
+        </defs>
+        <path
+          d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z"
+          fill="url(#logoGradient2)"
+        ></path>
+        <path
+          d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z"
+          fill="white"
+          stroke="white"
+          stroke-width="4"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-text">SERVO</div>
+      <div class="logo-subtext">Admin Panel</div>
+    </div>
+  </div>
+{% from "admin/components/macros.html" import is_active %}
+
+  <div class="sidebar-menu">
+    <div class="menu-section-label">Overview</div>
+
+    <a href="{{ url_for('admin.dashboard') }}"
+     class="menu-item {{ is_active('admin.dashboard') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+      </svg>
+      Overview
+    </a>
+
+    <a href="{{ url_for('admin.resellers') }}"
+     class="menu-item {{ is_active('admin.resellers') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+        <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+      </svg>
+      Resellers
+    </a>
+
+    <a href="{{ url_for('admin.Financials') }}"
+     class="menu-item {{ is_active('admin.Financials') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" x2="12" y1="2" y2="22"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      Financials
+    </a>
+
+    <a href="{{ url_for('admin.plans') }}"
+     class="menu-item {{ is_active('admin.plans') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+        ></path>
+        <path
+          d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+        ></path>
+        <path
+          d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+        ></path>
+      </svg>
+      Plans & Pricing
+    </a>
+
+    <a href="{{ url_for('admin.Billing') }}"
+     class="menu-item {{ is_active('admin.Billing') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+        <line x1="2" x2="22" y1="10" y2="10"></line>
+      </svg>
+      Billing
+    </a>
+
+    <a href="{{ url_for('admin.support') }}"
+     class="menu-item {{ is_active('admin.support') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"
+        ></path>
+        <path d="M13 5v2"></path>
+        <path d="M13 17v2"></path>
+        <path d="M13 11v2"></path>
+      </svg>
+      Support & Tickets
+    </a>
+
+    <a href="{{ url_for('admin.notifications') }}"
+     class="menu-item {{ is_active('admin.notifications') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+        <path
+          d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        ></path>
+      </svg>
+      Notifications
+    </a>
+
+    <a href="{{ url_for('admin.reports') }}"
+     class="menu-item {{ is_active('admin.reports') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+        <path d="M18 17V9"></path>
+        <path d="M13 17V5"></path>
+        <path d="M8 17v-3"></path>
+      </svg>
+      Reports & Analytics
+    </a>
+
+    <a href="{{ url_for('admin.Roles') }}"
+     class="menu-item {{ is_active('admin.Roles') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+        ></path>
+        <path d="m9 12 2 2 4-4"></path>
+      </svg>
+      Roles & Permissions
+    </a>
+
+    <a href="{{ url_for('admin.audit_logs') }}"
+     class="menu-item {{ is_active('admin.audit_logs') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      Security & Logs
+    </a>
+
+    <a href="{{ url_for('admin.settings') }}"
+     class="menu-item {{ is_active('admin.settings') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+        ></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      System Settings
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">AD</div>
+      <div class="user-details">
+        <div class="user-email">admin@tvapp.com</div>
+        <div class="user-role">Super Admin</div>
+      </div>
+    </div>
+    <form method="POST" action="{{ url_for('admin.logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="logout-btn">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m16 17 5-5-5-5"></path>
+          <path d="M21 12H9"></path>
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        </svg>
+        LOGOUT
+      </button>
+    </form>
+  </div>
+</aside>

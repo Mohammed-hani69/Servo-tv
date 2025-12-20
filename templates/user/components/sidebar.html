@@ -1,0 +1,340 @@
+
+<style>
+    /* SIDEBAR */
+        .sidebar {
+            width: 96px;
+            background-color: rgba(2, 6, 23, 0.4);
+            backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 0;
+            z-index: 40;
+        }
+
+        .logo-btn {
+            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 80px rgba(37, 99, 235, 0.3);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .nav-menu {
+            flex: 1;
+            width: 100%;
+            padding: 0 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            overflow-y: auto;
+            -webkit-scrollbar-width: none;
+            scrollbar-width: none;
+        }
+
+        .nav-menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 1.25rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: rgb(148, 163, 184);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-icon {
+            margin-bottom: 0.25rem;
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-divider {
+            width: 50%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0.5rem 0;
+        }
+
+        .logout-btn {
+            padding: 1rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.75rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: rgb(248, 113, 113);
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+
+
+
+</style>
+
+
+
+<aside class="sidebar">
+  <!-- LOGO -->
+  <button class="logo-btn">
+    <svg
+      viewBox="0 0 200 200"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      class="logo-icon"
+    >
+      <defs>
+        <linearGradient id="logoGradient" x1="0" y1="0" x2="200" y2="200">
+          <stop offset="0%" stop-color="#3B82F6"></stop>
+          <stop offset="100%" stop-color="#2563EB"></stop>
+        </linearGradient>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur
+            stdDeviation="5"
+            result="coloredBlur"
+          ></feGaussianBlur>
+          <feMerge>
+            <feMergeNode in="coloredBlur"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+      </defs>
+      <path
+        d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z"
+        fill="url(#logoGradient)"
+        filter="url(#glow)"
+      ></path>
+      <path
+        d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z"
+        fill="white"
+        stroke="white"
+        stroke-width="4"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </button>
+{% from "user/components/macros.html" import is_active %}
+
+  <!-- NAVIGATION MENU -->
+  <nav class="nav-menu">
+    <a href="{{ url_for('users.dashboard') }}"
+     class="nav-btn {{ is_active('users.dashboard') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+        <path
+          d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+        ></path>
+      </svg>
+      <div class="nav-label">Home</div>
+    </a>
+
+    <a href="{{ url_for('users.my_list') }}"
+     class="nav-btn {{ is_active('users.my_list') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <path d="M3 5h.01"></path>
+        <path d="M3 12h.01"></path>
+        <path d="M3 19h.01"></path>
+        <path d="M8 5h13"></path>
+        <path d="M8 12h13"></path>
+        <path d="M8 19h13"></path>
+      </svg>
+      <div class="nav-label">My List</div>
+    </a>
+
+    <div class="sidebar-divider"></div>
+
+    <a href="{{ url_for('users.live_tv') }}"
+     class="nav-btn {{ is_active('users.live_tv') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <path d="m17 2-5 5-5-5"></path>
+        <rect width="20" height="15" x="2" y="7" rx="2"></rect>
+      </svg>
+      <div class="nav-label">Live TV</div>
+    </a>
+
+    <a href="{{ url_for('users.movies') }}"
+     class="nav-btn {{ is_active('users.movies') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+        <path d="M7 3v18"></path>
+        <path d="M3 7.5h4"></path>
+        <path d="M3 12h18"></path>
+        <path d="M3 16.5h4"></path>
+        <path d="M17 3v18"></path>
+        <path d="M17 7.5h4"></path>
+        <path d="M17 16.5h4"></path>
+      </svg>
+      <div class="nav-label">Movies</div>
+    </a>
+
+    <a href="{{ url_for('users.series') }}"
+     class="nav-btn {{ is_active('users.series') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <path d="m17 2-5 5-5-5"></path>
+        <rect width="20" height="15" x="2" y="7" rx="2"></rect>
+      </svg>
+      <div class="nav-label">Series</div>
+    </a>
+
+    <div class="sidebar-divider"></div>
+
+    <a href="{{ url_for('users.profile') }}"
+     class="nav-btn {{ is_active('users.profile') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+      <div class="nav-label">Profile</div>
+    </a>
+
+    <a href="{{ url_for('users.settings') }}"
+     class="nav-btn {{ is_active('users.settings') }}">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="nav-icon"
+      >
+        <path
+          d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
+        ></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      <div class="nav-label">Settings</div>
+    </a>
+  </nav>
+
+  <!-- LOGOUT -->
+  <a href="{{ url_for('users.logout') }}" class="logout-btn">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="m16 17 5-5-5-5"></path>
+      <path d="M21 12H9"></path>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+    </svg>
+    <div class="nav-label" style="margin-top: 0.25rem">LOGOUT</div>
+  </a>
+</aside>

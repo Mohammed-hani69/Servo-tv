@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - Distributor Portal Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/reseller/login.css">
+    
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="login-background">
+        <div class="glow-blob blue"></div>
+        <div class="glow-blob purple"></div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="logo-wrapper">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0" y1="0" x2="200" y2="200">
+                            <stop offset="0%" stop-color="#3B82F6"></stop>
+                            <stop offset="100%" stop-color="#2563EB"></stop>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="5" result="coloredBlur"></feGaussianBlur>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"></feMergeNode>
+                                <feMergeNode in="SourceGraphic"></feMergeNode>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <path d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z" fill="url(#logoGradient)" filter="url(#glow)"></path>
+                    <path d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round"></path>
+                </svg>
+            </div>
+            <h1 class="login-title">Distributor Portal</h1>
+            <p class="login-subtitle">Manage your IPTV business securely</p>
+        </div>
+
+        <!-- Form -->
+        <form class="login-form" method="POST" action="{{ url_for('reseller.login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; {% if category == 'error' %}background-color: rgba(220, 38, 38, 0.1); border: 1px solid rgb(220, 38, 38); color: rgb(254, 202, 202);{% else %}background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgb(34, 197, 94); color: rgb(187, 247, 208);{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Email Field -->
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <div class="form-input-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="form-input-icon">
+                        <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
+                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    </svg>
+                    <input class="form-input" name="email" placeholder="distributor@servo.tv" type="email" required>
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="form-input-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="form-input-icon">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input class="form-input" name="password" placeholder="••••••••" type="password" required>
+                </div>
+            </div>
+
+            <!-- Remember & Forgot -->
+            <div class="form-actions">
+                <label class="checkbox-wrapper">
+                    <input class="checkbox-input" name="remember" type="checkbox">
+                    <div class="checkbox-box"></div>
+                    <span class="checkbox-label">Remember me</span>
+                </label>
+                <button type="button" class="forgot-button">Forgot Password?</button>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-button">
+                <span>Access Dashboard</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="submit-icon">
+                    <path d="M5 12h14"></path>
+                    <path d="m12 5 7 7-7 7"></path>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="info-icon">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+            </svg>
+            <div class="info-content">
+                <p class="info-title">Demo Credentials:</p>
+                <div class="info-credentials">
+                    <span>Email: demo@tvapp.com</span>
+                    <span>Pass: password</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="login-footer">
+            © 2024 Servo Systems. Secure Access v2.1.0
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Support Center - Servo Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/admin/support.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        {% include 'admin/components/sidebar.html' %}
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="search-container">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="m21 21-4.34-4.34"/>
+                            <circle cx="11" cy="11" r="8"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="ابحث عن التذاكر...">
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <button class="notification-button">
+                        <svg class="notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+                            <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
+                        </svg>
+                        <span class="notification-dot"></span>
+                    </button>
+
+                    <div class="divider"></div>
+
+                    <div class="user-info">
+                        <div class="user-details">
+                            <div class="user-name">Admin</div>
+                            <div class="user-id">ID: admin-001</div>
+                        </div>
+                        <div class="user-avatar">A</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Header Section -->
+                <div class="content-header">
+                    <div class="header-info">
+                        <h1>Support Center</h1>
+                        <p>إدارة طلبات الدعم من الموزعين</p>
+                    </div>
+                </div>
+
+                <!-- Support Container -->
+                <div class="support-container">
+                    <!-- Tickets List -->
+                    <div class="tickets-list" id="tickets-list">
+                        <!-- سيتم ملء القائمة من السيرفر -->
+                    </div>
+
+                    <!-- Details Panel (Empty State) -->
+                    <div class="details-panel" id="details-panel">
+                        <div class="empty-state">
+                            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <p class="empty-text">اختر تذكرة من القائمة لعرض التفاصيل</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-icon {
+            color: #f1f5f9;
+            font-size: 1.2rem;
+            cursor: help;
+            font-weight: bold;
+            user-select: none;
+        }
+        
+        .tooltip-box {
+            visibility: hidden;
+            opacity: 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            text-align: right;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: normal;
+            width: 250px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border: 2px solid #3b82f6;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .tooltip-box::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px 8px 0 8px;
+            border-style: solid;
+            border-color: #3b82f6 transparent transparent transparent;
+        }
+        
+        .tooltip-container:hover .tooltip-box {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <script>
+        // تهيئة Socket.IO
+        const socket = io();
+        
+        // بيانات التذاكر المرسلة من السيرفر
+        const initialTickets = {{ tickets|tojson|safe }};
+        console.log('📋 Loaded tickets:', initialTickets);
+        
+        let currentSelectedTicketId = null;
+
+        // الاتصال بـ Socket.IO
+        socket.on('connect', () => {
+            console.log('✓ متصل بـ Socket.IO');
+        });
+
+        // استقبال رسائل جديدة
+        socket.on('new_message', (data) => {
+            console.log('📨 رسالة جديدة:', data);
+            
+            // ✅ إذا كانت الرسالة لنفس التذكرة المفتوحة الآن
+            if (currentSelectedTicketId === data.ticket_id) {
+                const messagesContainer = document.getElementById('messages-container');
+                if (!messagesContainer) return;
+                
+                const senderLabel = data.sender_type === 'admin' ? '👨‍💼 الإدارة' : '🤝 الموزع';
+                const msgClass = data.sender_type === 'admin' ? 'message-admin' : 'message-reseller';
+                const createdTime = new Date(data.created_at).toLocaleString('ar-EG');
+                const bgColor = data.sender_type === 'admin' ? '#1e3a8a' : '#1e293b';
+                const borderColor = data.sender_type === 'admin' ? '#3b82f6' : '#64748b';
+                
+                const messageHTML = `
+                    <div class="chat-message ${msgClass}" style="display: flex; flex-direction: column; align-items: ${data.sender_type === 'admin' ? 'flex-start' : 'flex-end'}; animation: slideIn 0.3s ease-out;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; width: 100%; justify-content: ${data.sender_type === 'admin' ? 'flex-start' : 'flex-end'};">
+                            <span style="color: #cbd5e1; font-weight: 600; font-size: 0.875rem;">${senderLabel}</span>
+                            <span style="color: #64748b; font-size: 0.75rem;">•</span>
+                            <span style="color: #94a3b8; font-size: 0.8rem;">${createdTime}</span>
+                        </div>
+                        <div style="background: ${bgColor}; color: #f1f5f9; padding: 0.875rem 1rem; border-radius: 0.625rem; border-left: 4px solid ${borderColor}; max-width: 75%; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                            ${data.message}
+                        </div>
+                    </div>
+                `;
+                
+                // إضافة الرسالة مباشرة للـ DOM
+                messagesContainer.insertAdjacentHTML('beforeend', messageHTML);
+                
+                // التمرير تلقائياً للأسفل
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                console.log('✅ رسالة مضافة للـ DOM');
+            }
+            
+            // تحديث عدد الرسائل في قائمة التذاكر
+            const ticket = initialTickets.find(t => t.id === data.ticket_id);
+            if (ticket) {
+                ticket.message_count = (ticket.message_count || 0) + 1;
+            }
+        });
+
+        socket.on('error', (data) => {
+            console.error('❌ خطأ:', data.msg);
+            alert('خطأ: ' + data.msg);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('✗ تم قطع الاتصال');
+        });
+
+        // جلب وعرض التذاكر
+        async function loadTickets(statusFilter = 'all', priorityFilter = 'all') {
+            try {
+                console.log('📌 Loading tickets with filters:', { statusFilter, priorityFilter });
+                console.log('📌 Total tickets:', initialTickets.length);
+                
+                let filteredTickets = initialTickets;
+                
+                if (statusFilter !== 'all') {
+                    filteredTickets = filteredTickets.filter(t => t.status === statusFilter);
+                }
+                
+                if (priorityFilter !== 'all') {
+                    filteredTickets = filteredTickets.filter(t => t.priority === priorityFilter);
+                }
+                
+                console.log('📌 Filtered tickets:', filteredTickets.length);
+                
+                const ticketsList = document.getElementById('tickets-list');
+                if (!ticketsList) {
+                    console.error('❌ tickets-list element not found');
+                    return;
+                }
+                
+                ticketsList.innerHTML = '';
+                
+                if (filteredTickets.length === 0) {
+                    ticketsList.innerHTML = '<div style="padding: 2rem; text-align: center; color: #64748b;"><p>لا توجد تذاكر</p></div>';
+                    console.log('⚠️ No tickets to display');
+                    return;
+                }
+                
+                filteredTickets.forEach(ticket => {
+                    const priorityEmojis = {
+                        'low': '🟢',
+                        'normal': '🟡',
+                        'high': '🟠',
+                        'urgent': '🔴'
+                    };
+                    const statusIcons = {
+                        'open': '📖',
+                        'in_progress': '⚙️',
+                        'closed': '✅'
+                    };
+                    const priorityClass = `badge-${ticket.priority}`;
+                    const statusClass = `badge-${ticket.status.replace('_', '-')}`;
+                    const createdDate = new Date(ticket.created_at).toLocaleDateString('ar-EG');
+                    
+                    const button = document.createElement('button');
+                    button.className = 'ticket-item';
+                    if (currentSelectedTicketId === ticket.id) {
+                        button.classList.add('active');
+                    }
+                    
+                    button.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <span style="color: #3b82f6; font-size: 0.85rem; background: #1e3a8a; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; font-weight: 600;">#${ticket.ticket_number}</span>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <span style="background: ${ticket.priority === 'urgent' ? '#dc2626' : ticket.priority === 'high' ? '#ea580c' : ticket.priority === 'normal' ? '#f59e0b' : '#10b981'}; color: #fff; padding: 0.25rem 0.625rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${priorityEmojis[ticket.priority] || '·'} ${ticket.priority}</span>
+                                <span style="background: ${ticket.status === 'open' ? '#3b82f6' : ticket.status === 'in_progress' ? '#8b5cf6' : '#22c55e'}; color: #fff; padding: 0.25rem 0.625rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">${statusIcons[ticket.status] || '·'} ${ticket.status}</span>
+                            </div>
+                        </div>
+                        <h4 style="color: #f1f5f9; margin: 0 0 0.5rem 0; font-size: 0.95rem; font-weight: 600; line-height: 1.4;">${ticket.subject}</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: #cbd5e1; font-size: 0.825rem;">👤 ${ticket.reseller_name}</span>
+                            <span style="color: #64748b; font-size: 0.8rem;">📅 ${createdDate}</span>
+                        </div>
+                    `;
+                    
+                    button.style.cssText = `
+                        all: unset;
+                        display: block;
+                        padding: 1rem;
+                        background: #0f172a;
+                        border: 2px solid #334155;
+                        border-radius: 0.625rem;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        margin-bottom: 0.75rem;
+                    `;
+                    
+                    button.onmouseover = function() {
+                        this.style.borderColor = '#3b82f6';
+                        this.style.backgroundColor = '#1a1f3a';
+                        this.style.boxShadow = '0 4px 12px rgba(59,130,246,0.2)';
+                    };
+                    button.onmouseout = function() {
+                        this.style.borderColor = '#334155';
+                        this.style.backgroundColor = currentSelectedTicketId === ticket.id ? '#1a1f3a' : '#0f172a';
+                        this.style.boxShadow = 'none';
+                    };
+                    
+                    if (currentSelectedTicketId === ticket.id) {
+                        button.style.backgroundColor = '#1a1f3a';
+                        button.style.borderColor = '#3b82f6';
+                        button.style.boxShadow = '0 4px 12px rgba(59,130,246,0.3)';
+                    }
+                    
+                    button.addEventListener('click', (e) => loadTicketDetails(ticket.id, e));
+                    ticketsList.appendChild(button);
+                });
+                
+                console.log('✅ Tickets loaded successfully');
+            } catch (error) {
+                console.error('❌ خطأ في تحميل التذاكر:', error);
+            }
+        }
+        
+        // جلب تفاصيل التذكرة
+        async function loadTicketDetails(ticketId, event) {
+            try {
+                const ticket = initialTickets.find(t => t.id === ticketId);
+                
+                if (!ticket) {
+                    console.error('التذكرة غير موجودة');
+                    return;
+                }
+                
+                currentSelectedTicketId = ticketId;
+                
+                // الانضمام إلى غرفة التذكرة
+                socket.emit('join_ticket', { ticket_id: ticketId });
+                
+                const detailsPanel = document.getElementById('details-panel');
+                
+                let messagesHTML = '';
+                if (ticket.messages && ticket.messages.length > 0) {
+                    messagesHTML = ticket.messages.map(msg => {
+                        const senderLabel = msg.sender_type === 'admin' ? '👨‍💼 الإدارة' : '🤝 ' + ticket.reseller_name;
+                        const msgClass = msg.sender_type === 'admin' ? 'message-admin' : 'message-reseller';
+                        const createdTime = new Date(msg.created_at).toLocaleString('ar-EG');
+                        const bgColor = msg.sender_type === 'admin' ? '#1e3a8a' : '#1e293b';
+                        const borderColor = msg.sender_type === 'admin' ? '#3b82f6' : '#64748b';
+                        
+                        return `
+                            <div class="chat-message ${msgClass}" style="display: flex; flex-direction: column; align-items: ${msg.sender_type === 'admin' ? 'flex-start' : 'flex-end'}; animation: slideIn 0.3s ease-out;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; width: 100%; justify-content: ${msg.sender_type === 'admin' ? 'flex-start' : 'flex-end'};">
+                                    <span style="color: #cbd5e1; font-weight: 600; font-size: 0.875rem;">${senderLabel}</span>
+                                    <span style="color: #64748b; font-size: 0.75rem;">•</span>
+                                    <span style="color: #94a3b8; font-size: 0.8rem;">${createdTime}</span>
+                                </div>
+                                <div style="background: ${bgColor}; color: #f1f5f9; padding: 0.875rem 1rem; border-radius: 0.625rem; border-left: 4px solid ${borderColor}; max-width: 75%; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                    ${msg.message}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                
+                const statusOptions = ['open', 'in_progress', 'closed']
+                    .map(status => {
+                        const statusLabels = {
+                            'open': 'مفتوح',
+                            'in_progress': 'قيد المعالجة',
+                            'closed': 'مغلق'
+                        };
+                        return `<option value="${status}" ${ticket.status === status ? 'selected' : ''}>${statusLabels[status]}</option>`;
+                    }).join('');
+                
+                detailsPanel.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 350px 1fr; height: 100%; gap: 1rem; padding: 1.5rem; color: #cbd5e1;">
+                        <!-- Left Sidebar: Ticket Information (Scrollable) -->
+                        <div style="display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; padding-right: 0.5rem;">
+                            <!-- Header Section -->
+                            <div style="padding: 1rem; border-bottom: 2px solid #334155; border-radius: 0.5rem; background: rgba(59,130,246,0.05);">
+                                <h3 style="color: #f1f5f9; margin: 0 0 0.75rem 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.5px; word-break: break-word;">${ticket.subject}</h3>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <span style="color: #94a3b8; font-size: 0.875rem; background: #1e293b; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-family: 'Courier New', monospace; font-weight: 600; width: fit-content;">#${ticket.ticket_number}</span>
+                                    <div>
+                                        <strong style="color: #f1f5f9;">${ticket.reseller_name}</strong><br>
+                                        <span style="color: #64748b; font-size: 0.875rem;">${ticket.reseller_email}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Ticket Info Grid (Compact) -->
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+                                <div style="padding: 0.75rem; border-left: 3px solid #3b82f6; background: rgba(59,130,246,0.05); border-radius: 0.25rem;">
+                                    <span style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">🔴 الأولوية</span>
+                                    <p style="margin: 0.5rem 0 0 0; color: #f1f5f9; font-weight: 600; font-size: 0.95rem;">${ticket.priority}</p>
+                                </div>
+                                <div style="padding: 0.75rem; border-left: 3px solid #10b981; background: rgba(16,185,129,0.05); border-radius: 0.25rem;">
+                                    <span style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">✅ الحالة</span>
+                                    <p style="margin: 0.5rem 0 0 0; color: #f1f5f9; font-weight: 600; font-size: 0.95rem;">${ticket.status}</p>
+                                </div>
+                                <div style="padding: 0.75rem; border-left: 3px solid #8b5cf6; background: rgba(139,92,246,0.05); border-radius: 0.25rem;">
+                                    <span style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">📅 الإنشاء</span>
+                                    <p style="margin: 0.5rem 0 0 0; color: #e2e8f0; font-size: 0.85rem;">${new Date(ticket.created_at).toLocaleString('ar-EG')}</p>
+                                </div>
+                                <div style="padding: 0.75rem; border-left: 3px solid #f59e0b; background: rgba(245,158,11,0.05); border-radius: 0.25rem;">
+                                    <span style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">⏱️ التحديث</span>
+                                    <p style="margin: 0.5rem 0 0 0; color: #e2e8f0; font-size: 0.85rem;">${new Date(ticket.updated_at).toLocaleString('ar-EG')}</p>
+                                </div>
+                                ${ticket.resolved_at ? `
+                                <div style="padding: 0.75rem; border-left: 3px solid #22c55e; background: rgba(34,197,94,0.05); border-radius: 0.25rem;">
+                                    <span style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">✔️ الحل</span>
+                                    <p style="margin: 0.5rem 0 0 0; color: #22c55e; font-size: 0.85rem; font-weight: 600;">${new Date(ticket.resolved_at).toLocaleString('ar-EG')}</p>
+                                </div>
+                                ` : ''}
+                                <div style="padding: 0.75rem; border-left: 3px solid #ec4899; background: rgba(236,72,153,0.05); border-radius: 0.25rem;">
+                                    <span style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">💬 الرسائل</span>
+                                    <p style="margin: 0.5rem 0 0 0; color: #f1f5f9; font-weight: 600; font-size: 0.95rem;">${ticket.message_count}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Description Section -->
+                            <div style="padding: 1rem; background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%); border-radius: 0.75rem; border-left: 4px solid #2563eb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+                                <strong style="color: #f1f5f9; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">📝 الوصف</strong>
+                                <p style="margin: 0.75rem 0 0 0; color: #cbd5e1; line-height: 1.6; font-size: 0.9rem;">${ticket.description}</p>
+                            </div>
+                            
+                            <!-- Status Update Section -->
+                            <div>
+                                <label style="display: block; color: #f1f5f9; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">🔄 تحديث الحالة</label>
+                                <select id="ticket-status" onchange="updateTicketStatus(${ticket.id})" style="padding: 0.75rem 1rem; border: 2px solid #334155; border-radius: 0.5rem; width: 100%; background-color: #0f172a; color: #f1f5f9; font-family: inherit; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.95rem;">
+                                    ${statusOptions}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Column: Chat Section (Main Focus) -->
+                        <div style="display: flex; flex-direction: column; gap: 1rem; height: 100%; overflow: hidden;">
+                            <!-- Messages Section -->
+                            <div style="flex: 1; display: flex; flex-direction: column; padding: 1rem; background: #0f172a; border: 2px solid #334155; border-radius: 0.75rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); overflow: hidden;">
+                                <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 700; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 0.75rem; border-bottom: 1px solid #334155;">
+                                    💬 المحادثة <span style="color: #3b82f6; margin-left: 0.5rem;">(${ticket.message_count} رسالة)</span>
+                                </div>
+                                <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding-right: 0.5rem;" id="messages-container">
+                                    ${messagesHTML || '<p style="color: #64748b; text-align: center; margin: auto;">لا توجد رسائل بعد</p>'}
+                                </div>
+                            </div>
+                            
+                            <!-- Reply Section -->
+                            <div style="padding: 1rem; border-top: 2px solid #334155; background: #0f172a; border-radius: 0.75rem; border: 2px solid #334155;">
+                                <label style="display: block; color: #f1f5f9; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">✏️ أكتب ردك</label>
+                                <textarea id="reply-message" placeholder="أكتب رسالتك هنا..." style="width: 100%; padding: 0.875rem 1rem; border: 2px solid #334155; border-radius: 0.5rem; color: #f1f5f9; background-color: #0f172a; font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 80px; transition: all 0.2s; outline: none; margin-bottom: 0.75rem;" onkeydown="this.style.borderColor = '#3b82f6';" onkeyup="this.style.borderColor = '#334155';"></textarea>
+                                <div style="display: flex; gap: 0.75rem;">
+                                    <div style="flex: 1; display: flex; gap: 0.5rem; align-items: stretch;">
+                                        <button onclick="sendReply(${ticket.id})" style="flex: 1; padding: 0.875rem 1rem; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(37,99,235,0.3); text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.boxShadow = '0 6px 12px rgba(37,99,235,0.5)';" onmouseout="this.style.boxShadow = '0 4px 6px rgba(37,99,235,0.3)';">✓ إرسال الرد</button>
+                                        <div class="tooltip-container" style="display: flex; align-items: center; padding: 0 0.5rem;">
+                                            <span class="tooltip-icon">?</span>
+                                            <div class="tooltip-box">
+                                                📢 <strong>الرسالة العامة</strong><br><br>
+                                                ✅ تظهر للموزع والإدارة<br>
+                                                🔔 إخطار للموزع<br>
+                                                📝 رد رسمي على الاستفسار
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="flex: 1; display: flex; gap: 0.5rem; align-items: stretch;">
+                                        <div class="tooltip-container" style="display: flex; align-items: center; padding: 0 0.5rem;">
+                                            <span class="tooltip-icon">?</span>
+                                            <div class="tooltip-box">
+                                                🔒 <strong>الرسالة الداخلية</strong><br><br>
+                                                🚫 لا تظهر للموزع<br>
+                                                👥 للإدارة فقط<br>
+                                                💬 ملاحظات داخلية<br>
+                                                📋 تنسيق بين الفريق
+                                            </div>
+                                        </div>
+                                        <button onclick="sendReply(${ticket.id}, true)" style="flex: 1; padding: 0.875rem 1rem; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #fff; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(249,115,22,0.3); text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.boxShadow = '0 6px 12px rgba(249,115,22,0.5)';" onmouseout="this.style.boxShadow = '0 4px 6px rgba(249,115,22,0.3)';">🔒 داخلي</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // تحديث active item في القائمة
+                if (event) {
+                    document.querySelectorAll('.ticket-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    event.currentTarget.classList.add('active');
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تحميل تفاصيل التذكرة:', error);
+            }
+        }
+        
+        // إرسال رد على التذكرة باستخدام Socket.IO
+        async function sendReply(ticketId, isInternal = false) {
+            const messageInput = document.getElementById('reply-message');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                alert('يرجى إدخال رسالة');
+                return;
+            }
+            
+            try {
+                // حفظ الرسالة عبر API (للحفظ في DB)
+                const response = await fetch(`/admin/api/tickets/${ticketId}/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        message,
+                        is_internal: isInternal
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageInput.value = '';
+                    
+                    // ✅ بث الرسالة عبر Socket.IO (للظهور الفوري عند جميع الأطراف)
+                    console.log('📤 Emitting send_message:', { ticket_id: ticketId, message });
+                    
+                    socket.emit('send_message', {
+                        ticket_id: ticketId,
+                        message: message,
+                        is_internal: isInternal
+                    });
+                    
+                    console.log('✅ Message sent to API and broadcasted via Socket.IO');
+                } else {
+                    alert('خطأ في إرسال الرسالة: ' + data.message);
+                }
+            } catch (error) {
+                alert('خطأ في إرسال الرسالة: ' + error.message);
+            }
+        }
+        
+        // تحديث حالة التذكرة
+        async function updateTicketStatus(ticketId) {
+            const statusSelect = document.getElementById('ticket-status');
+            const newStatus = statusSelect.value;
+            
+            try {
+                const response = await fetch(`/admin/api/tickets/${ticketId}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('خطأ في تحديث الحالة: ' + data.message);
+                    location.reload();
+                }
+            } catch (error) {
+                alert('خطأ في تحديث الحالة: ' + error.message);
+            }
+        }
+        
+        // تحميل التذاكر عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTickets();
+        });
+    </script>
+</body>
+</html>
+

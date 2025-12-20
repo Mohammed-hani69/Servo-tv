@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Servo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: "Inter", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: #000;
+            background-image: url("https://assets.nflxext.com/ffe/siteui/vlv3/d1532433-07b1-4e39-a920-0f08b81a489e/67033404-2df8-42e0-a5a0-4c8288b4da2c/IN-en-20231120-popsignuptwoweeks-perspective_alpha_website_large.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            color: #f8fafc;
+            overflow: hidden;
+            user-select: none;
+            min-height: 100vh;
+        }
+
+        *:focus {
+            outline: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulseSlow {
+            0% {
+                opacity: 0.4;
+            }
+            100% {
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes buttonHoverScale {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1.02);
+            }
+        }
+
+        .container {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            background-color: #000;
+            text-color: #fff;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .background-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, #000, rgba(0, 0, 0, 0.8), transparent);
+            z-index: 10;
+        }
+
+        .gradient-horizontal {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, #000, transparent, #000);
+            z-index: 10;
+        }
+
+        .background-image-layer {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center center;
+            opacity: 0.4;
+            animation: pulseSlow 10s infinite alternate;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 20;
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header {
+            position: absolute;
+            top: 32px;
+            left: 0;
+            right: 0;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            background: linear-gradient(to right, #fff, rgb(148, 163, 184));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .help-button {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgb(148, 163, 184);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .help-button:hover {
+            color: #fff;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 64px;
+            max-width: 896px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            letter-spacing: -0.025em;
+            line-height: 1.25;
+            color: #fff;
+        }
+
+        .hero-title-gradient {
+            background: linear-gradient(to right, rgb(96, 165, 250), rgb(192, 132, 252), rgb(248, 113, 113));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            line-height: 1.75;
+            color: rgb(203, 213, 225);
+            max-width: 672px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+            width: 100%;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 768px) {
+            .portal-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 64px;
+            }
+
+            .hero-title {
+                font-size: 72px;
+            }
+        }
+
+        .portal-card {
+            position: relative;
+            height: 256px;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+        }
+
+        @media (min-width: 768px) {
+            .portal-card {
+                height: 320px;
+            }
+        }
+
+        .portal-card:hover {
+            transform: scale(1.02);
+            border-color: rgba(220, 38, 38, 0.5);
+            box-shadow: 0 0 40px rgba(220, 38, 38, 0.2);
+        }
+
+        .portal-card.blue:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 40px rgba(37, 99, 235, 0.2);
+        }
+
+        .portal-gradient-overlay {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .portal-card:hover .portal-gradient-overlay {
+            opacity: 1;
+        }
+
+        .portal-red .portal-gradient-overlay {
+            background: linear-gradient(to bottom right, rgba(127, 29, 29, 0.2), transparent);
+        }
+
+        .portal-blue .portal-gradient-overlay {
+            background: linear-gradient(to bottom right, rgba(30, 58, 138, 0.2), transparent);
+        }
+
+        .portal-content {
+            position: absolute;
+            inset: 0;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .portal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            margin-bottom: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .portal-card:hover .portal-icon {
+            transform: scale(1.1);
+        }
+
+        .portal-icon.red {
+            background: linear-gradient(to bottom right, #dc2626, #ea580c);
+        }
+
+        .portal-icon.blue {
+            background: linear-gradient(to bottom right, #2563eb, #4f46e5);
+        }
+
+        .portal-icon svg {
+            width: 28px;
+            height: 28px;
+            color: #fff;
+        }
+
+        .portal-title {
+            font-size: 30px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .portal-card:hover .portal-title {
+            color: rgb(248, 113, 113);
+        }
+
+        .portal-card.blue:hover .portal-title {
+            color: rgb(96, 165, 250);
+        }
+
+        .portal-description {
+            font-size: 14px;
+            margin-bottom: 24px;
+            color: rgb(148, 163, 184);
+            transition: color 0.3s ease;
+        }
+
+        .portal-card:hover .portal-description {
+            color: rgb(226, 232, 240);
+        }
+
+        .portal-cta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgb(248, 113, 113);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .portal-card.blue .portal-cta {
+            color: rgb(96, 165, 250);
+        }
+
+        .portal-cta svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .portal-card:hover .portal-cta svg {
+            transform: translateX(4px);
+        }
+
+        .portal-icon-bg {
+            position: absolute;
+            bottom: -40px;
+            right: -40px;
+            width: 256px;
+            height: 256px;
+            color: rgba(255, 255, 255, 0.05);
+            transition: transform 0.7s ease;
+            z-index: 0;
+        }
+
+        .portal-card:hover .portal-icon-bg {
+            transform: rotate(0deg);
+        }
+
+        .portal-red .portal-icon-bg {
+            transform: rotate(-15deg);
+        }
+
+        .portal-blue .portal-icon-bg {
+            transform: rotate(15deg);
+        }
+
+        .portal-icon-bg svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .features-section {
+            margin-top: 80px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 32px;
+            color: rgb(100, 116, 139);
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+            z-index: 30;
+        }
+
+        @media (min-width: 768px) {
+            .features-section {
+                gap: 64px;
+            }
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-icon {
+            width: 18px;
+            height: 18px;
+            color: rgb(16, 185, 129);
+        }
+
+        .feature-item.blue .feature-icon {
+            color: rgb(59, 130, 246);
+        }
+
+        .feature-item.purple .feature-icon {
+            color: rgb(168, 85, 247);
+        }
+
+        .admin-button {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            z-index: 50;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgb(30, 41, 59);
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgb(148, 163, 184);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            text-decoration: none;
+        }
+
+        a.admin-button {
+            display: inline-flex;
+        }
+
+        .admin-button:hover {
+            background-color: rgba(127, 29, 29, 0.5);
+            border-color: rgba(239, 68, 68, 0.5);
+            color: rgb(248, 113, 113);
+        }
+
+        .admin-button svg {
+            width: 10px;
+            height: 10px;
+            color: inherit;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .portal-card {
+                height: 256px;
+            }
+
+            .features-section {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="background-layer">
+            <div class="gradient-overlay"></div>
+            <div class="gradient-horizontal"></div>
+            <div class="background-image-layer" style="background-image: url('https://assets.nflxext.com/ffe/siteui/vlv3/d1532433-07b1-4e39-a920-0f08b81a489e/67033404-2df8-42e0-a5a0-4c8288b4da2c/IN-en-20231120-popsignuptwoweeks-perspective_alpha_website_large.jpg');"></div>
+        </div>
+
+        <div class="content">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo-section">
+                    <svg class="logo-icon" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0" y1="0" x2="200" y2="200">
+                                <stop offset="0%" stop-color="#3B82F6"></stop>
+                                <stop offset="100%" stop-color="#2563EB"></stop>
+                            </linearGradient>
+                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="5" result="coloredBlur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <path d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z" fill="url(#logoGradient)" filter="url(#glow)"></path>
+                        <path d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round"></path>
+                    </svg>
+                    <span class="logo-text">SERVO</span>
+                </div>
+                <button class="help-button">Help Center</button>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <h1 class="hero-title">
+                    Unlimited Entertainment.<br><span class="hero-title-gradient">Limitless Possibilities.</span>
+                </h1>
+                <p class="hero-description">
+                    Experience the next generation of streaming technology. Choose your portal to get started.
+                </p>
+            </div>
+
+            <!-- Portal Cards Grid -->
+            <div class="portal-grid">
+                <!-- Viewer Card -->
+                <a href="/users/login" class="portal-card portal-red" style="text-decoration: none; color: inherit;">
+                    <div class="portal-gradient-overlay"></div>
+                    <div class="portal-content">
+                        <div>
+                            <div class="portal-icon red">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="portal-title">Viewer</h2>
+                            <p class="portal-description">
+                                Access thousands of Movies, Series, and Live TV channels on your device.
+                            </p>
+                        </div>
+                        <div class="portal-cta">
+                            Enter App
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="portal-icon-bg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                            <path d="M7 3v18"></path>
+                            <path d="M3 7.5h4"></path>
+                            <path d="M3 12h18"></path>
+                            <path d="M3 16.5h4"></path>
+                            <path d="M17 3v18"></path>
+                            <path d="M17 7.5h4"></path>
+                            <path d="M17 16.5h4"></path>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Reseller Card -->
+                <a href="/reseller/login" class="portal-card portal-blue blue" style="text-decoration: none; color: inherit;">
+                    <div class="portal-gradient-overlay"></div>
+                    <div class="portal-content">
+                        <div>
+                            <div class="portal-icon blue">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 7h6v6"></path>
+                                    <path d="m22 7-8.5 8.5-5-5L2 17"></path>
+                                </svg>
+                            </div>
+                            <h2 class="portal-title">Reseller</h2>
+                            <p class="portal-description">
+                                Manage users, generate codes, and track your earnings via the dashboard.
+                            </p>
+                        </div>
+                        <div class="portal-cta">
+                            Partner Login
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="portal-icon-bg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                            <path d="M2 12h20"></path>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features-section">
+                <div class="feature-item">
+                    <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                    <span>Secure Encryption</span>
+                </div>
+                <div class="feature-item blue">
+                    <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                        <path d="M2 12h20"></path>
+                    </svg>
+                    <span>Global Access</span>
+                </div>
+                <div class="feature-item purple">
+                    <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                    </svg>
+                    <span>4K Ultra HD</span>
+                </div>
+            </div>
+
+            <!-- Admin Button -->
+            <a href="/admin/login" class="admin-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Admin Panel
+            </a>
+        </div>
+    </div>
+</body>
+</html>

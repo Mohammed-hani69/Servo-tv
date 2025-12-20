@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - User Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/dashboard.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        {% include 'user/components/sidebar.html' %}
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- HEADER -->
+                <div class="header-section">
+                    <div class="welcome-text">
+                        <div class="welcome-label">welcome_back</div>
+                        <h1 class="welcome-name" id="username-display">Loading...</h1>
+                    </div>
+                    <div class="time-display">
+                        <div class="time" dir="ltr" id="time-display">00:00 AM</div>
+                        <div class="date" id="date-display">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- FEATURED CARDS -->
+                <div class="card-grid">
+                    <!-- Live TV Card -->
+                    <button class="card blue">
+                        <img src="https://images.unsplash.com/photo-1593784991095-a20506948430?q=80&w=800" alt="Live TV" class="card-img">
+                        <div class="card-content">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m17 2-5 5-5-5"></path>
+                                    <rect width="20" height="15" x="2" y="7" rx="2"></rect>
+                                </svg>
+                            </div>
+                            <h3 class="card-title">Live TV</h3>
+                            <p class="card-subtitle">
+                                section_enter
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </p>
+                        </div>
+                    </button>
+
+                    <!-- Movies Card -->
+                    <button class="card purple">
+                        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=800" alt="Movies" class="card-img">
+                        <div class="card-content">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                                    <path d="M7 3v18"></path>
+                                    <path d="M3 7.5h4"></path>
+                                    <path d="M3 12h18"></path>
+                                    <path d="M3 16.5h4"></path>
+                                    <path d="M17 3v18"></path>
+                                    <path d="M17 7.5h4"></path>
+                                    <path d="M17 16.5h4"></path>
+                                </svg>
+                            </div>
+                            <h3 class="card-title">Movies</h3>
+                            <p class="card-subtitle">
+                                section_enter
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </p>
+                        </div>
+                    </button>
+
+                    <!-- Series Card -->
+                    <button class="card emerald">
+                        <img src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=800" alt="Series" class="card-img">
+                        <div class="card-content">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m17 2-5 5-5-5"></path>
+                                    <rect width="20" height="15" x="2" y="7" rx="2"></rect>
+                                </svg>
+                            </div>
+                            <h3 class="card-title">Series</h3>
+                            <p class="card-subtitle">
+                                section_enter
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </p>
+                        </div>
+                    </button>
+
+                    <!-- Playlists Card -->
+                    <button class="card orange">
+                        <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800" alt="Playlists" class="card-img">
+                        <div class="card-content">
+                            <div class="card-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 5H3"></path>
+                                    <path d="M11 12H3"></path>
+                                    <path d="M16 19H3"></path>
+                                    <path d="M18 9v6"></path>
+                                    <path d="M21 12h-6"></path>
+                                </svg>
+                            </div>
+                            <h3 class="card-title">my_playlists</h3>
+                            <p class="card-subtitle">
+                                section_enter
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            </p>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- CONTINUE WATCHING SECTION -->
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-line blue"></div>
+                        <h2 class="section-title">continue_watching</h2>
+                    </div>
+                    <div class="carousel">
+                        <button class="carousel-item">
+                            <img src="https://picsum.photos/400/225?random=11" alt="Show" class="carousel-item-img">
+                            <div class="carousel-overlay">
+                                <div class="play-button">
+                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </button>
+
+                        <button class="carousel-item">
+                            <img src="https://picsum.photos/400/225?random=12" alt="Show" class="carousel-item-img">
+                            <div class="carousel-overlay">
+                                <div class="play-button">
+                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </button>
+
+                        <button class="carousel-item">
+                            <img src="https://picsum.photos/400/225?random=13" alt="Show" class="carousel-item-img">
+                            <div class="carousel-overlay">
+                                <div class="play-button">
+                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- RECENTLY ADDED SECTION -->
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-line yellow"></div>
+                        <h2 class="section-title">recently_added</h2>
+                    </div>
+                    <div class="item-grid">
+                        <button class="grid-item">
+                            <div class="grid-item-img-container">
+                                <img src="https://picsum.photos/300/450?random=21" alt="Movie" class="grid-item-img">
+                                <div class="grid-item-badge">new_badge</div>
+                            </div>
+                            <div class="grid-item-info">
+                                <div class="grid-item-title">New Movie 1</div>
+                                <div class="grid-item-meta">2024 • Action</div>
+                            </div>
+                        </button>
+
+                        <button class="grid-item">
+                            <div class="grid-item-img-container">
+                                <img src="https://picsum.photos/300/450?random=22" alt="Movie" class="grid-item-img">
+                                <div class="grid-item-badge">new_badge</div>
+                            </div>
+                            <div class="grid-item-info">
+                                <div class="grid-item-title">New Movie 2</div>
+                                <div class="grid-item-meta">2024 • Action</div>
+                            </div>
+                        </button>
+
+                        <button class="grid-item">
+                            <div class="grid-item-img-container">
+                                <img src="https://picsum.photos/300/450?random=23" alt="Movie" class="grid-item-img">
+                                <div class="grid-item-badge">new_badge</div>
+                            </div>
+                            <div class="grid-item-info">
+                                <div class="grid-item-title">New Movie 3</div>
+                                <div class="grid-item-meta">2024 • Action</div>
+                            </div>
+                        </button>
+
+                        <button class="grid-item">
+                            <div class="grid-item-img-container">
+                                <img src="https://picsum.photos/300/450?random=24" alt="Movie" class="grid-item-img">
+                                <div class="grid-item-badge">new_badge</div>
+                            </div>
+                            <div class="grid-item-info">
+                                <div class="grid-item-title">New Movie 4</div>
+                                <div class="grid-item-meta">2024 • Action</div>
+                            </div>
+                        </button>
+
+                        <button class="grid-item">
+                            <div class="grid-item-img-container">
+                                <img src="https://picsum.photos/300/450?random=25" alt="Movie" class="grid-item-img">
+                                <div class="grid-item-badge">new_badge</div>
+                            </div>
+                            <div class="grid-item-info">
+                                <div class="grid-item-title">New Movie 5</div>
+                                <div class="grid-item-meta">2024 • Action</div>
+                            </div>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Display logged-in username
+        function displayUsername() {
+            const username = sessionStorage.getItem('username') || 'Guest';
+            document.getElementById('username-display').textContent = username;
+        }
+
+        // Live clock that updates every second
+        function updateClock() {
+            const now = new Date();
+            
+            // Format time as HH:MM AM/PM
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // 0 should be 12
+            const timeString = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+            
+            // Format date as Day, Month Date
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            const dateString = now.toLocaleDateString('en-US', options);
+            
+            // Update display
+            document.getElementById('time-display').textContent = timeString;
+            document.getElementById('date-display').textContent = dateString;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            displayUsername();
+            updateClock();
+            
+            // Update clock every second
+            setInterval(updateClock, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - Reseller Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/reseller/dashboard.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        {% include 'reseller/components/sidebar.html' %}
+
+        <!-- MAIN CONTENT -->
+        <div class="main-wrapper">
+            <!-- HEADER -->
+            <header class="main-header">
+                <div class="search-box">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+                        <path d="m21 21-4.34-4.34"></path>
+                        <circle cx="11" cy="11" r="8"></circle>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="reseller_search_placeholder">
+                </div>
+
+                <div class="header-actions">
+                    <button class="icon-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                            <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path>
+                        </svg>
+                        <span class="notification-dot"></span>
+                    </button>
+                    <div class="divider"></div>
+                    <div class="user-info">
+                        <div class="user-text">
+                            <div class="user-name">{{ reseller.name }}</div>
+                            <div class="user-id">{{ reseller.email }}</div>
+                        </div>
+                        <div class="user-avatar">D</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT AREA -->
+            <main class="main-content">
+                <div class="content-spacing">
+                    <!-- STATS GRID -->
+                    <div class="stats-grid">
+                        <!-- Points Balance Card -->
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon emerald">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                        <line x1="2" x2="22" y1="10" y2="10"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ reseller.points_balance }}</div>
+                            <div class="stat-label">points_balance</div>
+                            <div style="font-size: 0.75rem; color: rgba(245, 209, 6, 1); margin-top: 0.5rem;">~ ${{ "%.2f"|format(reseller.total_amount_charged ) }} (approx_value)</div>
+                        </div>
+
+                        <!-- Active Subscribers Card -->
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon blue">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                        <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                    </svg>
+                                </div>
+                                <div class="stat-badge {% if stats.active_change_percent >= 0 %}up{% else %}down{% endif %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        {% if stats.active_change_percent >= 0 %}
+                                        <path d="M7 7h10v10"></path>
+                                        <path d="M7 17 17 7"></path>
+                                        {% else %}
+                                        <path d="m7 7 10 10"></path>
+                                        <path d="M17 7v10H7"></path>
+                                        {% endif %}
+                                    </svg>
+                                    {{ "%.1f"|format(stats.active_change_percent|abs) }}%
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.active_subscriptions }}</div>
+                            <div class="stat-label">active_subscribers</div>
+                        </div>
+
+                        <!-- Codes Today Card -->
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon purple">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M10.65 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v10.1"></path>
+                                        <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
+                                        <path d="m10 15 1 1"></path>
+                                        <path d="m11 14-4.586 4.586"></path>
+                                        <circle cx="5" cy="20" r="2"></circle>
+                                    </svg>
+                                </div>
+                                <div class="stat-badge {% if stats.daily_change_percent >= 0 %}up{% else %}down{% endif %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        {% if stats.daily_change_percent >= 0 %}
+                                        <path d="M7 7h10v10"></path>
+                                        <path d="M7 17 17 7"></path>
+                                        {% else %}
+                                        <path d="m7 7 10 10"></path>
+                                        <path d="M17 7v10H7"></path>
+                                        {% endif %}
+                                    </svg>
+                                    {{ "%.1f"|format(stats.daily_change_percent|abs) }}%
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.today_activations }}</div>
+                            <div class="stat-label">codes_today</div>
+                        </div>
+
+                        <!-- Expired Users Card -->
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon orange">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" x2="12" y1="8" y2="12"></line>
+                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value">{{ stats.expired_subscriptions }}</div>
+                            <div class="stat-label">expired_users</div>
+                            {% if stats.expired_subscriptions > 0 %}
+                            <div style="font-size: 0.75rem; color: rgb(239, 68, 68); margin-top: 0.5rem; font-weight: 600;">Action required</div>
+                            {% else %}
+                            <div style="font-size: 0.75rem; color: rgb(71, 85, 105); margin-top: 0.5rem;">All good</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ANALYTICS AND QUICK ACTIONS -->
+                    <div class="analytics-section">
+                        <!-- Chart Card -->
+                        <div class="analytics-card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">تحليل التفعيلات</h3>
+                                    <p class="card-description">اتجاه التفعيلات والاشتراكات</p>
+                                </div>
+                            </div>
+
+                            <!-- Time Period Selector -->
+                            <div class="time-period-selector">
+                                <button class="period-btn active" data-period="daily">يومي</button>
+                                <button class="period-btn" data-period="weekly">أسبوعي</button>
+                                <button class="period-btn" data-period="monthly">شهري</button>
+                                <button class="period-btn" data-period="yearly">سنوي</button>
+                            </div>
+
+                            <!-- Chart -->
+                            <div class="chart-container">
+                                <canvas id="activationsChart"></canvas>
+                            </div>
+
+                            <!-- Trend Indicator -->
+                            <div class="trend-indicator" id="trendIndicator">
+                                <div class="trend-icon up">↑</div>
+                                <span class="trend-text up" id="trendText">النمو: +12.5% مقارنة بالفترة السابقة</span>
+                            </div>
+                        </div>
+
+                        <!-- Subscription Types Chart -->
+                        <div class="quick-actions-card">
+                            <h3 class="quick-actions-title">نسبة الاشتراكات</h3>
+                            <div class="chart-container" style="margin-bottom: 1rem;">
+                                <canvas id="subscriptionChart"></canvas>
+                            </div>
+                            <div id="subscriptionStats" style="padding: 1rem; background-color: rgba(30, 41, 59, 0.5); border-radius: 0.5rem; text-align: center;">
+                                <div style="font-size: 0.875rem; color: rgb(148, 163, 184); margin-bottom: 0.5rem;">جاري التحميل...</div>
+                            </div>
+                        </div>
+                            <h3 class="quick-actions-title">quick_actions</h3>
+                            <div class="action-buttons">
+                                <button class="action-btn">
+                                    <div class="action-group">
+                                        <div class="action-btn-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M10.65 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v10.1"></path>
+                                                <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
+                                                <path d="m10 15 1 1"></path>
+                                                <path d="m11 14-4.586 4.586"></path>
+                                                <circle cx="5" cy="20" r="2"></circle>
+                                            </svg>
+                                        </div>
+                                        <span>generate_code</span>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="action-btn-arrow">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <line x1="19" x2="19" y1="8" y2="14"></line>
+                                        <line x1="22" x2="16" y1="11" y2="11"></line>
+                                    </svg>
+                                </button>
+                                <button class="action-btn secondary">
+                                    <div class="action-group">
+                                        <div class="action-btn-icon" style="background: none;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                <circle cx="9" cy="7" r="4"></circle>
+                                            </svg>
+                                        </div>
+                                        <span>manage_users</span>
+                                    </div>
+                                </button>
+                                <button class="action-btn secondary">
+                                    <div class="action-group">
+                                        <div class="action-btn-icon" style="background: none;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                                <line x1="2" x2="22" y1="10" y2="10"></line>
+                                            </svg>
+                                        </div>
+                                        <span>purchase_points</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div class="alert-banner">
+                                <div class="alert-box">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" x2="12" y1="8" y2="12"></line>
+                                        <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                                    </svg>
+                                    <div class="alert-content">
+                                        <div class="alert-title">system_maintenance</div>
+                                        <div class="alert-text">Scheduled for tonight 03:00 UTC. Dashboard might be unavailable for 10 mins.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let activationsChart = null;
+        let subscriptionChart = null;
+        let currentPeriod = 'daily';
+
+        function updateActivationsChart(period) {
+            // جلب البيانات من الخادم
+            fetch(`/reseller/api/analytics?period=${period}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch analytics data');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (!result.success) {
+                        console.error('Error:', result.message);
+                        return;
+                    }
+
+                    const data = result.data;
+                    const ctx = document.getElementById('activationsChart').getContext('2d');
+
+                    if (activationsChart) {
+                        activationsChart.destroy();
+                    }
+
+                    activationsChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [
+                                {
+                                    label: 'التفعيلات',
+                                    data: data.activations,
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    borderWidth: 3,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointBackgroundColor: 'rgb(59, 130, 246)',
+                                    pointBorderColor: 'rgb(59, 130, 246)',
+                                    pointRadius: 5,
+                                    pointHoverRadius: 7,
+                                    pointBorderWidth: 2
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        color: 'rgb(148, 163, 184)',
+                                        font: {
+                                            family: "'Inter', sans-serif",
+                                            size: 12
+                                        },
+                                        padding: 15,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                    titleColor: 'white',
+                                    bodyColor: 'rgb(226, 232, 240)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    displayColors: true,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + context.parsed.y + ' تفعيل';
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    grid: {
+                                        display: false,
+                                        color: 'rgba(255, 255, 255, 0.05)'
+                                    },
+                                    ticks: {
+                                        color: 'rgb(100, 116, 139)',
+                                        font: {
+                                            family: "'Inter', sans-serif",
+                                            size: 11
+                                        }
+                                    }
+                                },
+                                y: {
+                                    grid: {
+                                        color: 'rgba(255, 255, 255, 0.05)',
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: 'rgb(100, 116, 139)',
+                                        font: {
+                                            family: "'Inter', sans-serif",
+                                            size: 11
+                                        },
+                                        callback: function(value) {
+                                            return value.toLocaleString('ar-SA');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Update trend indicator
+                    const trend = data.trend;
+                    const trendIndicator = document.getElementById('trendIndicator');
+                    const trendIcon = trendIndicator.querySelector('.trend-icon');
+                    const trendText = document.getElementById('trendText');
+
+                    if (trend >= 0) {
+                        trendIcon.className = 'trend-icon up';
+                        trendIcon.textContent = '↑';
+                        trendText.className = 'trend-text up';
+                        trendText.textContent = `النمو: +${trend}% مقارنة بالفترة السابقة`;
+                    } else {
+                        trendIcon.className = 'trend-icon down';
+                        trendIcon.textContent = '↓';
+                        trendText.className = 'trend-text down';
+                        trendText.textContent = `الانخفاض: ${Math.abs(trend)}% مقارنة بالفترة السابقة`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching analytics:', error);
+                    alert('خطأ في تحميل البيانات. يرجى المحاولة مجدداً.');
+                });
+        }
+
+        function updateSubscriptionChart() {
+            // جلب بيانات نسبة الاشتراكات
+            fetch('/reseller/api/subscription-types')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch subscription data');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (!result.success) {
+                        console.error('Error:', result.message);
+                        return;
+                    }
+
+                    const data = result.data;
+                    const ctx = document.getElementById('subscriptionChart').getContext('2d');
+
+                    if (subscriptionChart) {
+                        subscriptionChart.destroy();
+                    }
+
+                    subscriptionChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['سنوي', 'مدى الحياة'],
+                            datasets: [{
+                                data: [data.yearly, data.lifetime],
+                                backgroundColor: [
+                                    'rgba(59, 130, 246, 0.8)',
+                                    'rgba(168, 85, 247, 0.8)'
+                                ],
+                                borderColor: [
+                                    'rgb(59, 130, 246)',
+                                    'rgb(168, 85, 247)'
+                                ],
+                                borderWidth: 2,
+                                hoverOffset: 10
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        color: 'rgb(148, 163, 184)',
+                                        font: {
+                                            family: "'Inter', sans-serif",
+                                            size: 12
+                                        },
+                                        padding: 15,
+                                        usePointStyle: true,
+                                        pointStyle: 'circle'
+                                    }
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                    titleColor: 'white',
+                                    bodyColor: 'rgb(226, 232, 240)',
+                                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                                    borderWidth: 1,
+                                    padding: 12,
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.parsed || 0;
+                                            return label + ': ' + value + ' اشتراك';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // تحديث الإحصائيات
+                    const statsHtml = `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: rgb(59, 130, 246);">${data.yearly}</div>
+                                <div style="font-size: 0.75rem; color: rgb(148, 163, 184); margin-top: 0.25rem;">سنوي (${data.yearly_percent}%)</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: rgb(168, 85, 247);">${data.lifetime}</div>
+                                <div style="font-size: 0.75rem; color: rgb(148, 163, 184); margin-top: 0.25rem;">مدى الحياة (${data.lifetime_percent}%)</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
+                            <div style="font-size: 0.875rem; color: rgb(226, 232, 240);">إجمالي: <span style="font-weight: 700;">${data.total}</span></div>
+                        </div>
+                    `;
+                    document.getElementById('subscriptionStats').innerHTML = statsHtml;
+                })
+                .catch(error => {
+                    console.error('Error fetching subscription data:', error);
+                    document.getElementById('subscriptionStats').innerHTML = '<div style="color: rgb(248, 113, 113);">خطأ في تحميل البيانات</div>';
+                });
+        }
+
+        // Period button click handlers
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = this.dataset.period;
+                updateActivationsChart(currentPeriod);
+            });
+        });
+
+        // Initialize charts on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateActivationsChart('daily');
+            updateSubscriptionChart();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - Series</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/series.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        {% include 'user/components/sidebar.html' %}
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header -->
+            <header class="header">
+                <input type="text" class="search-input" placeholder="Search series..." id="searchInput">
+                
+                <div class="header-right">
+                    <div class="notification-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <div class="notification-dot"></div>
+                    </div>
+                    <div class="user-avatar">U</div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <div class="page-title">Series</div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <label class="filter-label">Genre:</label>
+                    <select class="filter-select" id="genreFilter">
+                        <option value="all">All Genres</option>
+                        <option value="action">Action</option>
+                        <option value="drama">Drama</option>
+                        <option value="comedy">Comedy</option>
+                        <option value="thriller">Thriller</option>
+                        <option value="sci-fi">Sci-Fi</option>
+                    </select>
+
+                    <label class="filter-label">Year:</label>
+                    <select class="filter-select" id="yearFilter">
+                        <option value="all">All Years</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                    </select>
+                </div>
+
+                <!-- Series Grid -->
+                <div class="series-grid" id="seriesGrid">
+                    <!-- Series 1 -->
+                    <div class="series-card" data-genre="action" data-year="2024">
+                        <div class="series-poster">
+                            <div class="series-poster-image">🎬</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">The Midnight Protocol</div>
+                            <div class="series-meta">
+                                <span class="series-year">2024</span>
+                                <span class="series-rating">⭐ 8.5</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 2 -->
+                    <div class="series-card" data-genre="drama" data-year="2023">
+                        <div class="series-poster">
+                            <div class="series-poster-image">📺</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Heart's Desire</div>
+                            <div class="series-meta">
+                                <span class="series-year">2023</span>
+                                <span class="series-rating">⭐ 9.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 3 -->
+                    <div class="series-card" data-genre="comedy" data-year="2024">
+                        <div class="series-poster">
+                            <div class="series-poster-image">😂</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Office Chaos</div>
+                            <div class="series-meta">
+                                <span class="series-year">2024</span>
+                                <span class="series-rating">⭐ 8.2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 4 -->
+                    <div class="series-card" data-genre="thriller" data-year="2023">
+                        <div class="series-poster">
+                            <div class="series-poster-image">🔪</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Dark Secrets</div>
+                            <div class="series-meta">
+                                <span class="series-year">2023</span>
+                                <span class="series-rating">⭐ 8.8</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 5 -->
+                    <div class="series-card" data-genre="sci-fi" data-year="2024">
+                        <div class="series-poster">
+                            <div class="series-poster-image">🚀</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Quantum Leap</div>
+                            <div class="series-meta">
+                                <span class="series-year">2024</span>
+                                <span class="series-rating">⭐ 8.7</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 6 -->
+                    <div class="series-card" data-genre="action" data-year="2022">
+                        <div class="series-poster">
+                            <div class="series-poster-image">⚔️</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Warrior Kings</div>
+                            <div class="series-meta">
+                                <span class="series-year">2022</span>
+                                <span class="series-rating">⭐ 8.4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 7 -->
+                    <div class="series-card" data-genre="drama" data-year="2024">
+                        <div class="series-poster">
+                            <div class="series-poster-image">💔</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Broken Promises</div>
+                            <div class="series-meta">
+                                <span class="series-year">2024</span>
+                                <span class="series-rating">⭐ 8.6</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Series 8 -->
+                    <div class="series-card" data-genre="comedy" data-year="2023">
+                        <div class="series-poster">
+                            <div class="series-poster-image">🎭</div>
+                            <button class="play-button" title="Play">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="series-info">
+                            <div class="series-title">Laugh Track</div>
+                            <div class="series-meta">
+                                <span class="series-year">2023</span>
+                                <span class="series-rating">⭐ 7.9</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State (Hidden by default) -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">📺</div>
+                    <div class="empty-title">No Series Found</div>
+                    <div class="empty-text">Try adjusting your filters or search criteria</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const genreFilter = document.getElementById('genreFilter');
+        const yearFilter = document.getElementById('yearFilter');
+        const seriesGrid = document.getElementById('seriesGrid');
+        const emptyState = document.getElementById('emptyState');
+        const seriesCards = document.querySelectorAll('.series-card');
+
+        function filterSeries() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedGenre = genreFilter.value;
+            const selectedYear = yearFilter.value;
+            let visibleCount = 0;
+
+            seriesCards.forEach(card => {
+                const title = card.querySelector('.series-title').textContent.toLowerCase();
+                const genre = card.getAttribute('data-genre');
+                const year = card.getAttribute('data-year');
+
+                const matchesSearch = title.includes(searchTerm);
+                const matchesGenre = selectedGenre === 'all' || genre === selectedGenre;
+                const matchesYear = selectedYear === 'all' || year === selectedYear;
+
+                if (matchesSearch && matchesGenre && matchesYear) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                seriesGrid.style.display = 'none';
+                emptyState.style.display = 'flex';
+            } else {
+                seriesGrid.style.display = 'grid';
+                emptyState.style.display = 'none';
+            }
+        }
+
+        searchInput.addEventListener('input', filterSeries);
+        genreFilter.addEventListener('change', filterSeries);
+        yearFilter.addEventListener('change', filterSeries);
+
+        // Play button functionality
+        document.querySelectorAll('.play-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const title = this.closest('.series-card').querySelector('.series-title').textContent;
+                alert(`Playing: ${title}`);
+            });
+        });
+
+        // Series card click
+        document.querySelectorAll('.series-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.play-button')) {
+                    const title = this.querySelector('.series-title').textContent;
+                    alert(`Viewing details for: ${title}`);
+                }
+            });
+        });
+
+        // Sidebar menu navigation
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Notification icon click
+        document.querySelector('.notification-icon').addEventListener('click', function() {
+            alert('You have 3 new notifications');
+        });
+
+        // User avatar click
+        document.querySelector('.user-avatar').addEventListener('click', function() {
+            alert('User menu would open here');
+        });
+
+        // Logout button
+        document.querySelector('.logout-button').addEventListener('click', function() {
+            alert('Logging out...');
+            // In a real app, this would redirect to login page
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+title=ServoTV
+subtitle=IPTV Activation System
+major_version=1
+minor_version=0
+build_version=1
+
+type=advertising
+
+' Device Information
+mm_icon_focus_hd=pkg:/images/mm_icon_focus_hd.png
+mm_icon_focus_sd=pkg:/images/mm_icon_focus_sd.png
+mm_icon_unfocus_hd=pkg:/images/mm_icon_unfocus_hd.png
+mm_icon_unfocus_sd=pkg:/images/mm_icon_unfocus_sd.png
+
+' Splash Screen
+splash_screen_hd=pkg:/images/splash_hd.png
+splash_screen_sd=pkg:/images/splash_sd.png
+splash_screen_fhd=pkg:/images/splash_fhd.png
+splash_screen_4k=pkg:/images/splash_4k.png
+
+' Description
+description=ServoTV - Device Activation & IPTV Streaming
+
+' Author
+author=ServoTV Team
+
+' API Keys and Permissions
+ui_resolutions=hd,fhd,4k
+ui_resolutions_16x9_only=true
+
+' Network Permissions
+network_access=true
+
+' File Permissions
+file_system_access=common
+
+' Supported Features
+supports_mouse_remote=false
+supports_hypercam_remote=true
+supports_input_remote=true
+
+' Network Detection
+require_network_access=true
+require_sw_version=7.5.0
+
+' Device Model Support
+supported_models=*
+
+' Brightscript Version
+minimum_brightscript_version=1.0.0

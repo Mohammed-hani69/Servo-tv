@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Roles & Permissions - Admin Panel - Servo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/admin/Roles.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        {% include 'admin/components/sidebar.html' %}
+        <!-- MAIN -->
+        <div class="main-container">
+            <main class="content animate-fade-in">
+                <!-- PAGE HEADER -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Roles & Permissions</h1>
+                        <p class="page-subtitle">Define access levels for your team</p>
+                    </div>
+                    <button class="add-btn" onclick="alert('Add new role...')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" x2="19" y1="8" y2="14"></line><line x1="22" x2="16" y1="11" y2="11"></line></svg>
+                        Add New Role
+                    </button>
+                </div>
+
+                <!-- ROLES GRID -->
+                <div class="grid">
+                    <div class="role-card">
+                        <div class="role-card-header">
+                            <div>
+                                <div class="role-title">Super Admin</div>
+                                <p class="role-description">Full access to all system features</p>
+                            </div>
+                            <div class="role-actions">
+                                <button class="action-btn" onclick="alert('Edit role...')" title="Edit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 21h8"></path><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-card-content">
+                            <div>
+                                <div class="permissions-label">Permissions</div>
+                                <div class="permissions-list">
+                                    <span class="permission-badge">ALL</span>
+                                </div>
+                            </div>
+                            <div class="role-footer">
+                                <span>2 Staff Members</span>
+                                <span>ID: role_1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="role-card">
+                        <div class="role-card-header">
+                            <div>
+                                <div class="role-title">Support Agent</div>
+                                <p class="role-description">Can manage tickets and view users</p>
+                            </div>
+                            <div class="role-actions">
+                                <button class="action-btn" onclick="alert('Edit role...')" title="Edit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 21h8"></path><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>
+                                </button>
+                                <button class="action-btn delete" onclick="alert('Delete role...')" title="Delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-card-content">
+                            <div>
+                                <div class="permissions-label">Permissions</div>
+                                <div class="permissions-list">
+                                    <span class="permission-badge">view_users</span>
+                                    <span class="permission-badge">manage_tickets</span>
+                                </div>
+                            </div>
+                            <div class="role-footer">
+                                <span>5 Staff Members</span>
+                                <span>ID: role_2</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="role-card">
+                        <div class="role-card-header">
+                            <div>
+                                <div class="role-title">Finance Manager</div>
+                                <p class="role-description">Access to billing and payments only</p>
+                            </div>
+                            <div class="role-actions">
+                                <button class="action-btn" onclick="alert('Edit role...')" title="Edit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 21h8"></path><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>
+                                </button>
+                                <button class="action-btn delete" onclick="alert('Delete role...')" title="Delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-card-content">
+                            <div>
+                                <div class="permissions-label">Permissions</div>
+                                <div class="permissions-list">
+                                    <span class="permission-badge">view_payments</span>
+                                    <span class="permission-badge">manage_invoices</span>
+                                    <span class="permission-badge">view_reports</span>
+                                </div>
+                            </div>
+                            <div class="role-footer">
+                                <span>1 Staff Member</span>
+                                <span>ID: role_3</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="role-card">
+                        <div class="role-card-header">
+                            <div>
+                                <div class="role-title">Content Manager</div>
+                                <p class="role-description">Manage media and playlists</p>
+                            </div>
+                            <div class="role-actions">
+                                <button class="action-btn" onclick="alert('Edit role...')" title="Edit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 21h8"></path><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>
+                                </button>
+                                <button class="action-btn delete" onclick="alert('Delete role...')" title="Delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-card-content">
+                            <div>
+                                <div class="permissions-label">Permissions</div>
+                                <div class="permissions-list">
+                                    <span class="permission-badge">manage_content</span>
+                                    <span class="permission-badge">manage_playlists</span>
+                                    <span class="permission-badge">view_analytics</span>
+                                </div>
+                            </div>
+                            <div class="role-footer">
+                                <span>3 Staff Members</span>
+                                <span>ID: role_4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="role-card">
+                        <div class="role-card-header">
+                            <div>
+                                <div class="role-title">Viewer</div>
+                                <p class="role-description">Read-only access for viewing</p>
+                            </div>
+                            <div class="role-actions">
+                                <button class="action-btn" onclick="alert('Edit role...')" title="Edit">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 21h8"></path><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path></svg>
+                                </button>
+                                <button class="action-btn delete" onclick="alert('Delete role...')" title="Delete">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="role-card-content">
+                            <div>
+                                <div class="permissions-label">Permissions</div>
+                                <div class="permissions-list">
+                                    <span class="permission-badge">view_only</span>
+                                </div>
+                            </div>
+                            <div class="role-footer">
+                                <span>12 Staff Members</span>
+                                <span>ID: role_5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PERMISSIONS MATRIX -->
+                <div class="matrix-section">
+                    <div class="matrix-header">
+                        <h3>Permission Matrix Reference</h3>
+                        <p>Select a role card above to edit its granular permissions</p>
+                    </div>
+                    <div class="matrix-content">
+                        <div class="matrix-grid">
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">manage_distributors</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">view_distributors</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">manage_users</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">view_users</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">manage_payments</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">view_payments</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">manage_content</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">manage_tickets</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">manage_settings</span>
+                            </div>
+                            <div class="matrix-row">
+                                <div class="matrix-checkbox"></div>
+                                <span class="matrix-label">view_logs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Menu items
+        document.querySelectorAll('[data-menu]').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('[data-menu]').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Permission checkboxes
+        document.querySelectorAll('.matrix-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', function() {
+                this.classList.toggle('checked');
+            });
+        });
+    </script>
+</body>
+</html>

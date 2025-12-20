@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - Live TV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/live-tv.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        {% include 'user/components/sidebar.html' %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Categories Sidebar -->
+                <aside class="categories-sidebar">
+                    <h2 class="categories-title">Categories</h2>
+                    <div class="categories-list">
+                        <button class="category-item active">
+                            <span>All</span>
+                            <svg class="category-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m9 18 6-6-6-6"></path>
+                            </svg>
+                        </button>
+                        <button class="category-item">Favorites</button>
+                        <button class="category-item">Sports</button>
+                        <button class="category-item">News</button>
+                        <button class="category-item">Movies</button>
+                        <button class="category-item">Kids</button>
+                        <button class="category-item">Documentary</button>
+                        <button class="category-item">Music</button>
+                        <button class="category-item">International</button>
+                    </div>
+                </aside>
+
+                <!-- Channels Grid -->
+                <section class="channels-section">
+                    <div class="channels-header">
+                        <h1 class="channels-title">All Channels</h1>
+                        <span class="channels-count">6 channels found</span>
+                    </div>
+
+                    <div class="channels-grid">
+                        <!-- Channel Card 1 -->
+                        <div class="channel-card">
+                            <div class="channel-thumbnail">
+                                <img src="https://picsum.photos/100/100?random=1" alt="News 24/7">
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">News 24/7</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">1080p</span>
+                                    <span class="channel-category">News</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Channel Card 2 -->
+                        <div class="channel-card">
+                            <div class="channel-thumbnail">
+                                <img src="https://picsum.photos/100/100?random=2" alt="Sports HD">
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">Sports HD</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">1080p</span>
+                                    <span class="channel-category">Sports</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Channel Card 3 -->
+                        <div class="channel-card">
+                            <div class="channel-thumbnail">
+                                <img src="https://picsum.photos/100/100?random=3" alt="Movies Action">
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">Movies Action</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">1080p</span>
+                                    <span class="channel-category">Movies</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Channel Card 4 -->
+                        <div class="channel-card">
+                            <div class="channel-thumbnail">
+                                <img src="https://picsum.photos/100/100?random=4" alt="Kids TV">
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">Kids TV</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">1080p</span>
+                                    <span class="channel-category">Kids</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Channel Card 5 -->
+                        <div class="channel-card">
+                            <div class="channel-thumbnail">
+                                <img src="https://picsum.photos/100/100?random=5" alt="Documentary">
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">Documentary</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">1080p</span>
+                                    <span class="channel-category">Edu</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Channel Card 6 -->
+                        <div class="channel-card">
+                            <div class="channel-thumbnail">
+                                <img src="https://picsum.photos/100/100?random=6" alt="Music Hits">
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">Music Hits</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">1080p</span>
+                                    <span class="channel-category">Music</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+// Live TV - JavaScript Controller
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeEventListeners();
+    setupFocusNavigation();
+});
+
+// ============================================
+// Event Listeners
+// ============================================
+
+function initializeEventListeners() {
+    // Navigation Items
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', handleNavigation);
+    });
+
+    // Category Items
+    const categoryItems = document.querySelectorAll('.category-item');
+    categoryItems.forEach(item => {
+        item.addEventListener('click', handleCategoryChange);
+    });
+
+    // Channel Cards
+    const channelCards = document.querySelectorAll('.channel-card');
+    channelCards.forEach(card => {
+        card.addEventListener('click', handleChannelSelect);
+    });
+
+    // Favorite Buttons
+    const favoriteButtons = document.querySelectorAll('.channel-favorite');
+    favoriteButtons.forEach(btn => {
+        btn.addEventListener('click', handleFavorite);
+    });
+
+    // Logout Button
+    const logoutBtn = document.querySelector('.btn-logout');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+}
+
+// ============================================
+// Event Handlers
+// ============================================
+
+function handleNavigation(event) {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => item.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    console.log('Navigation:', event.currentTarget.textContent);
+}
+
+function handleCategoryChange(event) {
+    const categoryItems = document.querySelectorAll('.category-item');
+    categoryItems.forEach(item => item.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    const categoryName = event.currentTarget.textContent.trim();
+    console.log('Category changed to:', categoryName);
+    updateChannelsGrid(categoryName);
+}
+
+function handleChannelSelect(event) {
+    const channelName = event.currentTarget.querySelector('.channel-name')?.textContent;
+    console.log('Playing channel:', channelName);
+    // Add logic to play channel
+}
+
+function handleFavorite(event) {
+    event.stopPropagation();
+    const svg = event.currentTarget.querySelector('svg');
+    svg.style.fill = svg.style.fill === 'rgb(234, 179, 8)' ? 'none' : 'rgb(234, 179, 8)';
+    console.log('Favorite toggled');
+}
+
+function handleLogout() {
+    console.log('Logging out...');
+    // Add logout logic here
+    // window.location.href = '/logout';
+}
+
+// ============================================
+// Grid Update
+// ============================================
+
+function updateChannelsGrid(category) {
+    const channelCards = document.querySelectorAll('.channel-card');
+    channelCards.forEach(card => {
+        const cardCategory = card.querySelector('.channel-category')?.textContent;
+        if (category === 'All' || cardCategory === category) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// ============================================
+// Focus Navigation (for TV remote)
+// ============================================
+
+function setupFocusNavigation() {
+    document.addEventListener('keydown', (event) => {
+        const focusedElement = document.activeElement;
+
+        switch (event.key) {
+            case 'ArrowUp':
+                event.preventDefault();
+                moveFocus('up', focusedElement);
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                moveFocus('down', focusedElement);
+                break;
+            case 'ArrowLeft':
+                event.preventDefault();
+                moveFocus('left', focusedElement);
+                break;
+            case 'ArrowRight':
+                event.preventDefault();
+                moveFocus('right', focusedElement);
+                break;
+            case 'Enter':
+                if (focusedElement && focusedElement.click) {
+                    focusedElement.click();
+                }
+                break;
+        }
+    });
+}
+
+function moveFocus(direction, currentElement) {
+    const focusableElements = Array.from(
+        document.querySelectorAll(
+            'button, [href], input, [tabindex]'
+        )
+    ).filter(el => {
+        return el.offsetHeight > 0 && el.offsetWidth > 0;
+    });
+
+    const currentIndex = focusableElements.indexOf(currentElement);
+
+    if (currentIndex === -1) {
+        focusableElements[0]?.focus();
+        return;
+    }
+
+    let nextIndex = currentIndex;
+
+    switch (direction) {
+        case 'up':
+            nextIndex = currentIndex > 0 ? currentIndex - 1 : focusableElements.length - 1;
+            break;
+        case 'down':
+            nextIndex = currentIndex < focusableElements.length - 1 ? currentIndex + 1 : 0;
+            break;
+        case 'left':
+            nextIndex = currentIndex > 0 ? currentIndex - 1 : focusableElements.length - 1;
+            break;
+        case 'right':
+            nextIndex = currentIndex < focusableElements.length - 1 ? currentIndex + 1 : 0;
+            break;
+    }
+
+    focusableElements[nextIndex]?.focus();
+}
+
+// ============================================
+// Utility Functions
+// ============================================
+
+function logMessage(message) {
+    console.log(`[Servo TV] ${message}`);
+}
+
+function showNotification(message, duration = 3000) {
+    // Add notification UI here if needed
+    console.log(`[Notification] ${message}`);
+}
+
+    </script>
+</body>
+</html>

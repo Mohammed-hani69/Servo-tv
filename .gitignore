@@ -1,0 +1,41 @@
+# بيئات افتراضية
+venv/
+env/
+ENV/
+.venv
+.env
+
+# ملفات Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ملفات قاعدة البيانات
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# ملفات IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ملفات السجلات
+logs/
+*.log
+
+# ملفات النقل
+dist/
+build/
+*.egg-info/
+
+# ملفات النقطة
+.coverage
+.pytest_cache/
+htmlcov/

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servo Admin - Billing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/admin/Billing.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        {% include 'admin/components/sidebar.html' %}
+
+
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="header-info">
+                        <h1>Payments & Billing</h1>
+                        <p>Manage payment gateways and transactions</p>
+                    </div>
+                    <div class="header-buttons">
+                        <button class="btn btn-primary">Transactions</button>
+                        <button class="btn btn-secondary">Gateway Settings</button>
+                    </div>
+                </div>
+
+                <!-- Payments Table -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <div class="table-title">All Payments</div>
+                        <a class="export-link" href="#">
+                            <span>📥</span>
+                            <span>Export Report</span>
+                        </a>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Distributor</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Transaction 1: Completed -->
+                            <tr>
+                                <td class="id-cell">PAY-8821</td>
+                                <td>Alpha Stream</td>
+                                <td>Stripe</td>
+                                <td class="amount-cell">500 <span class="currency">USD</span></td>
+                                <td class="date-cell">2024-03-20 14:30</td>
+                                <td>
+                                    <span class="badge badge-completed">
+                                        <span>✓</span>
+                                        <span>Completed</span>
+                                    </span>
+                                </td>
+                                <td class="actions-cell">
+                                    <a class="action-link" href="#">
+                                        <span>📥</span>
+                                        <span>Invoice</span>
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <!-- Transaction 2: Pending -->
+                            <tr>
+                                <td class="id-cell">PAY-8822</td>
+                                <td>Beta IPTV</td>
+                                <td>PayMob</td>
+                                <td class="amount-cell">20000 <span class="currency">EGP</span></td>
+                                <td class="date-cell">2024-03-20 15:00</td>
+                                <td>
+                                    <span class="badge badge-pending">
+                                        <span>⏳</span>
+                                        <span>Pending</span>
+                                    </span>
+                                </td>
+                                <td class="actions-cell">
+                                    <button class="action-btn btn-approve">Approve</button>
+                                    <button class="action-btn btn-reject">Reject</button>
+                                </td>
+                            </tr>
+
+                            <!-- Transaction 3: Failed -->
+                            <tr>
+                                <td class="id-cell">PAY-8823</td>
+                                <td>Gamma Reseller</td>
+                                <td>Manual Transfer</td>
+                                <td class="amount-cell">100 <span class="currency">USD</span></td>
+                                <td class="date-cell">2024-03-19 09:00</td>
+                                <td>
+                                    <span class="badge badge-failed">
+                                        <span>✕</span>
+                                        <span>Failed</span>
+                                    </span>
+                                </td>
+                                <td class="actions-cell">
+                                    <span style="color: #475569; font-size: 12px;">—</span>
+                                </td>
+                            </tr>
+
+                            <!-- Transaction 4: Completed -->
+                            <tr>
+                                <td class="id-cell">PAY-8824</td>
+                                <td>Alpha Stream</td>
+                                <td>Fawry</td>
+                                <td class="amount-cell">5000 <span class="currency">EGP</span></td>
+                                <td class="date-cell">2024-03-18 11:20</td>
+                                <td>
+                                    <span class="badge badge-completed">
+                                        <span>✓</span>
+                                        <span>Completed</span>
+                                    </span>
+                                </td>
+                                <td class="actions-cell">
+                                    <a class="action-link" href="#">
+                                        <span>📥</span>
+                                        <span>Invoice</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar menu item click handling
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Action buttons
+        document.querySelectorAll('.btn-approve').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const row = this.closest('tr');
+                const id = row.querySelector('.id-cell').textContent;
+                alert(`Payment ${id} approved!`);
+            });
+        });
+
+        document.querySelectorAll('.btn-reject').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const row = this.closest('tr');
+                const id = row.querySelector('.id-cell').textContent;
+                alert(`Payment ${id} rejected!`);
+            });
+        });
+
+        // Export link
+        document.querySelector('.export-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Exporting payments report...');
+        });
+
+        // Invoice links
+        document.querySelectorAll('.action-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const row = this.closest('tr');
+                const id = row.querySelector('.id-cell').textContent;
+                alert(`Downloading invoice for ${id}...`);
+            });
+        });
+
+        // Logout button
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            alert('Logging out...');
+        });
+
+        // Gateway Settings button
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent.includes('Gateway')) {
+                    alert('Opening gateway settings...');
+                } else if (this.textContent.includes('Transactions')) {
+                    alert('Opening transactions view...');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

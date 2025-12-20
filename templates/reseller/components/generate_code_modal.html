@@ -1,0 +1,203 @@
+<!-- Generate Code Modal -->
+<div id="generateCodeModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="sticky top-0 bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus text-blue-500"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                Generate New Activation Code
+            </h2>
+            <button class="close-modal text-slate-400 hover:text-white transition-colors" title="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6l-12 12"></path><path d="M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <form id="generateCodeForm" class="p-6 space-y-5">
+            <!-- Username -->
+            <div>
+                <label class="block text-sm font-semibold text-white mb-2">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="Enter username"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none"
+                >
+            </div>
+
+            <!-- Activation Code -->
+            <div>
+                <label class="block text-sm font-semibold text-white mb-2">Activation Code</label>
+                <input 
+                    type="text" 
+                    id="activationCode" 
+                    name="activationCode" 
+                    placeholder="Enter activation code"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none font-mono text-sm"
+                >
+            </div>
+
+            <!-- Subscription Duration -->
+            <div>
+                <label class="block text-sm font-semibold text-white mb-2">Subscription Duration</label>
+                <div class="flex gap-3">
+                    <label class="flex-1 flex items-center gap-3 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg cursor-pointer hover:border-blue-500 transition-all">
+                        <input 
+                            type="radio" 
+                            name="subscriptionDuration" 
+                            value="1year" 
+                            class="w-4 h-4 cursor-pointer"
+                            required
+                        >
+                        <span class="text-white font-medium">1 Year</span>
+                    </label>
+                    <label class="flex-1 flex items-center gap-3 p-3 bg-slate-800 border-2 border-slate-700 rounded-lg cursor-pointer hover:border-green-500 transition-all">
+                        <input 
+                            type="radio" 
+                            name="subscriptionDuration" 
+                            value="lifetime" 
+                            class="w-4 h-4 cursor-pointer"
+                            required
+                        >
+                        <span class="text-white font-medium">Lifetime</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Available Devices (Fixed at 1) -->
+            <div>
+                <label class="block text-sm font-semibold text-white mb-2">Available Devices</label>
+                <div class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white text-center font-bold text-lg">
+                    1 Device
+                </div>
+                <p class="text-xs text-slate-400 mt-2">Fixed: 1 device per subscription</p>
+            </div>
+
+            <!-- Media Link -->
+            <div>
+                <label class="block text-sm font-semibold text-white mb-2">Media Link <span class="text-xs text-slate-400">(Optional)</span></label>
+                <input 
+                    type="url" 
+                    id="mediaLink" 
+                    name="mediaLink" 
+                    placeholder="https://example.com/playlist.m3u"
+                    class="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all outline-none text-sm"
+                >
+                <p class="text-xs text-slate-400 mt-1">Enter M3U playlist or media link</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-2 border-t border-slate-800">
+                <button 
+                    type="button" 
+                    class="close-modal flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg transition-colors font-medium"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="submit" 
+                    class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-lg transition-colors font-medium shadow-lg shadow-blue-900/20"
+                >
+                    Create Code
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Close modal function
+    function closeModal() {
+        document.getElementById('generateCodeModal').classList.add('hidden');
+        document.getElementById('generateCodeModal').classList.remove('flex');
+    }
+
+    // Open modal function
+    function openModal() {
+        document.getElementById('generateCodeModal').classList.remove('hidden');
+        document.getElementById('generateCodeModal').classList.add('flex');
+    }
+
+    // Initialize modal events
+    document.addEventListener('DOMContentLoaded', function() {
+        // Open modal button - linked to Generate Code button
+        const generateCodeBtn = document.querySelector('button:has(.lucide-plus)');
+        if (generateCodeBtn && generateCodeBtn.textContent.includes('Generate Code')) {
+            generateCodeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                openModal();
+            });
+        }
+
+        // Close modal buttons
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', closeModal);
+        });
+
+        // Close modal when clicking backdrop
+        document.getElementById('generateCodeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Device count buttons - REMOVED (devices are now fixed at 1)
+        // document.getElementById('increaseDevices').addEventListener('click', ...) 
+        // document.getElementById('decreaseDevices').addEventListener('click', ...)
+
+        // Form submission
+        document.getElementById('generateCodeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const durationValue = document.querySelector('input[name="subscriptionDuration"]:checked')?.value;
+            
+            const formData = {
+                username: document.getElementById('username').value || null,
+                activationCode: document.getElementById('activationCode').value,
+                subscriptionDuration: durationValue,  // '1year' or 'lifetime'
+                mediaLink: document.getElementById('mediaLink').value || null
+            };
+
+            // Validation
+            if (!formData.activationCode || !formData.subscriptionDuration) {
+                console.error('Missing required fields');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            // Send to backend
+            fetch('/reseller/api/activate-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reset form
+                    document.getElementById('generateCodeForm').reset();
+                    closeModal();
+                    // Reload or update UI automatically
+                    window.location.reload();
+                } else {
+                    console.error('Error:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+    });
+</script>

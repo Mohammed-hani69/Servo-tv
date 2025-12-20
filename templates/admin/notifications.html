@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Notifications - Admin Panel - Servo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/admin/notifications.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        {% include 'admin/components/sidebar.html' %}
+
+        <!-- MAIN -->
+        <div class="main-container">
+            <main class="content">
+                <div class="page-header animate-fade-in">
+                    <h1 class="page-title">Notifications Center</h1>
+                    <p class="page-subtitle">Broadcast messages to distributors and users</p>
+                </div>
+
+                <div class="grid">
+                    <!-- COMPOSE SECTION -->
+                    <div class="col-span-1">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg>
+                                    Compose Message
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <form>
+                                    <div class="form-group">
+                                        <label class="form-label">Target Audience</label>
+                                        <select class="form-select">
+                                            <option>All Distributors</option>
+                                            <option>Specific Distributor</option>
+                                            <option>All Users</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Message Type</label>
+                                        <div class="message-type-selector">
+                                            <button type="button" class="type-btn active" data-type="alert">Alert</button>
+                                            <button type="button" class="type-btn" data-type="warning">Warning</button>
+                                            <button type="button" class="type-btn" data-type="promotion">Promotion</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" class="form-input" placeholder="Brief subject..." />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Message Body</label>
+                                        <textarea class="form-textarea" placeholder="Type your message here..."></textarea>
+                                    </div>
+
+                                    <button type="button" class="btn btn-primary" onclick="alert('Message composed!')">
+                                        Compose Message
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY SECTION -->
+                    <div class="col-span-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Sent History</h3>
+                            </div>
+                            <div class="notification-list">
+                                <!-- NOTIFICATION 1 -->
+                                <div class="notification-item">
+                                    <div class="notification-header">
+                                        <div class="notification-content">
+                                            <div class="notification-icon alert">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                                            </div>
+                                            <div class="notification-info">
+                                                <div class="notification-title">Maintenance Notice</div>
+                                                <div class="notification-audience">To: All Distributors</div>
+                                            </div>
+                                        </div>
+                                        <div class="notification-meta">
+                                            <div class="notification-time">2024-03-20 10:00</div>
+                                            <div class="notification-sender">By: SuperAdmin</div>
+                                        </div>
+                                    </div>
+                                    <div class="notification-body">System down at 3AM</div>
+                                </div>
+
+                                <!-- NOTIFICATION 2 -->
+                                <div class="notification-item">
+                                    <div class="notification-header">
+                                        <div class="notification-content">
+                                            <div class="notification-icon info">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                                            </div>
+                                            <div class="notification-info">
+                                                <div class="notification-title">Low Balance</div>
+                                                <div class="notification-audience">To: Specific Distributor</div>
+                                            </div>
+                                        </div>
+                                        <div class="notification-meta">
+                                            <div class="notification-time">2024-03-19 15:30</div>
+                                            <div class="notification-sender">By: Finance</div>
+                                        </div>
+                                    </div>
+                                    <div class="notification-body">Please top up your points</div>
+                                </div>
+
+                                <!-- NOTIFICATION 3 -->
+                                <div class="notification-item">
+                                    <div class="notification-header">
+                                        <div class="notification-content">
+                                            <div class="notification-icon promotion">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg>
+                                            </div>
+                                            <div class="notification-info">
+                                                <div class="notification-title">Eid Sale</div>
+                                                <div class="notification-audience">To: All Users</div>
+                                            </div>
+                                        </div>
+                                        <div class="notification-meta">
+                                            <div class="notification-time">2024-03-18 09:00</div>
+                                            <div class="notification-sender">By: Marketing</div>
+                                        </div>
+                                    </div>
+                                    <div class="notification-body">50% Off Renewals</div>
+                                </div>
+
+                                <!-- NOTIFICATION 4 -->
+                                <div class="notification-item">
+                                    <div class="notification-header">
+                                        <div class="notification-content">
+                                            <div class="notification-icon warning">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                                            </div>
+                                            <div class="notification-info">
+                                                <div class="notification-title">Server Update</div>
+                                                <div class="notification-audience">To: All Users & Distributors</div>
+                                            </div>
+                                        </div>
+                                        <div class="notification-meta">
+                                            <div class="notification-time">2024-03-17 12:15</div>
+                                            <div class="notification-sender">By: IT Support</div>
+                                        </div>
+                                    </div>
+                                    <div class="notification-body">Scheduled maintenance on Sunday 2AM - 4AM</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Message Type Selector
+        document.querySelectorAll('[data-type]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('[data-type]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Menu Items
+        document.querySelectorAll('[data-menu]').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('[data-menu]').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

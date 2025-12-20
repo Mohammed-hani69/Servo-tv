@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Reports & Analytics - Admin Panel - Servo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/admin/reports.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- SIDEBAR -->
+        {% include 'admin/components/sidebar.html' %}
+
+        <!-- MAIN -->
+        <div class="main-container">
+            <main class="content animate-fade-in">
+                <!-- PAGE HEADER -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Reports & Analytics</h1>
+                        <p class="page-subtitle">Deep insights into system performance</p>
+                    </div>
+                    <div class="page-controls">
+                        <select class="date-select" id="dateRange">
+                            <option>Last 30 Days</option>
+                            <option>Last 60 Days</option>
+                            <option>Last 90 Days</option>
+                            <option>This Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- CHARTS GRID -->
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Revenue Growth</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-placeholder">
+                                <div class="chart-label">📈 Revenue Trend (Jan - Jul)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Active Users vs Expired</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-placeholder">
+                                <div class="chart-label">📊 User Status Distribution (Jan - Jul)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STAT CARDS -->
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="stat-title">Active Subscribers</div>
+                        <p class="stat-description">List of all currently active users</p>
+                        <div class="stat-buttons">
+                            <button class="stat-btn" onclick="alert('Exporting to PDF...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path></svg> PDF
+                            </button>
+                            <button class="stat-btn" onclick="alert('Exporting to Excel...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path></svg>
+                        </div>
+                        <div class="stat-title">Device Locations</div>
+                        <p class="stat-description">Geographical distribution of logins</p>
+                        <div class="stat-buttons">
+                            <button class="stat-btn" onclick="alert('Exporting to PDF...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path></svg> PDF
+                            </button>
+                            <button class="stat-btn" onclick="alert('Exporting to Excel...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon emerald">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg>
+                        </div>
+                        <div class="stat-title">Revenue Report</div>
+                        <p class="stat-description">Breakdown of points sales and usage</p>
+                        <div class="stat-buttons">
+                            <button class="stat-btn" onclick="alert('Exporting to PDF...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path></svg> PDF
+                            </button>
+                            <button class="stat-btn" onclick="alert('Exporting to Excel...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> Excel
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16h.01"></path><path d="M12 8v4"></path><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"></path></svg>
+                        </div>
+                        <div class="stat-title">Expired Subs</div>
+                        <p class="stat-description">Users who expired in selected period</p>
+                        <div class="stat-buttons">
+                            <button class="stat-btn" onclick="alert('Exporting to PDF...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path></svg> PDF
+                            </button>
+                            <button class="stat-btn" onclick="alert('Exporting to Excel...')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg> Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOP DISTRIBUTORS TABLE -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Top Performing Distributors</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Distributor</th>
+                                <th>Total Users</th>
+                                <th>Contribution</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="rank-cell">#1</td>
+                                <td class="distributor-name">Alpha Stream 1</td>
+                                <td class="users-cell">1,400</td>
+                                <td class="revenue-cell">$23,000</td>
+                                <td class="trend-cell">+11%</td>
+                            </tr>
+                            <tr>
+                                <td class="rank-cell">#2</td>
+                                <td class="distributor-name">Alpha Stream 2</td>
+                                <td class="users-cell">1,300</td>
+                                <td class="revenue-cell">$21,000</td>
+                                <td class="trend-cell">+12%</td>
+                            </tr>
+                            <tr>
+                                <td class="rank-cell">#3</td>
+                                <td class="distributor-name">Alpha Stream 3</td>
+                                <td class="users-cell">1,200</td>
+                                <td class="revenue-cell">$19,000</td>
+                                <td class="trend-cell">+13%</td>
+                            </tr>
+                            <tr>
+                                <td class="rank-cell">#4</td>
+                                <td class="distributor-name">Beta Network Co</td>
+                                <td class="users-cell">980</td>
+                                <td class="revenue-cell">$15,680</td>
+                                <td class="trend-cell">+9%</td>
+                            </tr>
+                            <tr>
+                                <td class="rank-cell">#5</td>
+                                <td class="distributor-name">Gamma Distribution</td>
+                                <td class="users-cell">850</td>
+                                <td class="revenue-cell">$13,600</td>
+                                <td class="trend-cell">+7%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Date range selector
+        const dateRange = document.getElementById('dateRange');
+        dateRange.addEventListener('change', function(e) {
+            alert(`Generating report for: ${e.target.value}`);
+        });
+
+        // Menu items
+        document.querySelectorAll('[data-menu]').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('[data-menu]').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

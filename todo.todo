@@ -1,0 +1,326 @@
+🗓️ الجدول الزمني الكامل حتى 1/1/2026
+📌 المرحلة 0 — التخطيط النهائي (يوم واحد)
+📆 17/12
+
+الهدف: تثبيت الصورة النهائية قبل أي كود
+
+المهام
+
+مراجعة النظام كامل (البرومت اللي كتبناه)
+
+تثبيت:
+
+Roles (Admin / Reseller / User / Device)
+
+Flows (Activation – Login – Limits)
+
+تحديد:
+
+DB: PostgreSQL
+
+Auth: JWT + Device Token
+
+رسم ERD (حتى لو على ورقة)
+
+الناتج
+✅ Architecture نهائية
+✅ ERD واضح
+✅ مفيش تغيير بعد اليوم ده
+
+🧱 المرحلة 1 — أساس الباك اند (Core Backend)
+📆 18/12
+
+المهام
+
+إنشاء مشروع Flask
+
+إعداد:
+
+config.py
+
+environments (dev / prod)
+
+إعداد SQLAlchemy + Migrate
+
+إنشاء app factory
+
+اختبار تشغيل السيرفر
+
+الناتج
+✅ Flask App شغال
+✅ DB متصلة
+✅ Migrations جاهزة
+
+📆 19/12
+
+المهام
+
+إنشاء Models:
+
+Admin
+
+Reseller
+
+User
+
+إنشاء BaseModel (timestamps, soft delete)
+
+Password hashing + PIN hashing
+
+الناتج
+✅ Models الأساسية
+✅ Migrations سليمة
+
+📆 20/12
+
+المهام
+
+إنشاء Models:
+
+Device
+
+ActivationCode
+
+DeviceActivationCode
+
+AuditLog
+
+العلاقات (FK + relationships)
+
+الناتج
+✅ كل الجداول جاهزة
+✅ DB Schema مكتمل 100%
+
+🔐 المرحلة 2 — Auth & Security
+📆 21/12
+
+المهام
+
+Auth:
+
+Admin login
+
+Reseller login
+
+JWT handling
+
+Middleware:
+
+admin_required
+
+reseller_required
+
+الناتج
+✅ تسجيل دخول آمن
+✅ Roles مفصولة
+
+📆 22/12
+
+المهام
+
+PIN verification للموزع
+
+Rate limiting (basic)
+
+Audit logging service
+
+الناتج
+✅ أمان العمليات الحساسة
+✅ Logs لكل شيء مهم
+
+📺 المرحلة 3 — Device & Activation Core (أهم مرحلة)
+📆 23/12
+
+المهام
+
+API:
+
+Device register
+
+Generate activation code (6 digits)
+
+Expiry logic (10 دقائق)
+
+منع إعادة التسجيل
+
+الناتج
+✅ TV App يطلع كود تفعيل
+
+📆 24/12
+
+المهام
+
+API:
+
+Reseller activates code
+
+Transaction كامل:
+
+verify code
+
+verify points
+
+create user
+
+create subscription
+
+create device
+
+deduct points
+
+الناتج
+✅ قلب النظام شغال (Activation Flow)
+
+📆 25/12
+
+المهام
+
+Device login API
+
+Check:
+
+subscription valid
+
+device limit
+
+Generate Device Token
+
+الناتج
+✅ TV App يدخل ويشتغل
+
+🧑‍💼 المرحلة 4 — لوحات التحكم (Admin / Reseller)
+📆 26/12
+
+المهام
+
+Reseller APIs:
+
+profile
+
+balance
+
+users
+
+devices
+
+subscriptions
+
+الناتج
+✅ Dashboard موزع جاهز للفرونت
+
+📆 27/12
+
+المهام
+
+Admin APIs:
+
+manage resellers
+
+adjust points
+
+view logs
+
+system stats
+
+الناتج
+✅ Admin Panel Backend جاهز
+
+🧪 المرحلة 5 — الاختبارات والتحصين
+📆 28/12
+
+المهام
+
+Test cases:
+
+expired code
+
+reused code
+
+device overflow
+
+invalid PIN
+
+Fix edge cases
+
+الناتج
+✅ نظام مستقر
+
+📆 29/12
+
+المهام
+
+Load testing (خفيف)
+
+تحسين Queries
+
+Indexes مهمة
+
+Cleanup code
+
+الناتج
+✅ Performance مقبول للإطلاق
+
+🚀 المرحلة 6 — النشر (Deployment)
+📆 30/12
+
+المهام
+
+إعداد Server:
+
+Linux
+
+Nginx
+
+Gunicorn
+
+ENV variables
+
+Migrate production DB
+
+الناتج
+✅ Backend Live
+
+📆 31/12
+
+المهام
+
+ربط:
+
+TV App
+
+Admin Frontend
+
+Reseller Frontend
+
+Smoke testing
+
+Backup setup
+
+الناتج
+✅ النظام شغال فعليًا
+
+🎉 المرحلة الأخيرة
+📆 1/1/2026
+
+المهام
+
+Monitoring
+
+Fix سريع لأي Bug
+
+توثيق النظام
+
+أخذ Snapshot نهائي
+
+الناتج
+🏁 PROJECT COMPLETED & LIVE
+
+🟢 ملاحظات مهمة جدًا
+
+لو اشتغلت 4–6 ساعات يوميًا → الخطة ممتازة
+
+لا تبدأ فرونت قبل 25/12
+
+لا تغيّر DB بعد 20/12
+
+أي تأخير يوم = ضغط يومين بعده

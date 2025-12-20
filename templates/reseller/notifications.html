@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - Notifications</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/reseller/notifications.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0" y1="0" x2="200" y2="200">
+                            <stop offset="0%" stop-color="#3B82F6"></stop>
+                            <stop offset="100%" stop-color="#2563EB"></stop>
+                        </linearGradient>
+                    </defs>
+                    <path d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z" fill="url(#logoGradient)"></path>
+                    <path d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round"></path>
+                </svg>
+                <div class="logo-text">
+                    <h1>SERVO</h1>
+                    <p>Reseller Panel</p>
+                </div>
+            </div>
+
+            <div class="sidebar-menu no-scrollbar">
+                <div class="sidebar-menu-title">Main Menu</div>
+                
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                        <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                        <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                        <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                    </svg>
+                    Dashboard
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M10.65 22H18a2 2 0 0 0 2-2V8a2.4 2.4 0 0 0-.706-1.706l-3.588-3.588A2.4 2.4 0 0 0 14 2H6a2 2 0 0 0-2 2v10.1"></path>
+                        <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
+                    </svg>
+                    Activation Codes
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                    </svg>
+                    Users
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect>
+                        <path d="M12 18h.01"></path>
+                    </svg>
+                    Devices
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                        <line x1="2" x2="22" y1="10" y2="10"></line>
+                    </svg>
+                    Billing
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"></path>
+                        <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path>
+                        <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path>
+                    </svg>
+                    Plans
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+                        <path d="M18 17V9"></path>
+                        <path d="M13 17V5"></path>
+                        <path d="M8 17v-3"></path>
+                    </svg>
+                    Reports
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                        <path d="M13 5v2"></path>
+                        <path d="M13 17v2"></path>
+                        <path d="M13 11v2"></path>
+                    </svg>
+                    Support
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                    Sub-accounts
+                </button>
+
+                <button class="menu-item active">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                        <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path>
+                    </svg>
+                    Notifications
+                </button>
+
+                <button class="menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Settings
+                </button>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="balance-card">
+                    <div class="balance-label">Current Balance</div>
+                    <div class="balance-amount">
+                        850 <span class="balance-currency">PTS</span>
+                    </div>
+                    <button class="topup-btn">Add Points</button>
+                </div>
+                <button class="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="m16 17 5-5-5-5"></path>
+                        <path d="M21 12H9"></path>
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-wrapper">
+            <div class="main-overlay"></div>
+
+            <!-- Header -->
+            <header class="header">
+                <div class="search-container">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m21 21-4.34-4.34"></path>
+                        <circle cx="11" cy="11" r="8"></circle>
+                    </svg>
+                    <input type="text" class="search-input tv-focus" placeholder="Search notifications...">
+                </div>
+
+                <div class="header-right">
+                    <button class="notification-bell tv-focus">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
+                            <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path>
+                        </svg>
+                        <span class="notification-dot"></span>
+                    </button>
+                    <div class="header-divider"></div>
+                    <div class="user-section">
+                        <div class="user-info">
+                            <div class="user-email">demo@tvapp.com</div>
+                            <div class="user-id">ID: u-123</div>
+                        </div>
+                        <div class="avatar">D</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="main-content animate-fade-in">
+                <div class="content-wrapper">
+                    <!-- Header -->
+                    <div class="content-header">
+                        <div class="content-title">
+                            <h1>Notifications</h1>
+                            <p>Stay updated with system alerts and user activities</p>
+                        </div>
+                        <button class="mark-all-read">Mark all as read</button>
+                    </div>
+
+                    <!-- Notifications List -->
+                    <div class="notifications-list">
+                        <!-- Notification 1: Success -->
+                        <div class="notification-item active">
+                            <div class="notification-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-success">
+                                    <path d="M20 6 9 17l-5-5"></path>
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h3 class="notification-title">Points Purchase Successful</h3>
+                                    <span class="notification-time">
+                                        <svg class="clock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M12 6v6l4 2"></path>
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                        </svg>
+                                        10 mins ago
+                                    </span>
+                                </div>
+                                <p class="notification-description">You have successfully purchased 500 points.</p>
+                            </div>
+                            <div class="notification-indicator"></div>
+                        </div>
+
+                        <!-- Notification 2: Warning -->
+                        <div class="notification-item active">
+                            <div class="notification-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-warning">
+                                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                                    <path d="M12 9v4"></path>
+                                    <path d="M12 17h.01"></path>
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h3 class="notification-title">User Expiration Warning</h3>
+                                    <span class="notification-time">
+                                        <svg class="clock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M12 6v6l4 2"></path>
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                        </svg>
+                                        2 hours ago
+                                    </span>
+                                </div>
+                                <p class="notification-description">User (alex@gmail.com) subscription is expiring in 24 hours.</p>
+                            </div>
+                            <div class="notification-indicator"></div>
+                        </div>
+
+                        <!-- Notification 3: Info -->
+                        <div class="notification-item inactive">
+                            <div class="notification-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-info">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 16v-4"></path>
+                                    <path d="M12 8h.01"></path>
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h3 class="notification-title">System Maintenance</h3>
+                                    <span class="notification-time">
+                                        <svg class="clock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M12 6v6l4 2"></path>
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                        </svg>
+                                        1 day ago
+                                    </span>
+                                </div>
+                                <p class="notification-description">The dashboard will be undergoing maintenance at 03:00 UTC.</p>
+                            </div>
+                        </div>
+
+                        <!-- Notification 4: Error -->
+                        <div class="notification-item inactive">
+                            <div class="notification-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-error">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="m15 9-6 6"></path>
+                                    <path d="m9 9 6 6"></path>
+                                </svg>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-header">
+                                    <h3 class="notification-title">Failed Activation Attempt</h3>
+                                    <span class="notification-time">
+                                        <svg class="clock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M12 6v6l4 2"></path>
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                        </svg>
+                                        2 days ago
+                                    </span>
+                                </div>
+                                <p class="notification-description">Multiple failed login attempts detected for Code A8B9...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Add interactivity
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Mark all as read functionality
+        document.querySelector('.mark-all-read').addEventListener('click', function() {
+            document.querySelectorAll('.notification-item').forEach(notification => {
+                notification.classList.remove('active');
+                notification.classList.add('inactive');
+            });
+        });
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.notification-item').forEach(notification => {
+                const title = notification.querySelector('.notification-title').textContent.toLowerCase();
+                const description = notification.querySelector('.notification-description').textContent.toLowerCase();
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    notification.style.display = 'flex';
+                } else {
+                    notification.style.display = 'none';
+                }
+            });
+        });
+
+        // Notification bell click handler
+        document.querySelector('.notification-bell').addEventListener('click', function() {
+            alert('Notification center opened');
+        });
+
+        // Logout button
+        document.querySelector('.logout-btn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        });
+
+        // TopUp button
+        document.querySelector('.topup-btn').addEventListener('click', function() {
+            alert('TopUp dialog would open here');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>Servo - resellers</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../../static/css/admin/resellers.css">
+    
+  </head>
+  <body>
+    <div class="container">
+      <!-- SIDEBAR -->
+      {% include 'admin/components/sidebar.html' %}
+
+      <!-- CREATE RESELLER MODAL -->
+      {% include 'admin/components/create_reseller_modal.html' %}
+
+      <!-- TOP UP MODAL -->
+      {% include 'admin/components/reseller_topup.html' %}
+
+      <!-- MAIN CONTENT -->
+      <div class="main-container">
+        <main class="main-content">
+          <div class="content-space">
+            <!-- HEADER -->
+            <div class="header">
+              <div class="header-left">
+                <h1>resellers</h1>
+                <p>Manage reseller accounts</p>
+              </div>
+              <button class="create-btn" onclick="openResellerModal()">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5v14"></path>
+                </svg>
+                Create Reseller
+              </button>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-container">
+              <div class="table-header-controls">
+                <div class="search-wrapper">
+                  <svg
+                    class="search-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m21 21-4.34-4.34"></path>
+                    <circle cx="11" cy="11" r="8"></circle>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search resellers..."
+                    class="search-input"
+                  />
+                </div>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>resellers</th>
+                    <th>Country</th>
+                    <th>Status</th>
+                    <th>Balance</th>
+                    <th>Total Points</th>
+                    <th>Users</th>
+                    <th>Revenue</th>
+                    <th style="text-align: right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for reseller in resellers %}
+                  <tr>
+                    <td>
+                      <div class="distributor-cell">
+                        <div class="distributor-avatar">
+                          {{ reseller.name[:2].upper() }}
+                        </div>
+                        <div class="distributor-info">
+                          <div class="distributor-name">
+                            {{ reseller.name }}
+                          </div>
+                          <div class="distributor-email">
+                            {{ reseller.email }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="country-text">
+                        {% if reseller.country %}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; margin-right: 4px; vertical-align: middle;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                          </svg>
+                          <span data-country-code="{{ reseller.country }}">{{ reseller.country }}</span>
+                        {% else %}
+                          <span style="color: #64748b;">-</span>
+                        {% endif %}
+                      </span>
+                    </td>
+                    <td>
+                      {% if reseller.is_active %}
+                      <span class="status-badge status-active">Active</span>
+                      {% else %}
+                      <span class="status-badge status-suspended"
+                        >Suspended</span
+                      >
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span class="points-text"
+                        >{{ reseller.points_balance }} PTS</span
+                      >
+                    </td>
+                    <td>
+                      <span class="points-text"
+                        >{{ reseller.total_points_charged }} PTS</span
+                      >
+                    </td>
+                    <td>
+                      <span class="stats-text"
+                        >{{ reseller.users|length }}</span
+                      >
+                    </td>
+                    <td>
+                      <span class="revenue-badge">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="12" x2="12" y1="2" y2="22"></line>
+                          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        ${{ "%.2f"|format(reseller.total_amount_charged) }}
+                      </span>
+                    </td>
+                    <!-- مثال حساب الإيرادات -->
+                    <td class="action-cell">
+                      <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                        <button type="button" class="btn-topup" onclick="openTopupModal({{ reseller.id }}, '{{ reseller.name }}')">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14M5 12h14"></path>
+                          </svg>
+                          Top Up
+                        </button>
+                        <button class="action-btn" onclick="toggleResellerStatus({{ reseller.id }}, {{ reseller.is_active|lower }})" title="{% if reseller.is_active %}Disable{% else %}Enable{% endif %}">
+                        {% if reseller.is_active %}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          style="color: rgb(52, 211, 153);"
+                        >
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        {% else %}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          style="color: rgb(248, 113, 113);"
+                        >
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                          <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                        {% endif %}
+                      </button>
+                      <button class="action-btn" onclick="printLastInvoice({{ reseller.id }})" title="Print Last Invoice">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: rgb(59, 130, 246);">
+                          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                          <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                      </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const countryNames = {
+        'SA': 'Saudi Arabia', 'AE': 'United Arab Emirates', 'KW': 'Kuwait', 'QA': 'Qatar',
+        'BH': 'Bahrain', 'OM': 'Oman', 'JO': 'Jordan', 'LB': 'Lebanon', 'SY': 'Syria',
+        'IQ': 'Iraq', 'PS': 'Palestine', 'EG': 'Egypt', 'TN': 'Tunisia', 'DZ': 'Algeria',
+        'MA': 'Morocco', 'LY': 'Libya', 'SD': 'Sudan', 'NG': 'Nigeria', 'ZA': 'South Africa',
+        'KE': 'Kenya', 'ET': 'Ethiopia', 'GB': 'United Kingdom', 'FR': 'France', 'DE': 'Germany',
+        'IT': 'Italy', 'ES': 'Spain', 'PT': 'Portugal', 'NL': 'Netherlands', 'BE': 'Belgium',
+        'CH': 'Switzerland', 'AT': 'Austria', 'SE': 'Sweden', 'NO': 'Norway', 'DK': 'Denmark',
+        'FI': 'Finland', 'PL': 'Poland', 'CZ': 'Czech Republic', 'HU': 'Hungary', 'RO': 'Romania',
+        'GR': 'Greece', 'TR': 'Turkey', 'RU': 'Russia', 'UA': 'Ukraine', 'IE': 'Ireland',
+        'LU': 'Luxembourg', 'US': 'United States', 'CA': 'Canada', 'MX': 'Mexico', 'CR': 'Costa Rica',
+        'PA': 'Panama', 'CU': 'Cuba', 'DO': 'Dominican Republic', 'JM': 'Jamaica', 'TT': 'Trinidad and Tobago',
+        'BR': 'Brazil', 'AR': 'Argentina', 'CO': 'Colombia', 'PE': 'Peru', 'CL': 'Chile',
+        'VE': 'Venezuela', 'EC': 'Ecuador', 'BO': 'Bolivia', 'PY': 'Paraguay', 'UY': 'Uruguay',
+        'GY': 'Guyana', 'SR': 'Suriname', 'IN': 'India', 'PK': 'Pakistan', 'BD': 'Bangladesh',
+        'LK': 'Sri Lanka', 'NP': 'Nepal', 'CN': 'China', 'JP': 'Japan', 'KR': 'South Korea',
+        'TH': 'Thailand', 'MY': 'Malaysia', 'SG': 'Singapore', 'ID': 'Indonesia', 'PH': 'Philippines',
+        'VN': 'Vietnam', 'HK': 'Hong Kong', 'TW': 'Taiwan', 'AU': 'Australia', 'NZ': 'New Zealand'
+      };
+
+      function getCountryName(code) {
+        return countryNames[code] || code;
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-country-code]').forEach(element => {
+          const code = element.getAttribute('data-country-code');
+          element.textContent = getCountryName(code);
+        });
+      });
+
+
+      async function printLastInvoice(resellerId) {
+        try {
+          const response = await fetch(`/admin/api/reseller/${resellerId}/last-invoice`);
+          
+          if (!response.ok) {
+            return;
+          }
+          
+          const data = await response.json();
+
+          if (data.success && data.invoice_path) {
+            // تحميل الفاتورة مباشرة من المسار
+            const downloadLink = document.createElement('a');
+            downloadLink.href = `/static/${data.invoice_path}`;
+            downloadLink.download = `${data.invoice_number}.pdf`;
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            
+            // تأخير صغير للتأكد من إضافة الرابط
+            setTimeout(() => {
+              downloadLink.click();
+            }, 100);
+            
+            // إزالة الرابط بعد التنزيل
+            setTimeout(() => {
+              document.body.removeChild(downloadLink);
+            }, 500);
+          }
+        } catch (error) {
+        }
+      }
+
+      async function toggleResellerStatus(resellerId, currentStatus) {
+        try {
+          const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+          
+          const response = await fetch(`/admin/api/resellers/toggle/${resellerId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+              is_active: !currentStatus
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            window.location.reload();
+          }
+        } catch (error) {
+        }
+      }
+    </script>
+  </body>
+</html>

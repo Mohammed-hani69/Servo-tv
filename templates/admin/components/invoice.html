@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - {{ invoice_number }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f7;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            padding: 60px 20px;
+            min-height: 100vh;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Header */
+        .invoice-header {
+            padding: 50px 50px 40px;
+            border-bottom: 1px solid #e8e8ed;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-section h1 {
+            font-size: 40px;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: -1px;
+        }
+        
+        .logo-section p {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .invoice-label {
+            font-size: 13px;
+            color: #86868b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .invoice-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2563eb;
+            margin-top: 8px;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+        }
+
+        /* Info Section */
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            padding: 40px 50px;
+            border-bottom: 1px solid #e8e8ed;
+        }
+
+        .info-block {
+            flex: 1;
+        }
+
+        .info-block h3 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #2563eb;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            margin-bottom: 16px;
+        }
+
+        .info-item-label {
+            font-size: 12px;
+            color: #86868b;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .info-item-value {
+            font-size: 15px;
+            color: #1d1d1f;
+            font-weight: 500;
+        }
+
+        /* Line Items */
+        .line-items {
+            padding: 40px 50px;
+            background: #fafafa;
+            border-top: 1px solid #e8e8ed;
+        }
+
+        .line-items table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .line-items thead th {
+            padding: 0 0 16px 0;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #2563eb;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        .line-items tbody td {
+            padding: 20px 0;
+            font-size: 15px;
+            color: #1d1d1f;
+        }
+
+        .item-name {
+            font-weight: 500;
+        }
+
+        .item-quantity {
+            text-align: center;
+            color: #1d1d1f;
+            font-weight: 500;
+        }
+
+        .item-amount {
+            text-align: right;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        /* Totals */
+        .totals-section {
+            padding: 40px 50px;
+            background: #ffffff;
+        }
+
+        .totals-wrapper {
+            max-width: 400px;
+            margin-left: auto;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            font-size: 15px;
+        }
+
+        .total-label {
+            color: #86868b;
+            font-weight: 500;
+        }
+
+        .total-value {
+            color: #1d1d1f;
+            font-weight: 500;
+        }
+
+        .total-row.final {
+            padding: 20px 0 0;
+            margin-top: 16px;
+            border-top: 2px solid #2563eb;
+            font-size: 24px;
+        }
+
+        .total-row.final .total-label,
+        .total-row.final .total-value {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .invoice-footer {
+            text-align: center;
+            padding: 40px 50px;
+            background: #fafafa;
+            border-top: 1px solid #e8e8ed;
+        }
+
+        .invoice-footer p {
+            margin: 6px 0;
+            color: #86868b;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .invoice-footer p:first-child {
+            color: #1d1d1f;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .invoice-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="header-top">
+                <div class="logo-section">
+                    <h1>SERVO</h1>
+                    <p>Premium Streaming Service</p>
+                </div>
+                <div class="invoice-status">
+                    <div class="invoice-label">Invoice</div>
+                    <div class="invoice-number">{{ invoice_number }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <div class="info-block">
+                <h3>From</h3>
+                <div class="info-item">
+                    <div class="info-item-label">Company</div>
+                    <div class="info-item-value">SERVO Inc.</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Email</div>
+                    <div class="info-item-value">billing@servo.com</div>
+                </div>
+            </div>
+            <div class="info-block">
+                <h3>Bill To</h3>
+                <div class="info-item">
+                    <div class="info-item-label">Name</div>
+                    <div class="info-item-value">{{ reseller_name }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Email</div>
+                    <div class="info-item-value">{{ reseller_email }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-label">Date</div>
+                    <div class="info-item-value">{{ invoice_date }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Items -->
+        <div class="line-items">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: left;">Description</th>
+                        <th style="text-align: center; width: 25%;">Quantity</th>
+                        <th style="text-align: right; width: 25%;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="item-name">Streaming Points Top Up</td>
+                        <td class="item-quantity">{{ points }} PTS</td>
+                        <td class="item-amount">${{ amount_usd }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <div class="totals-wrapper">
+                <div class="total-row">
+                    <span class="total-label">Subtotal</span>
+                    <span class="total-value">${{ amount_usd }}</span>
+                </div>
+                <div class="total-row final">
+                    <span class="total-label">Total</span>
+                    <span class="total-value">${{ amount_usd }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+            <p>Thank you for your business!</p>
+            <p>For support, contact: support@servo.com</p>
+        </div>
+    </div>
+</body>
+</html>

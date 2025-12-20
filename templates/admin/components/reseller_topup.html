@@ -1,0 +1,451 @@
+<!-- Top Up Modal -->
+<div id="topupModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div>
+                <h2 class="modal-title">Top Up Points</h2>
+                <p class="modal-subtitle" id="resellerNameDisplay">Add points and charge for reseller account</p>
+            </div>
+            <button class="modal-close-btn" onclick="closeTopupModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form class="modal-form" id="topupForm" method="POST" action="" onsubmit="handleTopupSubmit(event)">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-section">
+                <h3 class="section-title">Points Information</h3>
+                <div class="form-group">
+                    <label for="topupPoints" class="form-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; margin-right: 4px;">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <path d="M12 1v6m0 6v6"></path>
+                        </svg>
+                        Number of Points <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="topupPoints" 
+                        name="points" 
+                        class="form-input" 
+                        placeholder="Enter number of points (e.g. 1000)"
+                        required
+                        min="1"
+                        max="999999"
+                    >
+                    <small class="form-hint">Must be at least 1 point</small>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">Payment Details</h3>
+                <div class="form-group">
+                    <label for="topupAmount" class="form-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline; margin-right: 4px;">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <path d="M12 1v6m0 6v6"></path>
+                        </svg>
+                        Amount (USD) <span class="required">*</span>
+                    </label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input 
+                            type="number" 
+                            id="topupAmount" 
+                            name="amount" 
+                            class="form-input" 
+                            placeholder="0.00"
+                            required
+                            min="0.01"
+                            step="0.01"
+                            max="999999.99"
+                        >
+                    </div>
+                    <small class="form-hint">Minimum $0.01</small>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <h3 class="summary-title">Summary</h3>
+                <div class="summary-item">
+                    <span>Points:</span>
+                    <span id="summaryPoints" class="summary-value">0</span>
+                </div>
+                <div class="summary-item">
+                    <span>Amount:</span>
+                    <span id="summaryAmount" class="summary-value">$0.00</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeTopupModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6l-12 12"></path>
+                        <path d="M6 6l12 12"></path>
+                    </svg>
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5v14"></path>
+                    </svg>
+                    Generate Invoice & Top Up
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Modal Overlay */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    /* Modal Container */
+    .modal-container {
+        background-color: rgb(15, 23, 42);
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Modal Header */
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 24px;
+        border-bottom: 1px solid #1e293b;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .modal-subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+    }
+
+    .modal-close-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+        background-color: #1e293b;
+        color: #fff;
+    }
+
+    /* Modal Form */
+    .modal-form {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e2e8f0;
+    }
+
+    .required {
+        color: rgb(248, 113, 113);
+    }
+
+    .form-input {
+        background-color: #020617;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #fff;
+        font-family: inherit;
+        transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+        border-color: rgb(239, 68, 68);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: #64748b;
+    }
+
+    /* Form Sections */
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+        background-color: rgba(30, 41, 59, 0.3);
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+    }
+
+    .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
+
+    .form-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .amount-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .currency-symbol {
+        position: absolute;
+        left: 12px;
+        color: #94a3b8;
+        font-weight: 600;
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .amount-input-wrapper .form-input {
+        padding-left: 32px;
+    }
+
+    /* Summary Box */
+    .summary-box {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+        margin: 8px 0;
+    }
+
+    .summary-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0 0 12px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        color: #e2e8f0;
+        font-size: 14px;
+    }
+
+    .summary-item:last-child {
+        margin-top: 4px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(220, 38, 38, 0.2);
+        font-weight: 600;
+    }
+
+    .summary-value {
+        color: rgb(52, 211, 153);
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid #1e293b;
+        margin-top: 16px;
+    }
+
+    /* Buttons */
+    .btn-primary,
+    .btn-secondary {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background-color: rgb(220, 38, 38);
+        color: #fff;
+        min-width: 180px;
+    }
+
+    .btn-primary:hover {
+        background-color: rgb(185, 28, 28);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .btn-secondary {
+        background-color: #1e293b;
+        color: #e2e8f0;
+        min-width: 100px;
+    }
+
+    .btn-secondary:hover {
+        background-color: #334155;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 3px;
+    }
+</style>
+
+<script>
+    let currentResellerId = null;
+
+    function openTopupModal(resellerId, resellerName) {
+        currentResellerId = resellerId;
+        const modal = document.getElementById('topupModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.getElementById('topupForm').action = `/admin/resellers/topup/${resellerId}`;
+            document.getElementById('resellerNameDisplay').textContent = `Top up points for: ${resellerName}`;
+            document.getElementById('topupForm').reset();
+            updateSummary();
+        }
+    }
+
+    function closeTopupModal() {
+        const modal = document.getElementById('topupModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function updateSummary() {
+        const points = document.getElementById('topupPoints').value || '0';
+        const amount = document.getElementById('topupAmount').value || '0.00';
+        
+        document.getElementById('summaryPoints').textContent = parseInt(points).toLocaleString();
+        document.getElementById('summaryAmount').textContent = '$' + parseFloat(amount).toFixed(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const pointsInput = document.getElementById('topupPoints');
+        const amountInput = document.getElementById('topupAmount');
+        
+        if (pointsInput) {
+            pointsInput.addEventListener('input', updateSummary);
+        }
+        if (amountInput) {
+            amountInput.addEventListener('input', updateSummary);
+        }
+
+        const topupForm = document.getElementById('topupForm');
+        if (topupForm) {
+            topupForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const points = document.getElementById('topupPoints').value;
+                const amount = document.getElementById('topupAmount').value;
+                
+                if (points && amount) {
+                    topupForm.submit();
+                }
+            });
+        }
+
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('topupModal');
+            if (modal && event.target === modal) {
+                closeTopupModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('topupModal');
+                if (modal && modal.style.display === 'flex') {
+                    closeTopupModal();
+                }
+            }
+        });
+    });
+</script>

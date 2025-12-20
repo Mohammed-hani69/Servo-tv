@@ -1,0 +1,473 @@
+<!-- Create Reseller Modal -->
+<div id="createResellerModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div>
+                <h2 class="modal-title">Create New Reseller</h2>
+                <p class="modal-subtitle">Add a new distributor account to the system</p>
+            </div>
+            <button class="modal-close-btn" onclick="closeResellerModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <form class="modal-form" id="createResellerForm">
+            <div class="form-group">
+                <label for="resellerName" class="form-label">Full Name <span class="required">*</span></label>
+                <input 
+                    type="text" 
+                    id="resellerName" 
+                    name="name" 
+                    class="form-input" 
+                    placeholder="Enter reseller name"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="resellerEmail" class="form-label">Email Address <span class="required">*</span></label>
+                <input 
+                    type="email" 
+                    id="resellerEmail" 
+                    name="email" 
+                    class="form-input" 
+                    placeholder="Enter email address"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="resellerPassword" class="form-label">Password <span class="required">*</span></label>
+                <input 
+                    type="password" 
+                    id="resellerPassword" 
+                    name="password" 
+                    class="form-input" 
+                    placeholder="Enter password"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="resellerCountry" class="form-label">Country <span class="required">*</span></label>
+                <select id="resellerCountry" name="country" class="form-input form-select" required>
+                    <option value="">-- Select Country --</option>
+                    
+                    <!-- Middle East -->
+                    <optgroup label="Middle East">
+                        <option value="SA">Saudi Arabia</option>
+                        <option value="AE">United Arab Emirates</option>
+                        <option value="KW">Kuwait</option>
+                        <option value="QA">Qatar</option>
+                        <option value="BH">Bahrain</option>
+                        <option value="OM">Oman</option>
+                        <option value="JO">Jordan</option>
+                        <option value="LB">Lebanon</option>
+                        <option value="SY">Syria</option>
+                        <option value="IQ">Iraq</option>
+                        <option value="PS">Palestine</option>
+                    </optgroup>
+                    
+                    <!-- Africa -->
+                    <optgroup label="Africa">
+                        <option value="EG">Egypt</option>
+                        <option value="TN">Tunisia</option>
+                        <option value="DZ">Algeria</option>
+                        <option value="MA">Morocco</option>
+                        <option value="LY">Libya</option>
+                        <option value="SD">Sudan</option>
+                        <option value="NG">Nigeria</option>
+                        <option value="ZA">South Africa</option>
+                        <option value="KE">Kenya</option>
+                        <option value="ET">Ethiopia</option>
+                    </optgroup>
+                    
+                    <!-- Europe -->
+                    <optgroup label="Europe">
+                        <option value="GB">United Kingdom</option>
+                        <option value="FR">France</option>
+                        <option value="DE">Germany</option>
+                        <option value="IT">Italy</option>
+                        <option value="ES">Spain</option>
+                        <option value="PT">Portugal</option>
+                        <option value="NL">Netherlands</option>
+                        <option value="BE">Belgium</option>
+                        <option value="CH">Switzerland</option>
+                        <option value="AT">Austria</option>
+                        <option value="SE">Sweden</option>
+                        <option value="NO">Norway</option>
+                        <option value="DK">Denmark</option>
+                        <option value="FI">Finland</option>
+                        <option value="PL">Poland</option>
+                        <option value="CZ">Czech Republic</option>
+                        <option value="HU">Hungary</option>
+                        <option value="RO">Romania</option>
+                        <option value="GR">Greece</option>
+                        <option value="TR">Turkey</option>
+                        <option value="RU">Russia</option>
+                        <option value="UA">Ukraine</option>
+                        <option value="IE">Ireland</option>
+                        <option value="LU">Luxembourg</option>
+                    </optgroup>
+                    
+                    <!-- North America -->
+                    <optgroup label="North America">
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="MX">Mexico</option>
+                    </optgroup>
+                    
+                    <!-- Central America & Caribbean -->
+                    <optgroup label="Central America & Caribbean">
+                        <option value="CR">Costa Rica</option>
+                        <option value="PA">Panama</option>
+                        <option value="CU">Cuba</option>
+                        <option value="DO">Dominican Republic</option>
+                        <option value="JM">Jamaica</option>
+                        <option value="TT">Trinidad and Tobago</option>
+                    </optgroup>
+                    
+                    <!-- South America -->
+                    <optgroup label="South America">
+                        <option value="BR">Brazil</option>
+                        <option value="AR">Argentina</option>
+                        <option value="CO">Colombia</option>
+                        <option value="PE">Peru</option>
+                        <option value="CL">Chile</option>
+                        <option value="VE">Venezuela</option>
+                        <option value="EC">Ecuador</option>
+                        <option value="BO">Bolivia</option>
+                        <option value="PY">Paraguay</option>
+                        <option value="UY">Uruguay</option>
+                        <option value="GY">Guyana</option>
+                        <option value="SR">Suriname</option>
+                    </optgroup>
+                    
+                    <!-- Asia -->
+                    <optgroup label="Asia">
+                        <option value="CN">China</option>
+                        <option value="JP">Japan</option>
+                        <option value="IN">India</option>
+                        <option value="SG">Singapore</option>
+                        <option value="TH">Thailand</option>
+                        <option value="MY">Malaysia</option>
+                        <option value="ID">Indonesia</option>
+                        <option value="PH">Philippines</option>
+                        <option value="VN">Vietnam</option>
+                        <option value="KR">South Korea</option>
+                        <option value="PK">Pakistan</option>
+                        <option value="BD">Bangladesh</option>
+                        <option value="HK">Hong Kong</option>
+                        <option value="TW">Taiwan</option>
+                    </optgroup>
+                    
+                    <!-- Oceania -->
+                    <optgroup label="Oceania">
+                        <option value="AU">Australia</option>
+                        <option value="NZ">New Zealand</option>
+                        <option value="FJ">Fiji</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeResellerModal()">Cancel</button>
+                <button type="submit" class="btn-submit">Create Reseller</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .modal-container {
+        background-color: rgb(15, 23, 42);
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 24px;
+        border-bottom: 1px solid #1e293b;
+        gap: 16px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .modal-subtitle {
+        font-size: 14px;
+        color: #94a3b8;
+    }
+
+    .modal-close-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .modal-close-btn:hover {
+        background-color: #334155;
+        color: #fff;
+    }
+
+    .modal-form {
+        padding: 24px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e2e8f0;
+        display: flex;
+        gap: 4px;
+    }
+
+    .required {
+        color: rgb(239, 68, 68);
+    }
+
+    .form-input {
+        background-color: #020617;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+        border-color: rgb(239, 68, 68);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: #64748b;
+    }
+
+    .form-select {
+        cursor: pointer;
+        padding-right: 12px;
+    }
+
+    .form-select option {
+        background-color: #020617;
+        color: #fff;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding: 16px 24px;
+        border-top: 1px solid #1e293b;
+    }
+
+    .btn-cancel {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        border: 1px solid #1e293b;
+        background-color: transparent;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        background-color: #334155;
+        color: #fff;
+        border-color: #475569;
+    }
+
+    .btn-submit {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        background-color: rgb(220, 38, 38);
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+        background-color: rgb(185, 28, 28);
+    }
+
+    .btn-submit:active {
+        transform: scale(0.98);
+    }
+
+    /* Scrollbar styling */
+    .modal-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .modal-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .modal-container::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 3px;
+    }
+
+    .modal-container::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+</style>
+
+<script>
+    function openResellerModal() {
+        const modal = document.getElementById('createResellerModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeResellerModal() {
+        const modal = document.getElementById('createResellerModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        document.getElementById('createResellerForm').reset();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('createResellerModal');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeResellerModal();
+                }
+            });
+        }
+
+        const form = document.getElementById('createResellerForm');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const name = document.getElementById('resellerName').value.trim();
+                const email = document.getElementById('resellerEmail').value.trim();
+                const password = document.getElementById('resellerPassword').value.trim();
+                const country = document.getElementById('resellerCountry').value.trim();
+
+                if (!name || !email || !password || !country) {
+                    return;
+                }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    return;
+                }
+
+                if (password.length < 6) {
+                    return;
+                }
+
+                const formData = {
+                    name: name,
+                    email: email,
+                    password: password,
+                    country: country
+                };
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+                fetch('/admin/api/resellers/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.text())
+                .then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        if (data.success) {
+                            closeResellerModal();
+                            setTimeout(() => {
+                                location.reload();
+                            }, 300);
+                        }
+                    } catch (e) {
+                        // Silent fail
+                    }
+                })
+                .catch(error => {
+                    // Silent fail
+                });
+            });
+        }
+    });
+</script>
