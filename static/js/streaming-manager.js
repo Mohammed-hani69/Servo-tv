@@ -157,10 +157,20 @@ class StreamingManager {
 
         if (group.includes('sports') || group.includes('news') || group.includes('live')) {
             content.type = 'live-tv';
-        } else if (group.includes('movies') || group.includes('film')) {
+        } else if (group.includes('movies') || group.includes('film') || group.includes('movie')) {
             content.type = 'movies';
-        } else if (group.includes('series') || group.includes('drama')) {
+        } else if (group.includes('series') || group.includes('drama') || group.includes('serial') || group.includes('show')) {
             content.type = 'series';
+        } else {
+            // Default categorization based on content name
+            const name = content.name.toLowerCase();
+            if (name.includes('series') || name.includes('drama') || name.includes('show')) {
+                content.type = 'series';
+            } else if (name.includes('movie') || name.includes('film')) {
+                content.type = 'movies';
+            } else {
+                content.type = 'live-tv'; // Default
+            }
         }
     }
 

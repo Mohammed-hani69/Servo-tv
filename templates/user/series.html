@@ -267,16 +267,31 @@
             }
         }
 
-        searchInput.addEventListener('input', filterSeries);
-        genreFilter.addEventListener('change', filterSeries);
-        yearFilter.addEventListener('change', filterSeries);
+        console.log('Setting up event listeners...');
+        
+        const searchInput = document.getElementById('searchInput');
+        const genreFilter = document.getElementById('genreFilter');
+        const yearFilter = document.getElementById('yearFilter');
+        const seriesGrid = document.querySelector('.series-cards');
+        const emptyState = document.getElementById('emptyState');
+        
+        // Only attach listeners if elements exist
+        if (searchInput) {
+            searchInput.addEventListener('input', filterSeries);
+        }
+        if (genreFilter) {
+            genreFilter.addEventListener('change', filterSeries);
+        }
+        if (yearFilter) {
+            yearFilter.addEventListener('change', filterSeries);
+        }
 
         // Play button functionality
         document.querySelectorAll('.play-button').forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const title = this.closest('.series-card').querySelector('.series-title').textContent;
-                alert(`Playing: ${title}`);
+                console.log(`Playing: ${title}`);
             });
         });
 
@@ -285,7 +300,7 @@
             card.addEventListener('click', function(e) {
                 if (!e.target.closest('.play-button')) {
                     const title = this.querySelector('.series-title').textContent;
-                    alert(`Viewing details for: ${title}`);
+                    console.log(`Viewing series: ${title}`);
                 }
             });
         });
@@ -298,24 +313,32 @@
             });
         });
 
-        // Notification icon click
-        document.querySelector('.notification-icon').addEventListener('click', function() {
-            alert('You have 3 new notifications');
-        });
+        // Notification icon click - check if element exists
+        const notificationIcon = document.querySelector('.notification-icon');
+        if (notificationIcon) {
+            notificationIcon.addEventListener('click', function() {
+                console.log('Notifications viewed');
+            });
+        }
 
-        // User avatar click
-        document.querySelector('.user-avatar').addEventListener('click', function() {
-            alert('User menu would open here');
-        });
+        // User avatar click - check if element exists
+        const userAvatar = document.querySelector('.user-avatar');
+        if (userAvatar) {
+            userAvatar.addEventListener('click', function() {
+                console.log('User menu clicked');
+            });
+        }
 
-        // Logout button
-        document.querySelector('.logout-button').addEventListener('click', function() {
-            alert('Logging out...');
-            // In a real app, this would redirect to login page
-        });
+        // Logout button - check if element exists
+        const logoutButton = document.querySelector('.logout-button');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+                window.location.href = '/logout';
+            });
+        }
     </script>
     
-    <!-- App Manager للتعامل مع الأخطاء -->
+    <!-- App Manager for error handling -->
     <script src="../../static/js/app-manager.js"></script>
     
     <!-- Streaming Manager -->

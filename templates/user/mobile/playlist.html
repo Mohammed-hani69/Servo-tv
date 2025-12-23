@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Servo - Playlist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/playlist.css">
+    <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+</head>
+<body>
+    <header class="mobile-header"><h1>My Playlist</h1></header>
+    <main class="mobile-main">
+        <div class="playlist-items">
+            <button class="playlist-item" onclick="console.log('Playing item')">
+                <img src="https://picsum.photos/300/450?random=1" alt="Item">
+                <div class="item-info">
+                    <div class="item-title">Playlist Item 1</div>
+                    <div class="item-duration">45 min</div>
+                </div>
+            </button>
+            <button class="playlist-item" onclick="console.log('Playing item')">
+                <img src="https://picsum.photos/300/450?random=2" alt="Item">
+                <div class="item-info">
+                    <div class="item-title">Playlist Item 2</div>
+                    <div class="item-duration">120 min</div>
+                </div>
+            </button>
+        </div>
+        <div class="bottom-spacer"></div>
+    </main>
+    
+    <!-- BOTTOM NAVIGATION COMPONENT -->
+    {% include 'user/mobile/components/bottom-nav.html' %}
+</body>
+</html>

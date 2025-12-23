@@ -50,7 +50,7 @@
                 muted
                 playsinline
                 loop 
-                poster="https://picsum.photos/1920/1080"
+                poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Crect fill='%23000' width='1920' height='1080'/%3E%3Ctext x='50%25' y='50%25' font-size='48' fill='%23666' text-anchor='middle' dy='.3em'%3ELoading Player%3C/text%3E%3C/svg%3E"
             >
                 <source src="" type="video/mp2t" />
                 Your browser does not support the video tag.
@@ -249,7 +249,7 @@
             channelName.textContent = channel.name;
             channelInfo.textContent = channel.group;
 
-            // 🎬 Step 1: اطلب play token من السيرفر
+            // Step 1: Request play token from server
             fetch('/api/stream/play', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -260,7 +260,7 @@
                 })
             }).then(r => r.json()).then(data => {
                 if (data.success && data.play_token) {
-                    // 🎬 Step 2: اطلب الرابط النهائي من /stream/live مع التوكن
+                    // Step 2: Request final URL from /stream/live with token
                     fetch(`/stream/live?token=${data.play_token}`)
                         .then(r => r.json())
                         .then(streamData => {

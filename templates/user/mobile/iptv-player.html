@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Servo - IPTV Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/player.css">
+    <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+</head>
+<body>
+    <div class="player-container">
+        <video id="video-player" class="video-player" controls>
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <div class="player-controls">
+            <button onclick="document.getElementById('video-player').play()">▶ Play</button>
+            <button onclick="document.getElementById('video-player').pause()">⏸ Pause</button>
+            <button onclick="toggleFullscreen()">⛶ Fullscreen</button>
+        </div>
+
+        <div class="player-info">
+            <h2>{{ device_name }}</h2>
+            <p>IPTV Channel</p>
+        </div>
+
+        <div class="related-videos">
+            <h3>Channels</h3>
+            <button class="video-item" onclick="console.log('Switching channel')">
+                <div>Channel 1</div>
+            </button>
+            <button class="video-item" onclick="console.log('Switching channel')">
+                <div>Channel 2</div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleFullscreen() {
+            const video = document.getElementById('video-player');
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                video.requestFullscreen().catch(err => {
+                    console.log('Error:', err);
+                });
+            }
+        }
+
+        // Handle screen orientation
+        window.addEventListener('orientationchange', () => {
+            const video = document.getElementById('video-player');
+            if (window.innerWidth > window.innerHeight) {
+                video.requestFullscreen().catch(() => {});
+            }
+        });
+    </script>
+</body>
+</html>

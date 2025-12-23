@@ -379,6 +379,9 @@
         border: none;
         padding: 0;
         text-align: start;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .movie-card:hover {
@@ -398,6 +401,7 @@
         height: 100%;
         object-fit: cover;
         transition: transform var(--transition-normal);
+        display: block;
     }
 
     .movie-card:hover .movie-image,

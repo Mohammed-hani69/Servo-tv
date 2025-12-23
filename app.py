@@ -1,11 +1,12 @@
 import os
-from flask import Flask, render_template, request, jsonify, current_app, session
+from flask import Flask, render_template, request, jsonify, current_app, session, send_file
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from config import DEBUG, TESTING, SQLALCHEMY_TRACK_MODIFICATIONS
 from models import db, User, Reseller, Admin, Device, ActivationCode, DeviceActivationCode, AuditLog, SupportTicket, TicketMessage
 from datetime import datetime
+from io import BytesIO
 
 # تحميل متغيرات البيئة من ملف .env
 load_dotenv()
@@ -44,6 +45,18 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 @app.route('/')
 def index():
     return render_template('landingpage.html')
+
+
+# مسار الـ Favicon
+@app.route('/favicon.ico')
+def favicon():
+    """خدمة الـ favicon - استجابة بسيطة SVG icon"""
+    # إنشاء صورة SVG بسيطة كـ favicon
+    svg_data = b'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#1f2937"/>
+        <text x="50" y="60" font-size="60" fill="#3b82f6" font-weight="bold" text-anchor="middle">S</text>
+    </svg>'''
+    return send_file(BytesIO(svg_data), mimetype='image/svg+xml', cache_timeout=3600)
 
 
 # معالج صحة التطبيق

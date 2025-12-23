@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Servo - Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/settings.css">
+    <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+</head>
+<body>
+    <header class="mobile-header"><h1>Settings</h1></header>
+    <main class="mobile-main">
+        <section class="settings-section">
+            <h2>Playback</h2>
+            <div class="setting-item">
+                <span>Quality</span>
+                <select>
+                    <option>Auto</option>
+                    <option>720p</option>
+                    <option>480p</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <span>Subtitles</span>
+                <input type="checkbox" checked>
+            </div>
+        </section>
+
+        <section class="settings-section">
+            <h2>Account</h2>
+            <div class="setting-item">
+                <button onclick="window.location.href='/settings/email'">Change Email</button>
+            </div>
+            <div class="setting-item">
+                <button onclick="window.location.href='/settings/password'">Change Password</button>
+            </div>
+        </section>
+
+        <section class="settings-section">
+            <h2>Other</h2>
+            <div class="setting-item">
+                <button onclick="window.location.href='/logout'">Logout</button>
+            </div>
+        </section>
+
+        <div class="bottom-spacer"></div>
+    </main>
+    
+    <!-- BOTTOM NAVIGATION COMPONENT -->
+    {% include 'user/mobile/components/bottom-nav.html' %}
+</body>
+</html>

@@ -101,16 +101,22 @@ class MoviesApp {
         
         this.filteredMovies.forEach((movie, index) => {
             const isFavorite = this.isFavorite(movie.id);
-            const logoUrl = movie.logo || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23333' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='24' fill='%23fff' text-anchor='middle' dy='.3em'%3E${encodeURIComponent(movie.name.substring(0, 10))}'%3E%3C/text%3E%3C/svg%3E`;
+            // استخدام صورة عالية الجودة - من logo أو placeholder
+            const imageUrl = movie.logo && movie.logo.trim() 
+                ? movie.logo 
+                : `https://picsum.photos/300/450?random=${index + Math.random() * 1000}`;
+            
+            const placeholderUrl = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23234' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='18' font-weight='bold' fill='%23fff' text-anchor='middle' dy='.3em'%3E${encodeURIComponent(movie.name.substring(0, 15))}'%3E%3C/text%3E%3C/svg%3E`;
             
             html += `
-                <div class="movie-card tv-focus" data-movie-id="${movie.id}" data-index="${index}">
+                <div class="movie-card tv-focus" data-movie-id="${movie.id}" data-index="${index}" data-stream-url="${movie.streamUrl || ''}">
                     <div class="movie-poster">
-                        <img src="${logoUrl}" 
+                        <img src="${imageUrl}" 
                              alt="${movie.name}"
-                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22450%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22450%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2224%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3EMovie%3C/text%3E%3C/svg%3E'">
+                             loading="lazy"
+                             onerror="this.src='${placeholderUrl}'">
                         <div class="play-overlay">
-                            <button class="play-btn">
+                            <button class="play-btn" type="button" data-index="${index}">
                                 <svg viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M8 5v14l11-7z"></path>
                                 </svg>
@@ -125,7 +131,7 @@ class MoviesApp {
                             <span class="movie-rating">⭐ 8.5</span>
                         </div>
                     </div>
-                    <button class="movie-favorite ${isFavorite ? 'active' : ''}" data-movie-id="${movie.id}">
+                    <button class="movie-favorite ${isFavorite ? 'active' : ''}" data-movie-id="${movie.id}" type="button">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
                         </svg>
@@ -142,10 +148,23 @@ class MoviesApp {
      * إضافة Event Listeners للأفلام
      */
     attachMovieListeners() {
-        // تشغيل الفيلم
+        // تشغيل الفيلم عند الضغط على الكارد أو زر التشغيل
         document.querySelectorAll('.movie-card').forEach(card => {
+            // الضغط على الكارد كاملة
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('.movie-favorite')) {
+                    const index = parseInt(card.dataset.index);
+                    this.playMovie(this.filteredMovies[index]);
+                }
+            });
+        });
+        
+        // الضغط على زر التشغيل
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const card = btn.closest('.movie-card');
+                if (card) {
                     const index = parseInt(card.dataset.index);
                     this.playMovie(this.filteredMovies[index]);
                 }
@@ -228,20 +247,22 @@ class MoviesApp {
         try {
             console.log('▶️ تشغيل الفيلم:', movie.name);
             
+            if (!movie.streamUrl) {
+                throw new Error('لا توجد رابط تشغيل للفيلم');
+            }
+            
             // إغلاق أي player موجود
             this.closePlayer();
             
-            // فتح player جديد
+            // فتح player جديد مع التشغيل المباشر
             this.openPlayer(movie);
             
-            // تشغيل من خلال StreamingManager
-            const playUrl = await this.streamingManager.playContent(movie);
-            
-            console.log('✅ بدء التشغيل:', playUrl);
+            console.log('✅ بدء التشغيل:', movie.streamUrl);
             
         } catch (error) {
             console.error('❌ خطأ في التشغيل:', error);
-            this.showError('فشل التشغيل. يرجى المحاولة مرة أخرى.');
+            this.showError(`فشل التشغيل: ${error.message}`);
+            this.closePlayer();
         }
     }
 
@@ -252,13 +273,14 @@ class MoviesApp {
         const modal = document.createElement('div');
         modal.id = 'player-modal';
         modal.className = 'player-modal';
+        
         modal.innerHTML = `
             <div class="player-content">
-                <button class="player-close">✕</button>
-                <div class="movie-poster-large">
-                    <img src="${movie.logo || 'https://via.placeholder.com/400x600'}" alt="${movie.name}">
-                </div>
-                <video id="video-player" controls autoplay style="width: 100%; height: 100%;"></video>
+                <button class="player-close" type="button">✕</button>
+                <video id="video-player" controls autoplay playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                    <source src="${movie.streamUrl}" type="application/x-mpegURL">
+                    Your browser does not support the video tag.
+                </video>
                 <div class="player-info">
                     <h2>${movie.name}</h2>
                     <p>${movie.group}</p>
@@ -275,6 +297,15 @@ class MoviesApp {
         modal.querySelector('.player-close').addEventListener('click', () => {
             this.closePlayer();
         });
+        
+        // إغلاق عند الضغط على Escape
+        const closeOnEscape = (e) => {
+            if (e.key === 'Escape') {
+                this.closePlayer();
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        };
+        document.addEventListener('keydown', closeOnEscape);
     }
 
     /**

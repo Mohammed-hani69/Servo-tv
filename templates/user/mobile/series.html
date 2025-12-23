@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Servo - Series</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/movies.css">
+    <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+</head>
+<body>
+    <header class="mobile-header"><h1>Series</h1></header>
+    <main class="mobile-main">
+        <div class="movie-grid">
+            {% for i in range(1, 13) %}<button class="movie-item" onclick="console.log('Playing series')"><img src="https://picsum.photos/300/450?random={{ i + 30 }}"><div class="movie-badge">NEW</div><div class="movie-info"><div class="movie-title">Series {{ i }}</div></div></button>{% endfor %}
+        </div>
+        <div class="bottom-spacer"></div>
+    </main>
+    
+    <!-- BOTTOM NAVIGATION COMPONENT -->
+    {% include 'user/mobile/components/bottom-nav.html' %}
+</body>
+</html>

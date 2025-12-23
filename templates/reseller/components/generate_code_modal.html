@@ -14,6 +14,33 @@
 
         <!-- Modal Body -->
         <form id="generateCodeForm" class="p-6 space-y-5">
+            <!-- Error Alert -->
+            <div id="errorAlert" class="hidden rounded-lg border border-red-900/50 bg-red-950/40 p-4 text-red-200 flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div>
+                    <div class="font-semibold">Error</div>
+                    <div id="errorMessage" class="text-sm mt-1"></div>
+                </div>
+            </div>
+
+            <!-- Warning Alert -->
+            <div id="warningAlert" class="hidden rounded-lg border border-yellow-900/50 bg-yellow-950/40 p-4 text-yellow-200 flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.04h16.94a2 2 0 0 0 1.71-3.04l-8.47-14.14a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div>
+                    <div class="font-semibold">Warning</div>
+                    <div id="warningMessage" class="text-sm mt-1"></div>
+                </div>
+            </div>
+
+            <!-- Success Alert -->
+            <div id="successAlert" class="hidden rounded-lg border border-green-900/50 bg-green-950/40 p-4 text-green-200 flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 flex-shrink-0"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <div>
+                    <div class="font-semibold">Success</div>
+                    <div id="successMessage" class="text-sm mt-1">Activation code activated successfully! The page will reload...</div>
+                </div>
+            </div>
+
             <!-- Username -->
             <div>
                 <label class="block text-sm font-semibold text-white mb-2">Username</label>
@@ -142,26 +169,45 @@
             }
         });
 
-        // Device count buttons - REMOVED (devices are now fixed at 1)
-        // document.getElementById('increaseDevices').addEventListener('click', ...) 
-        // document.getElementById('decreaseDevices').addEventListener('click', ...)
+        // Real-time validation for activation code
+        const activationCodeInput = document.getElementById('activationCode');
+        activationCodeInput.addEventListener('input', function() {
+            validateActivationCode(this.value);
+        });
 
         // Form submission
         document.getElementById('generateCodeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Reset alerts
+            document.getElementById('errorAlert').classList.add('hidden');
+            document.getElementById('warningAlert').classList.add('hidden');
+            document.getElementById('successAlert').classList.add('hidden');
+            document.getElementById('errorMessage').textContent = '';
+            
             const durationValue = document.querySelector('input[name="subscriptionDuration"]:checked')?.value;
+            const activationCodeValue = document.getElementById('activationCode').value.trim();
             
             const formData = {
                 username: document.getElementById('username').value || null,
-                activationCode: document.getElementById('activationCode').value,
+                activationCode: activationCodeValue,
                 subscriptionDuration: durationValue,  // '1year' or 'lifetime'
                 mediaLink: document.getElementById('mediaLink').value || null
             };
 
-            // Validation
-            if (!formData.activationCode || !formData.subscriptionDuration) {
-                console.error('Missing required fields');
+            // Client-side Validation
+            if (!formData.activationCode) {
+                showError('Please enter an activation code');
+                return;
+            }
+
+            if (!formData.subscriptionDuration) {
+                showError('Please select a subscription duration (1 Year or Lifetime)');
+                return;
+            }
+
+            if (formData.activationCode.length < 3) {
+                showError('Activation code is too short. Please check your code.');
                 return;
             }
 
@@ -182,17 +228,24 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Show success message
+                    showSuccess('Activation code activated successfully! The page will reload...');
+                    
                     // Reset form
                     document.getElementById('generateCodeForm').reset();
-                    closeModal();
-                    // Reload or update UI automatically
-                    window.location.reload();
+                    
+                    // Reload after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
                 } else {
-                    console.error('Error:', data.message);
+                    // Show error message from API
+                    showError(data.message || 'An error occurred while activating the code');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+                showError('Connection error: ' + error.message);
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -200,4 +253,84 @@
             });
         });
     });
+
+    // Helper function to show error
+    function showError(message) {
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        const warningAlert = document.getElementById('warningAlert');
+        
+        // Hide warning when showing error
+        warningAlert.classList.add('hidden');
+        
+        // Clean message by removing emoji if present
+        const cleanMessage = message.replace(/^❌\s*/, '').replace(/^✅\s*/, '');
+        
+        errorMessage.textContent = cleanMessage;
+        errorAlert.classList.remove('hidden');
+        
+        // Scroll to top of form
+        document.querySelector('#generateCodeForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Helper function to show warning
+    function showWarning(message) {
+        const warningAlert = document.getElementById('warningAlert');
+        const warningMessage = document.getElementById('warningMessage');
+        
+        // Clean message by removing emoji if present
+        const cleanMessage = message.replace(/^⚠️\s*/, '').replace(/^⚡\s*/, '');
+        
+        warningMessage.textContent = cleanMessage;
+        warningAlert.classList.remove('hidden');
+    }
+
+    // Helper function to hide warning
+    function hideWarning() {
+        const warningAlert = document.getElementById('warningAlert');
+        warningAlert.classList.add('hidden');
+    }
+
+    // Helper function to show success
+    function showSuccess(message) {
+        const successAlert = document.getElementById('successAlert');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Clean message by removing emoji if present
+        const cleanMessage = message.replace(/^❌\s*/, '').replace(/^✅\s*/, '');
+        
+        successMessage.textContent = cleanMessage;
+        successAlert.classList.remove('hidden');
+        
+        // Scroll to top of form
+        document.querySelector('#generateCodeForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Validate activation code format
+    function validateActivationCode(code) {
+        const warningAlert = document.getElementById('warningAlert');
+        
+        // Reset alerts
+        document.getElementById('errorAlert').classList.add('hidden');
+        
+        if (!code || code.trim() === '') {
+            hideWarning();
+            return;
+        }
+
+        // Check if code is too short
+        if (code.length < 3) {
+            showWarning('Activation code is too short. Please enter a valid code.');
+            return;
+        }
+
+        // Check if code contains only valid characters (alphanumeric)
+        if (!/^[a-zA-Z0-9\-_]+$/.test(code)) {
+            showWarning('Invalid characters in activation code. Use only letters, numbers, hyphens, and underscores.');
+            return;
+        }
+
+        // All validations passed
+        hideWarning();
+    }
 </script>

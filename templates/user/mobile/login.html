@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Servo - Device Activation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/login.css">
+    <style>
+        /* ============ SPLASH SCREEN STYLES ============ */
+        .splash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOutSplash 0.6s ease forwards;
+            animation-delay: 2000ms;
+        }
+
+        .splash-overlay.hidden {
+            pointer-events: none;
+        }
+
+        .splash-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 40px;
+            animation: logoZoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .splash-logo svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 8px 24px rgba(59, 130, 246, 0.3));
+        }
+
+        .splash-text {
+            margin-bottom: 60px;
+        }
+
+        .splash-brand {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #3B82F6 0%, #A855F7 50%, #3B82F6 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite, textSlideIn 0.8s ease 0.2s backwards;
+            margin-bottom: 12px;
+        }
+
+        .splash-tagline {
+            font-size: 14px;
+            color: rgb(148, 163, 184);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            animation: textSlideIn 0.8s ease 0.4s backwards;
+        }
+
+        .splash-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            animation: slideUp 0.8s ease 0.6s backwards;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-top: 3px solid #3B82F6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-text {
+            font-size: 12px;
+            color: rgb(148, 163, 184);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoZoom {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-10deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% center;
+            }
+            50% {
+                background-position: 100% center;
+            }
+        }
+
+        @keyframes textSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOutSplash {
+            0% {
+                opacity: 1;
+                visibility: visible;
+            }
+            99% {
+                opacity: 0;
+                visibility: visible;
+            }
+            100% {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============ SPLASH SCREEN ============ -->
+    <div class="splash-overlay" id="splashOverlay">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0" y1="0" x2="200" y2="200">
+                            <stop offset="0%" stop-color="#3B82F6"></stop>
+                            <stop offset="100%" stop-color="#2563EB"></stop>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="5" result="coloredBlur"></feGaussianBlur>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"></feMergeNode>
+                                <feMergeNode in="SourceGraphic"></feMergeNode>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <path d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z" fill="url(#logoGradient)" filter="url(#glow)"></path>
+                    <path d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round"></path>
+                </svg>
+            </div>
+
+            <div class="splash-text">
+                <h1 class="splash-brand">SERVO</h1>
+                <p class="splash-tagline">Premium Streaming Experience</p>
+            </div>
+
+            <div class="splash-loader">
+                <div class="spinner"></div>
+                <p class="loader-text">Preparing...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ LOGIN PAGE ============ -->
+    <div class="login-container">
+        <!-- HEADER -->
+        <header class="login-header">
+            <div class="logo-badge">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient2" x1="0" y1="0" x2="200" y2="200">
+                            <stop offset="0%" stop-color="#3B82F6"></stop>
+                            <stop offset="100%" stop-color="#2563EB"></stop>
+                        </linearGradient>
+                        <filter id="glow2" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="5" result="coloredBlur"></feGaussianBlur>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"></feMergeNode>
+                                <feMergeNode in="SourceGraphic"></feMergeNode>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <path d="M45 35C45 23.4477 57.5 16.2274 67.5 22.001L170 81.001C180 86.7746 180 101.225 170 107.0L67.5 165.999C57.5 171.773 45 164.552 45 153.0V35Z" fill="url(#logoGradient2)" filter="url(#glow2)"></path>
+                    <path d="M95 55L75 100H105L85 145L135 90H105L120 55H95Z" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round"></path>
+                </svg>
+            </div>
+            <h1>SERVO</h1>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="login-main">
+            <div class="activation-card">
+                <h2 class="card-title">Device Activation</h2>
+                <p class="card-subtitle">Enter your activation code</p>
+
+                <!-- Device Info Section -->
+                <div class="device-info-section">
+                    <div class="info-item">
+                        <span class="info-label">Device ID</span>
+                        <span class="info-value" id="device-id-display">DEV-XXXXXXXX</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Activation Code</span>
+                        <span class="info-value code-display" id="activation-code-display">------</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Expires In</span>
+                        <span class="info-value timer" id="timer-display">10:00</span>
+                    </div>
+                </div>
+
+                <!-- Activation Form -->
+                <form class="login-form" id="deviceLoginForm">
+                    <!-- Code input removed - button submission only -->
+
+                    <button class="activate-button" type="submit" id="activateBtn">
+                        <span>Activate Device</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+                </form>
+
+                <!-- QR Code Section -->
+                
+
+                <!-- Footer -->
+                <p class="terms-text">By activating, you agree to our Terms of Service.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 🎯 Integrated system to retrieve device ID (Roku + Samsung + LG + Fingerprint)
+
+        /**
+         * Simple hash function to convert text to unique value
+         * Used instead of SHA-256 for simplicity and compatibility with older devices
+         */
+        function simpleHash(str) {
+            let hash = 0;
+            if (str.length === 0) return hash.toString(16);
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash).toString(16);
+        }
+
+        /**
+         * Receive messages from Roku application
+         * Roku sends device ID through window postMessage
+         */
+        let rokuDeviceData = null;
+        
+        window.addEventListener('message', function(event) {
+            console.log('📨 Message received from:', event.origin, event.data);
+            
+            if (event.data && event.data.type === 'device_data' && event.data.device_source === 'roku') {
+                console.log('✅ Received data from Roku:', event.data);
+                rokuDeviceData = event.data;
+                
+                // Update display with Roku data
+                if (event.data.device_id) {
+                    document.getElementById('device-id-display').textContent = event.data.device_id;
+                }
+                if (event.data.activation_code) {
+                    document.getElementById('activation-code-display').textContent = event.data.activation_code;
+                }
+                
+                // Save data
+                sessionStorage.setItem('device_data_source', 'roku');
+                sessionStorage.setItem('device_id', event.data.device_id);
+                sessionStorage.setItem('activation_code', event.data.activation_code);
+            }
+        }, false);
+
+        /**
+         * Create Device Fingerprint from fixed device properties
+         * These properties don't change on the same device unless basic settings are modified
+         */
+        function generateDeviceFingerprint() {
+            try {
+                const fingerprints = {
+                    // Screen information
+                    screen: `${window.screen.width}x${window.screen.height}x${window.screen.colorDepth}`,
+                    
+                    // Timezone (doesn't change naturally)
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    
+                    // Language
+                    language: navigator.language || navigator.userLanguage,
+                    
+                    // User Agent (device and browser identifier)
+                    ua: navigator.userAgent.substring(0, 50),
+                    
+                    // Platform
+                    platform: navigator.platform,
+                    
+                    // Hardware Concurrency (number of processors)
+                    hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+                    
+                    // Device Memory (if available)
+                    deviceMemory: navigator.deviceMemory || 'unknown',
+                    
+                    // Max Touch Points
+                    maxTouchPoints: navigator.maxTouchPoints || 0,
+                    
+                    // WebGL Info (if available)
+                    webglVendor: (() => {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                            if (gl) {
+                                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                                if (debugInfo) {
+                                    return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'unknown';
+                                }
+                            }
+                        } catch (e) {
+                            return 'unknown';
+                        }
+                        return 'unknown';
+                    })(),
+                };
+
+                // Combine all properties
+                const fingerprintString = Object.values(fingerprints).join('||');
+                console.log('📍 Fingerprint Components:', fingerprints);
+                
+                // Convert to unique hash
+                const hash = simpleHash(fingerprintString);
+                
+                // Format: FP-XXXXXXXX (example: FP-a1b2c3d4)
+                const deviceFingerprint = `FP-${hash.substring(0, 8).toUpperCase()}`;
+                
+                console.log('✅ Device Fingerprint:', deviceFingerprint);
+                return deviceFingerprint;
+            } catch (e) {
+                console.log('❌ Error creating Fingerprint:', e);
+                return null;
+            }
+        }
+
+        // 🎯 Get actual device ID from different devices
+
+        // 1️⃣ Samsung TV (DUID)
+        function getSamsungDeviceId() {
+            try {
+                if (window.webapis && window.webapis.productinfo) {
+                    return window.webapis.productinfo.getDuid();
+                }
+            } catch (e) {
+                console.log('❌ Samsung DUID not available');
+            }
+            return null;
+        }
+
+        // 2️⃣ LG TV (webOS - Serial Number)
+        function getLGDeviceId(callback) {
+            try {
+                if (window.webOS && window.webOS.service) {
+                    window.webOS.service.request(
+                        "luna://com.webos.service.tv.systemproperty",
+                        {
+                            method: "getSystemInfo",
+                            parameters: {
+                                keys: ["serialNumber"]
+                            },
+                            onSuccess: function (res) {
+                                const serialNumber = res.serialNumber || null;
+                                console.log('✅ LG Serial Number:', serialNumber);
+                                callback(serialNumber);
+                            },
+                            onFailure: function () {
+                                console.log('❌ LG Serial Number not available');
+                                callback(null);
+                            }
+                        }
+                    );
+                } else {
+                    callback(null);
+                }
+            } catch (e) {
+                console.log('❌ Error getting LG ID');
+                callback(null);
+            }
+        }
+
+        // 5️⃣ Attempt to get actual device ID from all sources
+        async function getActualDeviceId() {
+            return new Promise((resolve) => {
+                // If we have Roku data, use it directly
+                if (rokuDeviceData && rokuDeviceData.device_id) {
+                    console.log('✅ Using Roku ID:', rokuDeviceData.device_id);
+                    resolve({ id: rokuDeviceData.device_id, source: 'roku' });
+                    return;
+                }
+
+                // Try Samsung first
+                const samsungId = getSamsungDeviceId();
+                if (samsungId) {
+                    console.log('✅ Samsung DUID:', samsungId);
+                    resolve({ id: samsungId, source: 'samsung' });
+                    return;
+                }
+
+                // Try LG
+                getLGDeviceId((lgId) => {
+                    if (lgId) {
+                        console.log('✅ LG Serial:', lgId);
+                        resolve({ id: lgId, source: 'lg' });
+                        return;
+                    }
+
+                    // If all attempts fail, use Device Fingerprint
+                    const fingerprint = generateDeviceFingerprint();
+                    console.log('📍 Using Device Fingerprint:', fingerprint);
+                    resolve({ id: fingerprint, source: 'fingerprint' });
+                });
+            });
+        }
+
+        // Determine device_type (can be improved later for auto-detection)
+        function detectDeviceType() {
+            const ua = navigator.userAgent.toLowerCase();
+            if (ua.includes('tv') || ua.includes('smarttv') || ua.includes('samsung')) return 'samsung';
+            if (ua.includes('lg') || ua.includes('webos')) return 'lg';
+            if (ua.includes('android')) return 'android';
+            if (ua.includes('roku')) return 'roku';
+            if (ua.includes('appletv')) return 'apple-tv';
+            return 'web';
+        }
+
+        // Send device registration request
+        async function registerDevice() {
+            try {
+                // If we have Roku data, don't re-request
+                if (rokuDeviceData && rokuDeviceData.success && rokuDeviceData.device_id) {
+                    console.log('✅ Using previous Roku data:', rokuDeviceData.device_id);
+                    document.getElementById('device-id-display').textContent = rokuDeviceData.device_id;
+                    document.getElementById('activation-code-display').textContent = rokuDeviceData.activation_code;
+                    sessionStorage.setItem('device_id', rokuDeviceData.device_id);
+                    sessionStorage.setItem('activation_code', rokuDeviceData.activation_code);
+                    sessionStorage.setItem('device_data_source', 'roku');
+                    startCountdown(rokuDeviceData.expires_in_seconds);
+                    return;
+                }
+
+                const deviceType = detectDeviceType();
+                
+                // Attempt to get actual device ID or Fingerprint
+                const deviceIdInfo = await getActualDeviceId();
+                
+                const response = await fetch('/api/device/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        device_type: deviceType,
+                        actual_device_id: deviceIdInfo.id,  // Real ID or fingerprint
+                        device_id_source: deviceIdInfo.source  // ID source (roku/samsung/lg/fingerprint)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display data
+                    document.getElementById('device-id-display').textContent = data.device_id;
+                    document.getElementById('activation-code-display').textContent = data.activation_code;
+
+                    // Save in session storage for later use
+                    sessionStorage.setItem('device_id', data.device_id);
+                    sessionStorage.setItem('activation_code', data.activation_code);
+                    sessionStorage.setItem('device_data_source', deviceIdInfo.source);
+
+                    // Start countdown timer
+                    startCountdown(data.expires_in_seconds);
+                } else {
+                    console.error('Device registration failed:', data.error);
+                }
+            } catch (error) {
+                console.error('Error during device registration:', error);
+            }
+        }
+
+        // Countdown timer function
+        function startCountdown(totalSeconds) {
+            let remainingSeconds = totalSeconds;
+            const timerDisplay = document.getElementById('timer-display');
+
+            const countdownInterval = setInterval(() => {
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                // Change color when approaching expiration
+                if (remainingSeconds <= 60) {
+                    timerDisplay.style.color = '#ff6b6b';
+                } else {
+                    timerDisplay.style.color = '#ffffff';
+                }
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(countdownInterval);
+                    timerDisplay.textContent = 'Generating new code...';
+                    timerDisplay.style.color = '#fbbf24';
+                    
+                    // Generate new code automatically after time expires
+                    setTimeout(() => {
+                        registerDevice();
+                    }, 1000);
+                } else {
+                    remainingSeconds--;
+                }
+            }, 1000);
+        }
+
+        // ============================================================================
+        // 🟢 Phase 9: Button submit handler
+        // ============================================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Call registration on page load
+            registerDevice();
+
+            // Handle button click
+            const deviceLoginForm = document.getElementById('deviceLoginForm');
+            const activateBtn = document.getElementById('activateBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            deviceLoginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Get device ID from session storage
+                const deviceId = sessionStorage.getItem('device_id');
+
+                if (!deviceId) {
+                    showErrorMessage('Device ID not available. Please wait.');
+                    return;
+                }
+
+                // Add loading state
+                activateBtn.disabled = true;
+                activateBtn.innerHTML = '<span>Loading...</span>';
+
+                try {
+                    // ============================================================================
+                    // 13️⃣ Send device/login request
+                    // ============================================================================
+                    const response = await fetch('/api/device/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            device_id: deviceId
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // ✅ Activation successful - proceed to dashboard
+                        console.log('✅ Device login successful:', data.data);
+                        
+                        // Save data in session storage
+                        sessionStorage.setItem('user_token', data.data.token);
+                        sessionStorage.setItem('user_id', data.data.user_id);
+                        sessionStorage.setItem('username', data.data.username);
+                        sessionStorage.setItem('media_link', data.data.media_link || '');
+                        
+                        // Redirect to dashboard after one second
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1000);
+                    } else {
+                        // ❌ Activation failed
+                        showErrorMessage(data.message || 'Device has not been activated yet');
+                        activateBtn.disabled = false;
+                        activateBtn.innerHTML = '<span>Activate Device</span><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
+                    }
+                } catch (error) {
+                    console.error('❌ Error during device login:', error);
+                    showErrorMessage('An error occurred. Please try again.');
+                    activateBtn.disabled = false;
+                    activateBtn.innerHTML = '<span>Activate Device</span><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>';
+                }
+            });
+
+            // Function to display error message
+            function showErrorMessage(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        /**
+         * 🎬 Splash Screen Controller
+         * Display splash screen for 2 seconds then hide it
+         */
+        (function initSplashScreen() {
+            const splashOverlay = document.getElementById('splashOverlay');
+            
+            if (!splashOverlay) return;
+            
+            console.log('Splash screen started');
+            
+            // After 2000ms, hide the splash
+            setTimeout(() => {
+                console.log('Hiding splash screen');
+                splashOverlay.classList.add('hidden');
+            }, 2000);
+            
+            // بعد 2600ms (بعد انتهاء الـ animation)، احذف الـ element
+            setTimeout(() => {
+                splashOverlay.style.display = 'none';
+            }, 2600);
+        })();
+    </script>
+</body>
+</html>

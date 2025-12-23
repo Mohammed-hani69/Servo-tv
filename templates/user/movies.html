@@ -50,40 +50,18 @@
         </main>
     </div>
 
-    <script>
-                // Movies data
-        const moviesData = [
-            { id: 1, title: 'The Dark Knight', rating: 7.8, year: 2022, category: 'action', quality: 'HD', image: 'https://picsum.photos/300/450?random=200' },
-            { id: 2, title: 'Inception', rating: 9.1, year: 2023, category: 'scifi', quality: 'HD', image: 'https://picsum.photos/300/450?random=201' },
-            { id: 3, title: 'Interstellar', rating: 7.6, year: 2022, category: 'scifi', quality: 'HD', image: 'https://picsum.photos/300/450?random=202' },
-            { id: 4, title: 'Avengers: Endgame', rating: 8.6, year: 2020, category: 'action', quality: 'HD', image: 'https://picsum.photos/300/450?random=203' },
-            { id: 5, title: 'The Matrix', rating: 7.8, year: 2024, category: 'scifi', quality: 'HD', image: 'https://picsum.photos/300/450?random=204' },
-            { id: 6, title: 'Gladiator', rating: 7.8, year: 2024, category: 'action', quality: 'HD', image: 'https://picsum.photos/300/450?random=205' },
-            { id: 7, title: 'Titanic', rating: 8.0, year: 2023, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=206' },
-            { id: 8, title: 'Avatar', rating: 8.2, year: 2022, category: 'scifi', quality: 'HD', image: 'https://picsum.photos/300/450?random=207' },
-            { id: 9, title: 'The Godfather', rating: 7.7, year: 2021, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=208' },
-            { id: 10, title: 'Pulp Fiction', rating: 8.8, year: 2022, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=209' },
-            { id: 11, title: 'Fight Club', rating: 7.7, year: 2020, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=210' },
-            { id: 12, title: 'Forrest Gump', rating: 8.8, year: 2022, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=211' },
-            { id: 13, title: 'The Lion King', rating: 8.1, year: 2021, category: 'comedy', quality: 'HD', image: 'https://picsum.photos/300/450?random=212' },
-            { id: 14, title: 'Joker', rating: 8.6, year: 2024, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=213' },
-            { id: 15, title: 'Black Panther', rating: 7.8, year: 2020, category: 'action', quality: 'HD', image: 'https://picsum.photos/300/450?random=214' },
-            { id: 16, title: 'Frozen', rating: 9.1, year: 2021, category: 'comedy', quality: 'HD', image: 'https://picsum.photos/300/450?random=215' },
-            { id: 17, title: 'Toy Story', rating: 7.7, year: 2022, category: 'comedy', quality: 'HD', image: 'https://picsum.photos/300/450?random=216' },
-            { id: 18, title: 'Spider-Man: No Way Home', rating: 9.2, year: 2020, category: 'action', quality: 'HD', image: 'https://picsum.photos/300/450?random=217' },
-            { id: 19, title: 'Breaking Bad', rating: 9.2, year: 2023, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=218' },
-            { id: 20, title: 'Stranger Things', rating: 7.7, year: 2022, category: 'horror', quality: 'HD', image: 'https://picsum.photos/300/450?random=219' },
-            { id: 21, title: 'Game of Thrones', rating: 9.5, year: 2021, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=220' },
-            { id: 22, title: 'The Crown', rating: 8.1, year: 2022, category: 'drama', quality: 'HD', image: 'https://picsum.photos/300/450?random=221' },
-            { id: 23, title: 'The Mandalorian', rating: 7.5, year: 2022, category: 'scifi', quality: 'HD', image: 'https://picsum.photos/300/450?random=222' },
-            { id: 24, title: 'The Witcher', rating: 9.4, year: 2021, category: 'action', quality: 'HD', image: 'https://picsum.photos/300/450?random=223' },
-            { id: 25, title: 'Friends', rating: 8.9, year: 2021, category: 'comedy', quality: 'HD', image: 'https://picsum.photos/300/450?random=224' },
-            { id: 26, title: 'The Office', rating: 9.2, year: 2021, category: 'comedy', quality: 'HD', image: 'https://picsum.photos/300/450?random=225' }
-        ];
+    <!-- Streaming Manager -->
+    <script src="../../static/js/streaming-manager.js"></script>
 
+    <script>
+        // Removed static movies data - using StreamingManager instead
+        
         // State management
         let currentCategory = 'all';
         let searchQuery = '';
+        let allMovies = [];
+        let filteredMovies = [];
+        let streamingManager = null;
 
         // DOM elements
         const moviesGrid = document.getElementById('moviesGrid');
@@ -91,10 +69,27 @@
         const searchInput = document.getElementById('searchInput');
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            renderMovies(moviesData);
-            setupEventListeners();
-            setupKeyboardNavigation();
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Loading movies...');
+            try {
+                // Initialize streaming manager
+                streamingManager = new StreamingManager();
+                await streamingManager.init();
+                
+                // Get movies from IPTV
+                allMovies = streamingManager.getContentByType('movies');
+                filteredMovies = [...allMovies];
+                
+                console.log(`Loaded ${allMovies.length} movies`);
+                
+                renderMovies(filteredMovies);
+                setupEventListeners();
+                setupKeyboardNavigation();
+                
+            } catch (error) {
+                console.error('Error loading movies:', error);
+                moviesGrid.innerHTML = '<div class="no-content">Failed to load movies</div>';
+            }
         });
 
         /**
@@ -139,21 +134,26 @@
         * Filter movies based on category and search
         */
         function filterMovies() {
-            let filtered = moviesData;
+            let filtered = allMovies;
 
             // Filter by category
             if (currentCategory !== 'all') {
-                filtered = filtered.filter(movie => movie.category === currentCategory);
+                filtered = filtered.filter(movie => {
+                    const category = (movie.group || '').toLowerCase();
+                    return category === currentCategory.toLowerCase();
+                });
             }
 
             // Filter by search query
             if (searchQuery) {
-                filtered = filtered.filter(movie =>
-                    movie.title.toLowerCase().includes(searchQuery)
-                );
+                filtered = filtered.filter(movie => {
+                    const title = (movie.name || '').toLowerCase();
+                    return title.includes(searchQuery);
+                });
             }
 
-            renderMovies(filtered);
+            filteredMovies = filtered;
+            renderMovies(filteredMovies);
         }
 
         /**
@@ -181,27 +181,31 @@
             card.className = 'movie-card tv-focus';
             card.tabIndex = index;
             card.dataset.movieId = movie.id;
+            card.dataset.streamUrl = movie.streamUrl || '';
+
+            const movieName = (movie.name || 'Movie').substring(0, 15);
+            const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23222' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
 
             card.innerHTML = `
-                <img src="${movie.image}" alt="${movie.title}" class="movie-image">
+                <img src="${movie.logo || placeholderSvg}" alt="${(movie.name || 'Movie').replace(/"/g, '&quot;')}" class="movie-image" loading="lazy">
                 <div class="new-badge">NEW</div>
                 <div class="movie-info">
                     <div class="movie-info-content">
-                        <h3 class="movie-title">${movie.title}</h3>
+                        <h3 class="movie-title">${movie.name || 'Unknown'}</h3>
                         <div class="movie-meta">
                             <span class="rating">
                                 <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
                                 </svg>
-                                ${movie.rating}
+                                8.5
                             </span>
                             <span>•</span>
-                            <span>${movie.year}</span>
+                            <span>${movie.group || 'Movies'}</span>
                             <span>•</span>
-                            <span class="quality-badge">${movie.quality}</span>
+                            <span class="quality-badge">HD</span>
                         </div>
                         <div class="movie-actions">
-                            <button class="play-btn" onclick="playMovie(event, ${movie.id})">
+                            <button class="play-btn" type="button">
                                 <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
                                 </svg>
@@ -214,8 +218,24 @@
 
             // Click handler for card selection
             card.addEventListener('click', () => {
-                console.log(`Selected movie: ${movie.title}`);
+                if (movie.streamUrl) {
+                    playMovie(movie);
+                } else {
+                    console.warn('No stream URL for movie:', movie.name);
+                    showError('No stream URL for this movie');
+                }
             });
+
+            // Add image error handler - set src directly to placeholder on error
+            const img = card.querySelector('.movie-image');
+            if (img && movie.logo) {
+                img.addEventListener('error', function onImageError() {
+                    if (this.src !== placeholderSvg) {
+                        this.src = placeholderSvg;
+                        this.style.backgroundColor = '#222';
+                    }
+                }, { once: false });
+            }
 
             return card;
         }
@@ -223,13 +243,265 @@
         /**
         * Play movie
         */
-        function playMovie(event, movieId) {
-            event.stopPropagation();
-            const movie = moviesData.find(m => m.id === movieId);
-            if (movie) {
-                console.log(`Playing: ${movie.title}`);
-                // Here you would typically navigate to a player or open a modal
+        function playMovie(movie) {
+            try {
+                console.log('Playing:', movie.name);
+                
+                if (!movie.streamUrl) {
+                    throw new Error('No stream URL');
+                }
+                
+                // Record as watched
+                recordWatched(movie);
+                
+                // Close any existing player
+                closePlayer();
+                
+                // Open new player
+                openPlayer(movie);
+                
+            } catch (error) {
+                console.error('Error playing movie:', error);
+                showError(`Playback failed: ${error.message}`);
             }
+        }
+
+        /**
+        * Record watched item with playback position
+        */
+        function recordWatched(movie) {
+            try {
+                const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                
+                // Remove if already exists
+                const filtered = watched.filter(w => w.id !== movie.id);
+                
+                // Get current playback position if available
+                const video = document.getElementById('video-player');
+                const currentTime = video ? video.currentTime : 0;
+                
+                // Add to front
+                const item = {
+                    id: movie.id,
+                    name: movie.name,
+                    logo: movie.logo,
+                    group: movie.group,
+                    type: 'movies',
+                    streamUrl: movie.streamUrl,
+                    timestamp: Date.now(),
+                    progress: currentTime > 0 ? Math.round((currentTime / (video?.duration || 1)) * 100) : 0,
+                    currentTime: currentTime || 0,
+                    duration: video?.duration || 0
+                };
+                
+                filtered.unshift(item);
+                
+                // Keep only last 50
+                filtered.splice(50);
+                
+                // Save to localStorage
+                localStorage.setItem('watched_items', JSON.stringify(filtered));
+                
+                console.log('Watched item recorded at:', Math.floor(currentTime), 'seconds');
+            } catch (error) {
+                console.warn('Error recording watched item:', error);
+            }
+        }
+
+        /**
+        * Open Player Modal
+        */
+        function openPlayer(movie) {
+            const modal = document.createElement('div');
+            modal.id = 'player-modal';
+            modal.className = 'player-modal';
+            
+            // Get saved playback position
+            const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+            const savedItem = watched.find(w => w.id === movie.id);
+            const startTime = savedItem && savedItem.currentTime > 0 ? savedItem.currentTime : 0;
+            const resumeMessage = startTime > 0 ? `Resume from ${Math.floor(startTime / 60)}:${String(Math.floor(startTime % 60)).padStart(2, '0')}` : '';
+            
+            modal.innerHTML = `
+                <div class="player-content">
+                    <button class="player-close" type="button">✕</button>
+                    ${resumeMessage ? `<div class="resume-notification">${resumeMessage}</div>` : ''}
+                    <video id="video-player" controls autoplay playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                        <source src="${movie.streamUrl}" type="application/x-mpegURL">
+                        Your browser does not support the video tag.
+                    </video>
+                    <div class="player-info">
+                        <h2>${movie.name}</h2>
+                        <p>${movie.group}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            injectPlayerStyles();
+            
+            // Set playback position after video loads
+            const video = document.getElementById('video-player');
+            if (startTime > 0) {
+                video.addEventListener('loadedmetadata', () => {
+                    video.currentTime = startTime;
+                    console.log('⏪ استئناف التشغيل من:', startTime, 'ثانية');
+                }, { once: true });
+            }
+            
+            // Save playback position periodically
+            const saveInterval = setInterval(() => {
+                if (!document.getElementById('player-modal')) {
+                    clearInterval(saveInterval);
+                    return;
+                }
+                updateWatchedTime(movie, video.currentTime, video.duration);
+            }, 5000);
+            
+            // Close button
+            modal.querySelector('.player-close').addEventListener('click', () => {
+                clearInterval(saveInterval);
+                // Save final position before closing
+                recordWatched(movie);
+                closePlayer();
+            });
+            
+            // Close on Escape
+            const closeOnEscape = (e) => {
+                if (e.key === 'Escape') {
+                    clearInterval(saveInterval);
+                    recordWatched(movie);
+                    closePlayer();
+                    document.removeEventListener('keydown', closeOnEscape);
+                }
+            };
+            document.addEventListener('keydown', closeOnEscape);
+        }
+
+        /**
+        * Update watched time without reloading
+        */
+        function updateWatchedTime(movie, currentTime, duration) {
+            try {
+                const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                const item = watched.find(w => w.id === movie.id);
+                
+                if (item) {
+                    item.currentTime = currentTime;
+                    item.duration = duration;
+                    item.progress = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+                    item.timestamp = Date.now();
+                    
+                    localStorage.setItem('watched_items', JSON.stringify(watched));
+                }
+            } catch (error) {
+                console.warn('Error updating watched time:', error);
+            }
+        }
+
+        /**
+        * Close Player
+        */
+        function closePlayer() {
+            const modal = document.getElementById('player-modal');
+            if (modal) {
+                const video = modal.querySelector('video');
+                if (video) video.pause();
+                modal.remove();
+            }
+        }
+
+        /**
+        * Inject Player Styles
+        */
+        function injectPlayerStyles() {
+            if (document.getElementById('player-styles')) return;
+            
+            const style = document.createElement('style');
+            style.id = 'player-styles';
+            style.textContent = `
+                .player-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                }
+                
+                .player-content {
+                    position: relative;
+                    width: 90%;
+                    height: 90%;
+                    background: #000;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                }
+                
+                .player-close {
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    width: 40px;
+                    height: 40px;
+                    background: rgba(0, 0, 0, 0.7);
+                    border: none;
+                    color: white;
+                    font-size: 24px;
+                    cursor: pointer;
+                    border-radius: 50%;
+                    z-index: 10000;
+                }
+                
+                .player-info {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+                    padding: 20px;
+                    color: white;
+                }
+                
+                .player-info h2 {
+                    margin: 0 0 5px 0;
+                }
+                
+                .player-info p {
+                    margin: 0;
+                    opacity: 0.7;
+                }
+            `;
+            
+            document.head.appendChild(style);
+        }
+
+        /**
+        * Show error message
+        */
+        function showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'error-toast';
+            toast.textContent = `❌ ${message}`;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                background: #ef4444;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 4px;
+                z-index: 10001;
+            `;
+            
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         /**
@@ -299,23 +571,6 @@
 
             focusableArray[nextIndex]?.focus();
         }
-
-        /**
-        * Utility: Log to console
-        */
-        function log(message) {
-            console.log(`[Movies App] ${message}`);
-        }
-
     </script>
-    
-    <!-- App Manager للتعامل مع الأخطاء -->
-    <script src="../../static/js/app-manager.js"></script>
-    
-    <!-- Streaming Manager -->
-    <script src="../../static/js/streaming-manager.js"></script>
-    
-    <!-- Movies App -->
-    <script src="../../static/js/movies-app.js"></script>
 </body>
 </html>

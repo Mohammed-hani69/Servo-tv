@@ -13,6 +13,8 @@ from audit_helper import log_user_action
 #=============================================================
 #=============================================================
 
+
+
 users_bp = Blueprint('users', __name__)
 
 
@@ -186,13 +188,28 @@ def register_device():
         }), 500
     
 
+@users_bp.route('/splash')
+def splash():
+    """صفحة Splash للموبايل"""
+    # فقط للأجهزة المحمولة
+    if is_mobile_device():
+        return render_template('user/mobile/splash.html')
+    # إذا كان desktop، انتقل مباشرة إلى login
+    return redirect(url_for('users.login'))
+
 @users_bp.route('/login')
 def login():
     device_uid = request.cookies.get('device_uid')
 
     if not device_uid:
+        # للموبايل، نتحقق من القادم من splash
+        if is_mobile_device():
+            template = 'user/mobile/login.html'
+        else:
+            template = 'user/login.html'
+        
         return render_template(
-            'user/login.html',
+            template,
             error="لم يتم التعرف على الجهاز"
         )
 
@@ -203,8 +220,13 @@ def login():
     ).first()
 
     if not device:
+        if is_mobile_device():
+            template = 'user/mobile/login.html'
+        else:
+            template = 'user/login.html'
+        
         return render_template(
-            'user/login.html',
+            template,
             error="الجهاز غير مفعل"
         )
 
@@ -259,14 +281,44 @@ def logout():
 # صفحات المستخدم العادي
 #================================================================
 
+def is_mobile_device():
+    """
+    التحقق من ما إذا كان الطلب من جهاز موبايل
+    بناءً على User-Agent
+    """
+    user_agent = request.headers.get('User-Agent', '').lower()
+    
+    mobile_keywords = [
+        'mobile', 'android', 'iphone', 'ipad', 'ipod',
+        'blackberry', 'windows phone', 'kindle', 'opera mini',
+        'playstation', 'tablet', 'webos', 'tizen'
+    ]
+    
+    return any(keyword in user_agent for keyword in mobile_keywords)
+
+def get_template_path(template_name):
+    """
+    الحصول على مسار القالب بناءً على نوع الجهاز
+    
+    Args:
+        template_name: اسم القالب (بدون user/) مثل 'dashboard.html'
+    
+    Returns:
+        المسار الكامل للقالب المناسب
+    """
+    if is_mobile_device():
+        return f'user/mobile/{template_name}'
+    return f'user/{template_name}'
+
 @users_bp.route('/dashboard')
 @user_login_required
 def dashboard():
     """صفحة لوحة تحكم المستخدم"""
     device_uid = session.get('device_uid')
     device = Device.query.filter_by(device_uid=device_uid).first()
-
-    return render_template('user/dashboard.html', device=device)
+    
+    template = get_template_path('dashboard.html')
+    return render_template(template, device=device)
 
 @users_bp.route('/player')
 @user_login_required
@@ -283,48 +335,71 @@ def player():
         activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
-            return render_template('user/player.html', error='Subscription expired')
+            template = get_template_path('player.html')
+            return render_template(template, error='Subscription expired')
         
         log_user_action(device.user_id, 'PLAYER_OPENED', 'فتح مشغل الفيديو')
         
-        return render_template('user/player.html')
+        template = get_template_path('player.html')
+        return render_template(template, device=device)
     
     except Exception as e:
         print(f"❌ خطأ في صفحة Player: {str(e)}")
-        return render_template('user/player.html', error=str(e))
+        template = get_template_path('player.html')
+        return render_template(template, error=str(e))
 
 @users_bp.route('/profile')
 @user_login_required
 def profile():
     """صفحة ملف المستخدم"""
-    return render_template('user/profile.html')
+    device_uid = session.get('device_uid')
+    device = Device.query.filter_by(device_uid=device_uid).first()
+    
+    template = get_template_path('profile.html')
+    return render_template(template, device=device)
 
 @users_bp.route('/series')
 @user_login_required
 def series():
     """صفحة سلسلة البرامج"""
-    return render_template('user/series.html')
+    device_uid = session.get('device_uid')
+    device = Device.query.filter_by(device_uid=device_uid).first()
+    
+    template = get_template_path('series.html')
+    return render_template(template, device=device)
 
 
 @users_bp.route('/movies')
 @user_login_required
 def movies():
     """صفحة الأفلام"""
-    return render_template('user/movies.html')
+    device_uid = session.get('device_uid')
+    device = Device.query.filter_by(device_uid=device_uid).first()
+    
+    template = get_template_path('movies.html')
+    return render_template(template, device=device)
 
 
 @users_bp.route('/settings')
 @user_login_required
 def settings():
     """صفحة إعدادات المستخدم"""
-    return render_template('user/settings.html')
+    device_uid = session.get('device_uid')
+    device = Device.query.filter_by(device_uid=device_uid).first()
+    
+    template = get_template_path('settings.html')
+    return render_template(template, device=device)
 
 
 @users_bp.route('/my-list', methods=['GET'])
 @user_login_required
 def my_list():
     """الحصول على أجهزة المستخدم"""
-    return render_template('user/playlist.html')
+    device_uid = session.get('device_uid')
+    device = Device.query.filter_by(device_uid=device_uid).first()
+    
+    template = get_template_path('playlist.html')
+    return render_template(template, device=device)
 
 
 
@@ -742,7 +817,8 @@ def iptv_player():
         print(f"✅ دخول صفحة IPTV Player: {device_uid}")
         log_user_action(device.user_id, 'IPTV_PAGE_VIEWED', 'دخول صفحة مشغل IPTV')
         
-        return render_template('user/iptv-player.html', device_name=device.device_name)
+        template = get_template_path('iptv-player.html')
+        return render_template(template, device_name=device.device_name)
         
     except Exception as e:
         print(f"❌ خطأ في صفحة IPTV: {str(e)}")
@@ -955,15 +1031,18 @@ def live_tv_page():
         activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
-            return render_template('user/live-tv.html', error='Subscription expired')
+            template = get_template_path('live-tv.html')
+            return render_template(template, error='Subscription expired')
         
         log_user_action(device.user_id, 'LIVE_TV_VIEWED', 'فتح صفحة Live TV')
         
-        return render_template('user/live-tv.html')
+        template = get_template_path('live-tv.html')
+        return render_template(template, device=device)
     
     except Exception as e:
         print(f"❌ خطأ في صفحة Live TV: {str(e)}")
-        return render_template('user/live-tv.html', error=str(e))
+        template = get_template_path('live-tv.html')
+        return render_template(template, error=str(e))
 
 
 @users_bp.route('/movies', methods=['GET'])
@@ -981,15 +1060,18 @@ def movies_page():
         activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
-            return render_template('user/movies.html', error='Subscription expired')
+            template = get_template_path('movies.html')
+            return render_template(template, error='Subscription expired')
         
         log_user_action(device.user_id, 'MOVIES_VIEWED', 'فتح صفحة Movies')
         
-        return render_template('user/movies.html')
+        template = get_template_path('movies.html')
+        return render_template(template, device=device)
     
     except Exception as e:
         print(f"❌ خطأ في صفحة Movies: {str(e)}")
-        return render_template('user/movies.html', error=str(e))
+        template = get_template_path('movies.html')
+        return render_template(template, error=str(e))
 
 
 @users_bp.route('/series', methods=['GET'])
@@ -1007,15 +1089,18 @@ def series_page():
         activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
-            return render_template('user/series.html', error='Subscription expired')
+            template = get_template_path('series.html')
+            return render_template(template, error='Subscription expired')
         
         log_user_action(device.user_id, 'SERIES_VIEWED', 'فتح صفحة Series')
         
-        return render_template('user/series.html')
+        template = get_template_path('series.html')
+        return render_template(template, device=device)
     
     except Exception as e:
         print(f"❌ خطأ في صفحة Series: {str(e)}")
-        return render_template('user/series.html', error=str(e))
+        template = get_template_path('series.html')
+        return render_template(template, error=str(e))
 
 
 #=============================================================

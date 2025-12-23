@@ -130,7 +130,6 @@ def dashboard():
     return render_template('reseller/dashboard.html', reseller=reseller, stats=stats)
 
 
-
 @reseller_bp.route('/activatecode')
 def activate_code():
     """صفحة لوحة تحكم الموزع"""
@@ -146,6 +145,131 @@ def activate_code():
     return render_template('reseller/activate-code.html', reseller=reseller)
 
 
+@reseller_bp.route('/profile')
+def profile():
+    """صفحة ملف الموزع الشخصي"""
+    if 'reseller_id' not in session:
+        return redirect(url_for('reseller.login'))
+    
+    # الحصول على بيانات الموزع من قاعدة البيانات
+    reseller = Reseller.query.get(session['reseller_id'])
+    if not reseller:
+        session.clear()
+        return redirect(url_for('reseller.login'))
+    
+    return render_template('reseller/profile.html', reseller=reseller)
+
+
+@reseller_bp.route('/users')
+def users():
+    """صفحة إدارة المستخدمين للموزع"""
+    if 'reseller_id' not in session:
+        return redirect(url_for('reseller.login'))
+    
+    reseller = Reseller.query.get(session['reseller_id'])
+    if not reseller:
+        session.clear()
+        return redirect(url_for('reseller.login'))
+    
+    # جلب المستخدمين الخاصين بالموزع وبيانات اشتراكاتهم
+    users_list = User.query.filter_by(reseller_id=session['reseller_id']).all()
+    users = []
+    
+    for user in users_list:
+        # جلب آخر كود تفعيل للمستخدم
+        latest_code = ActivationCode.query.filter_by(
+            assigned_user_id=user.id
+        ).order_by(ActivationCode.created_at.desc()).first()
+        
+        users.append({
+            'id': user.id,
+            'username': user.username,
+            'created_at': user.created_at.isoformat() if user.created_at else None,
+            'expiration_date': latest_code.expiration_date.strftime('%Y-%m-%d') if latest_code and latest_code.expiration_date else None,
+            'activation_code': latest_code.code if latest_code else None
+        })
+    
+    return render_template('reseller/users.html', reseller=reseller, users=users)
+
+
+@reseller_bp.route('/DeviceActivation')
+def device_activation():
+    """صفحة إدارة أجهزة الموزع"""
+    if 'reseller_id' not in session:
+        return redirect(url_for('reseller.login'))
+
+    # الحصول على بيانات الموزع من قاعدة البيانات
+    reseller = Reseller.query.get(session['reseller_id'])
+    if not reseller:
+        session.clear()
+        return redirect(url_for('reseller.login'))
+
+    # جلب جميع المستخدمين الخاصين بالموزع
+    users = User.query.filter_by(reseller_id=session['reseller_id']).all()
+    
+    # جلب جميع الأجهزة المرتبطة بمستخدمي هذا الموزع
+    devices_data = []
+    for user in users:
+        devices = Device.query.filter_by(user_id=user.id, is_deleted=False).all()
+        
+        for device in devices:
+            # الحصول على آخر كود تفعيل للمستخدم
+            latest_code = ActivationCode.query.filter_by(
+                assigned_user_id=user.id
+            ).order_by(ActivationCode.created_at.desc()).first()
+            
+            devices_data.append({
+                'id': device.id,  # معرف الجهاز في قاعدة البيانات
+                'device_id': device.device_uid,  # معرف الجهاز الفريد
+                'user_id': user.id,
+                'user_name': user.username,
+                'user_email': user.username,
+                'platform': device.device_type or 'Unknown',
+                'device_type': device.device_type or 'Unknown',
+                'last_login': device.last_login_at.strftime('%Y-%m-%d %H:%M') if device.last_login_at else 'Never',
+                'last_ip': device.last_ip or 'N/A',
+                'is_active': device.is_active,
+                'status': 'Active' if device.is_active else 'Blocked',
+                'first_login': device.first_login_at.strftime('%Y-%m-%d %H:%M') if device.first_login_at else 'N/A',
+                'activation_code': latest_code.code if latest_code else 'N/A'
+            })
+
+    return render_template('reseller/devices.html', reseller=reseller, devices=devices_data)
+
+
+@reseller_bp.route('/reports')
+def reports():
+    """صفحة تقارير الموزع"""
+    if 'reseller_id' not in session:
+        return redirect(url_for('reseller.login'))
+    
+    # الحصول على بيانات الموزع من قاعدة البيانات
+    reseller = Reseller.query.get(session['reseller_id'])
+    if not reseller:
+        session.clear()
+        return redirect(url_for('reseller.login'))
+    
+    return render_template('reseller/reports.html', reseller=reseller)
+
+
+
+@reseller_bp.route('/subaccounts')
+def subaccounts():
+    """صفحة إدارة الحسابات الفرعية للموزع"""
+    if 'reseller_id' not in session:
+        return redirect(url_for('reseller.login'))
+
+    # الحصول على بيانات الموزع من قاعدة البيانات
+    reseller = Reseller.query.get(session['reseller_id'])
+    if not reseller:
+        session.clear()
+        return redirect(url_for('reseller.login'))
+
+    return render_template('reseller/subaccounts.html', reseller=reseller)
+
+# ============================================================================
+# 🔐 نظام تسجيل دخول الموزعين وإدارة الجلسات
+# ============================================================================
 
 @reseller_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -261,6 +385,11 @@ def setup_pin():
     
     return render_template('reseller/setup_pin.html', reseller=reseller)
 
+
+#===========================================================================
+# 📦 API لنظام إدارة الموزعين
+#===========================================================================
+
 @reseller_bp.route('/api/my-codes', methods=['GET'])
 def get_activation_codes():
     """الحصول على أكواد التفعيل الخاصة بالموزع"""
@@ -307,10 +436,168 @@ def get_activation_codes():
         'count': len(codes_data)
     }), 200
 
-@reseller_bp.route('/api/my-users', methods=['GET'])
-def get_users():
-    """الحصول على المستخدمين الخاصين بالموزع"""
-    return jsonify([])
+@reseller_bp.route('/api/users/<int:user_id>', methods=['GET'])
+def get_user_detail(user_id):
+    """الحصول على تفاصيل مستخدم معين"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        user = User.query.filter_by(id=user_id, reseller_id=session['reseller_id']).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        latest_code = ActivationCode.query.filter_by(assigned_user_id=user.id).order_by(
+            ActivationCode.created_at.desc()).first()
+        
+        devices = Device.query.filter_by(user_id=user.id).all()
+        
+        # حساب حالة الاشتراك
+        now = datetime.now(timezone.utc)
+        is_active = False
+        expiration_date = None
+        plan_type = 'Inactive'
+        
+        if latest_code:
+            expiration_date = latest_code.expiration_date.isoformat() if latest_code.expiration_date else None
+            if latest_code.is_lifetime:
+                plan_type = 'مدى الحياة'
+                is_active = True
+            elif latest_code.expiration_date and not safe_datetime_compare(latest_code.expiration_date, now):
+                plan_type = 'Yearly'
+                is_active = True
+            else:
+                plan_type = 'Expired'
+                is_active = False
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'id': user.id,
+                'username': user.username,
+                'created_at': user.created_at.isoformat() if user.created_at else None,
+                'activation_code': latest_code.code if latest_code else None,
+                'expiration_date': expiration_date,
+                'plan_type': plan_type,
+                'is_active': is_active,
+                'max_devices': latest_code.max_devices if latest_code else 1,
+                'devices': [{
+                    'id': d.id,
+                    'device_uid': d.device_uid,
+                    'device_type': d.device_type,
+                    'is_active': d.is_active,
+                    'last_login': d.last_login_at.isoformat() if d.last_login_at else None
+                } for d in devices]
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/users/<int:user_id>/suspend', methods=['POST'])
+def suspend_user(user_id):
+    """إيقاف مستخدم"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        user = User.query.filter_by(id=user_id, reseller_id=session['reseller_id']).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        # إلغاء تفعيل أكواد المستخدم
+        codes = ActivationCode.query.filter_by(assigned_user_id=user.id).all()
+        for code in codes:
+            code.expiration_date = datetime.now(timezone.utc)
+        
+        # إلغاء تفعيل الأجهزة
+        devices = Device.query.filter_by(user_id=user.id).all()
+        for device in devices:
+            device.is_active = False
+        
+        db.session.commit()
+        
+        # تسجيل الإجراء
+        log_reseller_action(session['reseller_id'], f"Suspended user {user.username}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'User suspended successfully'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/users/<int:user_id>/change-password', methods=['POST'])
+def change_user_password(user_id):
+    """تغيير كلمة مرور المستخدم (يتم من خلال اعادة تفعيل)"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        user = User.query.filter_by(id=user_id, reseller_id=session['reseller_id']).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        # في هذا النظام، لا يوجد كلمة مرور للمستخدمين
+        # لكن يمكننا إرسال كود تفعيل جديد
+        
+        data = request.get_json()
+        new_code = data.get('new_code')
+        
+        if not new_code:
+            return jsonify({'success': False, 'message': 'New code required'}), 400
+        
+        # التحقق من أن الكود موجود وملك للموزع
+        code = ActivationCode.query.filter_by(
+            code=new_code,
+            reseller_id=session['reseller_id']
+        ).first()
+        
+        if not code:
+            return jsonify({'success': False, 'message': 'Invalid code'}), 400
+        
+        # تعيين الكود الجديد
+        code.assigned_user_id = user.id
+        code.activated_at = datetime.now(timezone.utc)
+        db.session.commit()
+        
+        log_reseller_action(session['reseller_id'], f"Assigned new code to user {user.username}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Code assigned successfully'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/users/<int:user_id>/delete', methods=['DELETE'])
+def delete_user(user_id):
+    """حذف مستخدم"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        user = User.query.filter_by(id=user_id, reseller_id=session['reseller_id']).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        username = user.username
+        db.session.delete(user)
+        db.session.commit()
+        
+        log_reseller_action(session['reseller_id'], f"Deleted user {username}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'User deleted successfully'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @reseller_bp.route('/api/profile', methods=['GET'])
@@ -627,7 +914,7 @@ def activate_code_api():
     if device_activation_code.is_used:
         return jsonify({'success': False, 'message': '❌ Activation code has already been used'}), 400
     
-    # التحقق: منتهي الصلاحية
+    # التحقق: Expired
     now = datetime.now(timezone.utc)
     if device_activation_code.expires_at and safe_datetime_compare(device_activation_code.expires_at, now):
         return jsonify({'success': False, 'message': '❌ Activation code has expired'}), 400
@@ -962,19 +1249,19 @@ def get_yearly_analytics(reseller_id, now):
 
 
 # ============================================================================
-# 📊 API لجلب نسبة الاشتراكات السنوية والمدى الحياة
+# 📊 API لجلب نسبة الاشتراكات الYearlyة والمدى الحياة
 # ============================================================================
 
 @reseller_bp.route('/api/subscription-types', methods=['GET'])
 def get_subscription_types():
-    """جلب نسبة الاشتراكات السنوية والمدى الحياة"""
+    """جلب نسبة الاشتراكات الYearlyة والمدى الحياة"""
     if 'reseller_id' not in session:
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
     reseller_id = session['reseller_id']
     
     try:
-        # عدد الاشتراكات السنوية
+        # عدد الاشتراكات الYearlyة
         yearly_subs = ActivationCode.query.filter(
             ActivationCode.reseller_id == reseller_id,
             ActivationCode.is_lifetime == False
@@ -1292,4 +1579,168 @@ def add_ticket_message(ticket_id):
     
     except Exception as e:
         db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ============================================================================
+# 🖥️ Device Management APIs
+# ============================================================================
+
+@reseller_bp.route('/api/devices/<int:device_id>/block', methods=['POST'])
+def block_device(device_id):
+    """حجب جهاز معين"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        device = Device.query.get(device_id)
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # التحقق من أن الجهاز يتبع موزع العاملية الحالية
+        user = User.query.get(device.user_id)
+        if not user or user.reseller_id != session['reseller_id']:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        # تحديث حالة الجهاز
+        device.is_active = False
+        db.session.commit()
+        
+        # تسجيل العملية
+        log_reseller_action(
+            reseller_id=session['reseller_id'],
+            action='block_device',
+            description=f'Blocked device {device.device_uid}',
+            resource_type='device',
+            resource_id=device.id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Device blocked successfully'
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/devices/<int:device_id>/unblock', methods=['POST'])
+def unblock_device(device_id):
+    """إلغاء حجب جهاز معين"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        device = Device.query.get(device_id)
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # التحقق من أن الجهاز يتبع موزع العاملية الحالية
+        user = User.query.get(device.user_id)
+        if not user or user.reseller_id != session['reseller_id']:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        # تحديث حالة الجهاز
+        device.is_active = True
+        db.session.commit()
+        
+        # تسجيل العملية
+        log_reseller_action(
+            reseller_id=session['reseller_id'],
+            action='unblock_device',
+            description=f'Unblocked device {device.device_uid}',
+            resource_type='device',
+            resource_id=device.id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Device unblocked successfully'
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/devices/<int:device_id>/remove', methods=['DELETE'])
+def remove_device(device_id):
+    """إزالة جهاز معين (عملية حذف منطقي)"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        device = Device.query.get(device_id)
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # التحقق من أن الجهاز يتبع موزع العاملية الحالية
+        user = User.query.get(device.user_id)
+        if not user or user.reseller_id != session['reseller_id']:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        # حذف منطقي
+        device.is_deleted = True
+        db.session.commit()
+        
+        # تسجيل العملية
+        log_reseller_action(
+            reseller_id=session['reseller_id'],
+            action='remove_device',
+            description=f'Removed device {device.device_uid}',
+            resource_type='device',
+            resource_id=device.id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Device removed successfully'
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/devices/<int:device_id>', methods=['GET'])
+def get_device_detail(device_id):
+    """الحصول على تفاصيل جهاز معين"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        device = Device.query.get(device_id)
+        if not device:
+            return jsonify({'success': False, 'message': 'Device not found'}), 404
+        
+        # التحقق من أن الجهاز يتبع موزع العاملية الحالية
+        user = User.query.get(device.user_id)
+        if not user or user.reseller_id != session['reseller_id']:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+        
+        latest_code = ActivationCode.query.filter_by(
+            assigned_user_id=user.id
+        ).order_by(ActivationCode.created_at.desc()).first()
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'id': device.id,
+                'device_uid': device.device_uid,
+                'user_id': user.id,
+                'username': user.username,
+                'device_type': device.device_type or 'Unknown',
+                'last_login': device.last_login_at.isoformat() if device.last_login_at else None,
+                'last_ip': device.last_ip or 'N/A',
+                'is_active': device.is_active,
+                'is_deleted': device.is_deleted,
+                'first_login': device.first_login_at.isoformat() if device.first_login_at else None,
+                'media_link': device.media_link or '',
+                'activation_code': latest_code.code if latest_code else 'N/A',
+                'created_at': device.created_at.isoformat() if device.created_at else None
+            }
+        }), 200
+    
+    except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500

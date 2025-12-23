@@ -1,0 +1,333 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-image: url('https://i.pinimg.com/736x/19/8b/2f/198b2f01e73b905772279616eccc7c65.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: rgb(248, 250, 252);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* ============ LOGIN CONTAINER ============ */
+.login-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: max(env(safe-area-inset-top), 12px) 0 0 0;
+}
+
+/* ============ LOGIN HEADER ============ */
+.login-header {
+    padding: 20px 16px;
+    text-align: center;
+}
+
+.logo-badge {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(88, 28, 135, 0.2) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.logo-badge svg {
+    width: 40px;
+    height: 40px;
+}
+
+.login-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.1em;
+}
+
+/* ============ LOGIN MAIN ============ */
+.login-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ============ ACTIVATION CARD ============ */
+.activation-card {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px 16px;
+    backdrop-filter: blur(8px);
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.card-subtitle {
+    font-size: 13px;
+    color: rgb(148, 163, 184);
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+/* ============ DEVICE INFO SECTION ============ */
+.device-info-section {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 12px;
+    color: rgb(148, 163, 184);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    font-family: 'Courier New', monospace;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.info-value.code-display {
+    letter-spacing: 0.2em;
+    font-size: 14px;
+}
+
+.info-value.timer {
+    color: rgb(59, 130, 246);
+    font-size: 16px;
+}
+
+/* ============ LOGIN FORM ============ */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.activate-button {
+    width: 100%;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.activate-button:active {
+    transform: scale(0.98);
+}
+
+.activate-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.activate-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    border-radius: 8px;
+    color: rgb(252, 165, 165);
+    padding: 10px 12px;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ============ QR CODE SECTION ============ */
+.qr-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 16px;
+    text-align: center;
+}
+
+.qr-label {
+    font-size: 12px;
+    color: rgb(148, 163, 184);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+}
+
+.qr-box {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    color: rgb(148, 163, 184);
+}
+
+.qr-box svg {
+    width: 100px;
+    height: 100px;
+}
+
+.qr-info {
+    font-size: 12px;
+    color: rgb(148, 163, 184);
+    margin-bottom: 0;
+}
+
+.qr-info strong {
+    color: rgb(147, 197, 253);
+    font-weight: 600;
+}
+
+/* ============ TERMS ============ */
+.terms-text {
+    font-size: 11px;
+    color: rgb(100, 116, 139);
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 320px) {
+    .activation-card {
+        padding: 16px 12px;
+    }
+
+    .card-title {
+        font-size: 18px;
+    }
+
+    .activate-button {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+
+    .info-value {
+        font-size: 12px;
+    }
+
+    .qr-box {
+        width: 100px;
+        height: 100px;
+    }
+
+    .qr-box svg {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+@media (min-width: 480px) {
+    .activation-card {
+        padding: 32px 24px;
+    }
+
+    .card-title {
+        font-size: 24px;
+    }
+
+    .activate-button {
+        padding: 16px 20px;
+        font-size: 15px;
+    }
+
+    .qr-box {
+        width: 150px;
+        height: 150px;
+    }
+
+    .qr-box svg {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* ============ DARK MODE ============ */
+@media (prefers-color-scheme: dark) {
+    body {
+        color-scheme: dark;
+    }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

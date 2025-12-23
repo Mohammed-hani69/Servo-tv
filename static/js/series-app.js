@@ -1,11 +1,11 @@
 /**
  * 📺 Series Module
  * 
- * إدارة صفحة المسلسلات مع:
- * - عرض قائمة المسلسلات
- * - المواسم والحلقات
- * - التشغيل المباشر
- * - المفضلة
+ * Manage series page with:
+ * - Display series list
+ * - Seasons and episodes
+ * - Direct playback
+ * - Favorites
  */
 
 class SeriesApp {
@@ -21,29 +21,34 @@ class SeriesApp {
     }
 
     /**
-     * التهيئة
+     * Initialize
      */
     async init() {
-        console.log('📺 بدء تهيئة Series...');
+        console.log('Initializing Series...');
         
         try {
-            // تهيئة مدير البث
+            // Initialize streaming manager
             this.streamingManager = new StreamingManager();
             await this.streamingManager.init();
             
-            // جلب المسلسلات من IPTV
+            // Get series from IPTV
             this.allSeries = this.streamingManager.getContentByType('series');
             this.filteredSeries = [...this.allSeries];
             
-            console.log(`✅ تم تحميل ${this.allSeries.length} مسلسل`);
+            console.log(`Loaded ${this.allSeries.length} series`);
             
-            // عرض الواجهة
+            // If no series available, log available content types for debugging
+            if (this.allSeries.length === 0) {
+                console.warn('No series found in content. Available movies: ' + this.streamingManager.getContentByType('movies').length);
+                console.warn('Available live-tv: ' + this.streamingManager.getContentByType('live-tv').length);
+            }
+            
+            // Render interface
             this.render();
-            this.setupEventListeners();
             
         } catch (error) {
-            console.error('❌ خطأ في التهيئة:', error);
-            this.showError('فشل تحميل المسلسلات');
+            console.error('Error initializing series:', error);
+            this.showError('Failed to load series');
         }
     }
 
@@ -56,7 +61,7 @@ class SeriesApp {
     }
 
     /**
-     * عرض الفئات
+     * Display categories
      */
     renderCategories() {
         const filterContainer = document.querySelector('.category-filter');
@@ -66,7 +71,7 @@ class SeriesApp {
         
         let html = `
             <button class="category-btn tv-focus ${this.currentCategory === 'all' ? 'active' : ''}" data-category="all">
-                الكل (${this.allSeries.length})
+                All (${this.allSeries.length})
             </button>
         `;
         
@@ -83,16 +88,34 @@ class SeriesApp {
     }
 
     /**
-     * عرض المسلسلات
+     * Display series
      */
     renderSeries() {
-        const container = document.querySelector('.series-container') || 
-                         document.querySelector('main');
-        
-        if (!container) return;
+        let seriesContainer = document.querySelector('.series-list-container');
+        if (!seriesContainer) {
+            const mainContent = document.querySelector('main .content') || document.querySelector('main');
+            if (!mainContent) return;
+            seriesContainer = document.createElement('div');
+            seriesContainer.className = 'series-list-container';
+            mainContent.appendChild(seriesContainer);
+        }
         
         if (this.filteredSeries.length === 0) {
-            container.innerHTML = '<div class="no-content">لا توجد مسلسلات</div>';
+            seriesContainer.innerHTML = `
+                <div class="no-content" style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 400px;
+                    text-align: center;
+                    color: #aaa;
+                ">
+                    <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.5;">📺</div>
+                    <h2 style="margin: 0 0 10px 0; font-size: 24px;">No Series Found</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.7;">No series match your current filter</p>
+                </div>
+            `;
             return;
         }
         
@@ -239,24 +262,45 @@ class SeriesApp {
     }
 
     /**
-     * إعداد Event Listeners
+     * Setup event listeners
      */
     setupEventListeners() {
-        // تصفية حسب الفئة
+        // Filter by category
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const category = e.target.dataset.category;
+                const category = e.target.closest('.category-btn').dataset.category;
                 this.filterByCategory(category);
             });
         });
         
-        // البحث
+        // Search
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 this.search(e.target.value);
             });
         }
+        
+        // Play buttons
+        document.querySelectorAll('.play-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const seriesId = btn.dataset.seriesId;
+                const series = this.allSeries.find(s => s.id === seriesId);
+                if (series) {
+                    this.playEpisode(series, 1);
+                }
+            });
+        });
+        
+        // Expand buttons
+        document.querySelectorAll('.expand-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const seriesId = btn.closest('[data-series-id]').dataset.seriesId;
+                this.toggleSeasons(seriesId);
+            });
+        });
     }
 
     /**
@@ -312,6 +356,9 @@ class SeriesApp {
         try {
             console.log(`▶️ تشغيل: ${series.name} - الحلقة ${episodeNumber}`);
             
+            // Record as watched
+            this.recordWatched(series);
+            
             // إغلاق أي player موجود
             this.closePlayer();
             
@@ -326,6 +373,42 @@ class SeriesApp {
         } catch (error) {
             console.error('❌ خطأ في التشغيل:', error);
             this.showError('فشل التشغيل. يرجى المحاولة مرة أخرى.');
+        }
+    }
+
+    /**
+     * تسجيل المسلسل كمشاهد
+     */
+    recordWatched(series) {
+        try {
+            const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+            
+            // Remove if already exists
+            const filtered = watched.filter(w => w.id !== series.id);
+            
+            // Add to front
+            const item = {
+                id: series.id,
+                name: series.name,
+                logo: series.logo,
+                group: series.group,
+                type: 'series',
+                streamUrl: series.streamUrl,
+                timestamp: Date.now(),
+                progress: 0
+            };
+            
+            filtered.unshift(item);
+            
+            // Keep only last 50
+            filtered.splice(50);
+            
+            // Save to localStorage
+            localStorage.setItem('watched_items', JSON.stringify(filtered));
+            
+            console.log('✅ تم تسجيل المشاهدة');
+        } catch (error) {
+            console.warn('⚠️ خطأ في تسجيل المشاهدة:', error);
         }
     }
 

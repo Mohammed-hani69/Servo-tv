@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Servo - User Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../static/css/user/dashboard.css">
     
@@ -34,7 +35,7 @@
                 <div class="card-grid">
                     <!-- Live TV Card -->
                     <button class="card blue">
-                        <img src="https://images.unsplash.com/photo-1593784991095-a20506948430?q=80&w=800" alt="Live TV" class="card-img">
+                        <svg class="card-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" /><stop offset="100%" style="stop-color:#0c4a6e;stop-opacity:1" /></linearGradient></defs><rect width="400" height="225" fill="url(#grad1)"/><text x="200" y="100" font-size="24" fill="white" font-weight="bold" text-anchor="middle" dy=".3em">Live TV</text></svg>
                         <div class="card-content">
                             <div class="card-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -44,7 +45,7 @@
                             </div>
                             <h3 class="card-title">Live TV</h3>
                             <p class="card-subtitle">
-                                section_enter
+                                section enter
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="m9 18 6-6-6-6"></path>
                                 </svg>
@@ -54,7 +55,7 @@
 
                     <!-- Movies Card -->
                     <button class="card purple">
-                        <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=800" alt="Movies" class="card-img">
+                        <svg class="card-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225"><defs><linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" /><stop offset="100%" style="stop-color:#4c1d95;stop-opacity:1" /></linearGradient></defs><rect width="400" height="225" fill="url(#grad2)"/><text x="200" y="100" font-size="24" fill="white" font-weight="bold" text-anchor="middle" dy=".3em">Movies</text></svg>
                         <div class="card-content">
                             <div class="card-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -80,7 +81,7 @@
 
                     <!-- Series Card -->
                     <button class="card emerald">
-                        <img src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=800" alt="Series" class="card-img">
+                        <svg class="card-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225"><defs><linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#059669;stop-opacity:1" /><stop offset="100%" style="stop-color:#064e3b;stop-opacity:1" /></linearGradient></defs><rect width="400" height="225" fill="url(#grad3)"/><text x="200" y="100" font-size="24" fill="white" font-weight="bold" text-anchor="middle" dy=".3em">Series</text></svg>
                         <div class="card-content">
                             <div class="card-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -100,7 +101,7 @@
 
                     <!-- Playlists Card -->
                     <button class="card orange">
-                        <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800" alt="Playlists" class="card-img">
+                        <svg class="card-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225"><defs><linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#f97316;stop-opacity:1" /><stop offset="100%" style="stop-color:#92400e;stop-opacity:1" /></linearGradient></defs><rect width="400" height="225" fill="url(#grad4)"/><text x="200" y="100" font-size="24" fill="white" font-weight="bold" text-anchor="middle" dy=".3em">Playlists</text></svg>
                         <div class="card-content">
                             <div class="card-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -126,50 +127,32 @@
                 <section class="section">
                     <div class="section-header">
                         <div class="section-line blue"></div>
-                        <h2 class="section-title">continue_watching</h2>
+                        <h2 class="section-title">Recently Watched Movies</h2>
                     </div>
-                    <div class="carousel">
-                        <button class="carousel-item">
-                            <img src="https://picsum.photos/400/225?random=11" alt="Show" class="carousel-item-img">
-                            <div class="carousel-overlay">
-                                <div class="play-button">
-                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill"></div>
-                            </div>
-                        </button>
+                    <div class="carousel" id="moviesCarousel">
+                        <div class="empty-state">No movies watched yet</div>
+                    </div>
+                </section>
 
-                        <button class="carousel-item">
-                            <img src="https://picsum.photos/400/225?random=12" alt="Show" class="carousel-item-img">
-                            <div class="carousel-overlay">
-                                <div class="play-button">
-                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill"></div>
-                            </div>
-                        </button>
+                <!-- SERIES WATCHING SECTION -->
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-line green"></div>
+                        <h2 class="section-title">Recently Watched Series</h2>
+                    </div>
+                    <div class="carousel" id="seriesCarousel">
+                        <div class="empty-state">No series watched yet</div>
+                    </div>
+                </section>
 
-                        <button class="carousel-item">
-                            <img src="https://picsum.photos/400/225?random=13" alt="Show" class="carousel-item-img">
-                            <div class="carousel-overlay">
-                                <div class="play-button">
-                                    <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
-                                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill"></div>
-                            </div>
-                        </button>
+                <!-- CONTINUE WATCHING SECTION -->
+                <section class="section">
+                    <div class="section-header">
+                        <div class="section-line red"></div>
+                        <h2 class="section-title" id="continue-title">continue_watching</h2>
+                    </div>
+                    <div class="carousel" id="continueCarousel">
+                        <div class="empty-state">No items watched</div>
                     </div>
                 </section>
 
@@ -177,104 +160,704 @@
                 <section class="section">
                     <div class="section-header">
                         <div class="section-line yellow"></div>
-                        <h2 class="section-title">recently_added</h2>
+                        <h2 class="section-title" id="favorites-title">my_favorites</h2>
                     </div>
-                    <div class="item-grid">
-                        <button class="grid-item">
-                            <div class="grid-item-img-container">
-                                <img src="https://picsum.photos/300/450?random=21" alt="Movie" class="grid-item-img">
-                                <div class="grid-item-badge">new_badge</div>
-                            </div>
-                            <div class="grid-item-info">
-                                <div class="grid-item-title">New Movie 1</div>
-                                <div class="grid-item-meta">2024 • Action</div>
-                            </div>
-                        </button>
-
-                        <button class="grid-item">
-                            <div class="grid-item-img-container">
-                                <img src="https://picsum.photos/300/450?random=22" alt="Movie" class="grid-item-img">
-                                <div class="grid-item-badge">new_badge</div>
-                            </div>
-                            <div class="grid-item-info">
-                                <div class="grid-item-title">New Movie 2</div>
-                                <div class="grid-item-meta">2024 • Action</div>
-                            </div>
-                        </button>
-
-                        <button class="grid-item">
-                            <div class="grid-item-img-container">
-                                <img src="https://picsum.photos/300/450?random=23" alt="Movie" class="grid-item-img">
-                                <div class="grid-item-badge">new_badge</div>
-                            </div>
-                            <div class="grid-item-info">
-                                <div class="grid-item-title">New Movie 3</div>
-                                <div class="grid-item-meta">2024 • Action</div>
-                            </div>
-                        </button>
-
-                        <button class="grid-item">
-                            <div class="grid-item-img-container">
-                                <img src="https://picsum.photos/300/450?random=24" alt="Movie" class="grid-item-img">
-                                <div class="grid-item-badge">new_badge</div>
-                            </div>
-                            <div class="grid-item-info">
-                                <div class="grid-item-title">New Movie 4</div>
-                                <div class="grid-item-meta">2024 • Action</div>
-                            </div>
-                        </button>
-
-                        <button class="grid-item">
-                            <div class="grid-item-img-container">
-                                <img src="https://picsum.photos/300/450?random=25" alt="Movie" class="grid-item-img">
-                                <div class="grid-item-badge">new_badge</div>
-                            </div>
-                            <div class="grid-item-info">
-                                <div class="grid-item-title">New Movie 5</div>
-                                <div class="grid-item-meta">2024 • Action</div>
-                            </div>
-                        </button>
+                    <div class="item-grid" id="favoritesGrid">
+                        <div class="empty-state">No favorite items</div>
                     </div>
                 </section>
             </div>
         </main>
     </div>
 
+    <script src="../../static/js/streaming-manager.js"></script>
     <script>
-        // Display logged-in username
-        function displayUsername() {
-            const username = sessionStorage.getItem('username') || 'Guest';
-            document.getElementById('username-display').textContent = username;
+        // ============================================
+        // Dashboard Manager
+        // ============================================
+        class DashboardManager {
+            constructor() {
+                this.streamingManager = null;
+                this.watchedItems = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                this.favoriteItems = JSON.parse(localStorage.getItem('favorite_items') || '[]');
+                this.currentSection = 'movies'; // Default section
+                
+                this.init();
+            }
+
+            async init() {
+                console.log('🎬 بدء تهيئة لوحة التحكم...');
+                try {
+                    // Initialize streaming manager
+                    this.streamingManager = new StreamingManager();
+                    await this.streamingManager.init();
+
+                    // Display username and time
+                    this.displayUsername();
+                    this.updateClock();
+                    setInterval(() => this.updateClock(), 1000);
+
+                    // Setup card listeners BEFORE loading content
+                    this.setupCardListeners();
+
+                    // Load initial content (Movies)
+                    this.loadSectionContent('movies');
+
+                    // Display separate Movies and Series sections
+                    this.displayMoviesSection();
+                    this.displaySeriesSection();
+
+                    console.log('✅ تم تهيئة لوحة التحكم بنجاح');
+
+                } catch (error) {
+                    console.error('❌ خطأ في تهيئة لوحة التحكم:', error);
+                }
+            }
+
+            /**
+             * Setup card click listeners
+             */
+            setupCardListeners() {
+                const cards = document.querySelectorAll('.card');
+                const pageMap = {
+                    'Live TV': '/live-tv',
+                    'Movies': '/movies',
+                    'Series': '/series',
+                    'my_playlists': '/my-list',
+                };
+
+                cards.forEach(card => {
+                    // Add hover effect
+                    card.addEventListener('mouseenter', () => {
+                        card.style.transition = 'all 0.3s ease';
+                    });
+
+                    // Click handler
+                    card.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const title = card.querySelector('.card-title').textContent.trim();
+                        const page = pageMap[title] || '/movies';
+                        
+                        // Add active state and loading effect
+                        cards.forEach(c => c.classList.remove('active'));
+                        card.classList.add('active');
+                        card.style.opacity = '0.8';
+                        
+                        // Add loading indicator
+                        const originalContent = card.innerHTML;
+                        card.innerHTML = `
+                            <div style="position: relative; z-index: 21; display: flex; align-items: center; justify-content: center; height: 100%;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                    <span style="color: white; font-size: 14px;">جاري التحميل...</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        console.log(`🎯 الانتقال إلى: ${title}`);
+                        console.log(`📍 URL: ${page}`);
+                        
+                        // Navigate to the page
+                        setTimeout(() => {
+                            window.location.href = page;
+                        }, 500);
+                    });
+                });
+
+                // Set Movies as default active
+                const defaultCard = Array.from(cards).find(c => 
+                    c.querySelector('.card-title').textContent.trim() === 'Movies'
+                );
+                if (defaultCard) {
+                    defaultCard.classList.add('active');
+                }
+            }
+
+            /**
+             * Load content for a section
+             */
+            async loadSectionContent(section) {
+                console.log(`📂 جاري تحميل قسم: ${section}`);
+                this.currentSection = section;
+
+                // Get content by type
+                const contentList = this.streamingManager.getContentByType(section);
+                
+                // Get watched items for this section
+                const watchedForSection = this.watchedItems.filter(item => 
+                    section === 'playlists' ? item.type === 'playlists' : item.type === section
+                );
+                
+                // Get favorites for this section
+                const favoritesForSection = this.favoriteItems.filter(item => 
+                    section === 'playlists' ? item.type === 'playlists' : item.type === section
+                );
+
+                // Sort watched by timestamp (newest first)
+                watchedForSection.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                // Render sections
+                this.renderContinueWatching(watchedForSection);
+                this.renderFavorites(favoritesForSection);
+
+                // Update section title
+                this.updateSectionTitles(section);
+            }
+
+            /**
+             * Render continue watching section
+             */
+            renderContinueWatching(watched) {
+                const carousel = document.getElementById('continueCarousel');
+                carousel.innerHTML = '';
+
+                if (watched.length === 0) {
+                    carousel.innerHTML = '<div class="empty-state">No content watched</div>';
+                    return;
+                }
+
+                // Show only last 5
+                watched.slice(0, 5).forEach(item => {
+                    const itemEl = document.createElement('button');
+                    itemEl.className = 'carousel-item';
+                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                    itemEl.innerHTML = `
+                        <img src="${item.logo || placeholderSvg}" 
+                             alt="${item.name}" class="carousel-item-img" loading="lazy">
+                        <div class="carousel-overlay">
+                            <div class="play-button">
+                                <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${item.progress || 0}%"></div>
+                        </div>
+                    `;
+
+                    // Add image error handler
+                    const img = itemEl.querySelector('.carousel-item-img');
+                    if (img && item.logo) {
+                        img.addEventListener('error', function onImageError() {
+                            if (this.src !== placeholderSvg) {
+                                this.src = placeholderSvg;
+                                this.style.backgroundColor = '#222';
+                            }
+                        }, { once: false });
+                    }
+
+                    itemEl.addEventListener('click', () => {
+                        this.playContent(item);
+                    });
+
+                    carousel.appendChild(itemEl);
+                });
+            }
+
+            /**
+             * Render favorites section
+             */
+            renderFavorites(favorites) {
+                const grid = document.getElementById('favoritesGrid');
+                grid.innerHTML = '';
+
+                if (favorites.length === 0) {
+                    grid.innerHTML = '<div class="empty-state">No items were added to the favorites.</div>';
+                    return;
+                }
+
+                // Show only first 6
+                favorites.slice(0, 6).forEach(item => {
+                    const itemEl = document.createElement('button');
+                    itemEl.className = 'grid-item';
+                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23222' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                    itemEl.innerHTML = `
+                        <div class="grid-item-img-container">
+                            <img src="${item.logo || placeholderSvg}" 
+                                 alt="${item.name}" class="grid-item-img" loading="lazy">
+                            <div class="grid-item-badge">⭐</div>
+                        </div>
+                        <div class="grid-item-info">
+                            <div class="grid-item-title">${item.name || 'Unknown'}</div>
+                            <div class="grid-item-meta">${item.group || 'Movies'}</div>
+                        </div>
+                    `;
+
+                    // Add image error handler
+                    const img = itemEl.querySelector('.grid-item-img');
+                    if (img && item.logo) {
+                        img.addEventListener('error', function onImageError() {
+                            if (this.src !== placeholderSvg) {
+                                this.src = placeholderSvg;
+                                this.style.backgroundColor = '#222';
+                            }
+                        }, { once: false });
+                    }
+
+                    itemEl.addEventListener('click', () => {
+                        this.playContent(item);
+                    });
+
+                    grid.appendChild(itemEl);
+                });
+            }
+
+            /**
+             * Play content and record it as watched
+             */
+            playContent(item) {
+                console.log('▶️ تشغيل:', item.name);
+                
+                // Open player in a modal or new window
+                this.openPlayer(item);
+            }
+
+            /**
+             * Open player modal with resume capability
+             */
+            openPlayer(item) {
+                const modal = document.createElement('div');
+                modal.id = 'dashboard-player-modal';
+                modal.className = 'dashboard-player-modal';
+                
+                // Get saved playback position
+                const startTime = item.currentTime || 0;
+                const resumeMessage = startTime > 0 ? `⏱️ استئناف من الدقيقة ${Math.floor(startTime / 60)}:${String(Math.floor(startTime % 60)).padStart(2, '0')}` : '';
+                
+                modal.innerHTML = `
+                    <div class="player-content">
+                        <button class="player-close" type="button">✕</button>
+                        ${resumeMessage ? `<div class="resume-notification">${resumeMessage}</div>` : ''}
+                        <video id="dashboard-video-player" controls autoplay playsinline style="width: 100%; height: 100%; object-fit: contain;">
+                            <source src="${item.streamUrl}" type="application/x-mpegURL">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="player-info">
+                            <h2>${item.name}</h2>
+                            <p>${item.group || 'Content'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                this.injectPlayerStyles();
+                
+                // Set playback position after video loads
+                const video = document.getElementById('dashboard-video-player');
+                if (startTime > 0) {
+                    video.addEventListener('loadedmetadata', () => {
+                        video.currentTime = startTime;
+                        console.log('⏪ استئناف التشغيل من:', startTime, 'ثانية');
+                    }, { once: true });
+                }
+                
+                // Save playback position periodically
+                const saveInterval = setInterval(() => {
+                    if (!document.getElementById('dashboard-player-modal')) {
+                        clearInterval(saveInterval);
+                        return;
+                    }
+                    this.updateWatchedTime(item, video.currentTime, video.duration);
+                }, 5000);
+                
+                // Close button
+                modal.querySelector('.player-close').addEventListener('click', () => {
+                    clearInterval(saveInterval);
+                    this.recordWatchedFinal(item, video.currentTime, video.duration);
+                    this.closePlayer();
+                });
+                
+                // Close on Escape
+                const closeOnEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        clearInterval(saveInterval);
+                        this.recordWatchedFinal(item, video.currentTime, video.duration);
+                        this.closePlayer();
+                        document.removeEventListener('keydown', closeOnEscape);
+                    }
+                };
+                document.addEventListener('keydown', closeOnEscape);
+            }
+
+            /**
+             * Close player modal
+             */
+            closePlayer() {
+                const modal = document.getElementById('dashboard-player-modal');
+                if (modal) {
+                    const video = modal.querySelector('video');
+                    if (video) video.pause();
+                    modal.remove();
+                }
+            }
+
+            /**
+             * Update watched time without reloading
+             */
+            updateWatchedTime(item, currentTime, duration) {
+                try {
+                    const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                    const watchedItem = watched.find(w => w.id === item.id);
+                    
+                    if (watchedItem) {
+                        watchedItem.currentTime = currentTime;
+                        watchedItem.duration = duration;
+                        watchedItem.progress = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+                        watchedItem.timestamp = Date.now();
+                        
+                        localStorage.setItem('watched_items', JSON.stringify(watched));
+                    }
+                } catch (error) {
+                    console.warn('Error updating watched time:', error);
+                }
+            }
+
+            /**
+             * Record final watched state
+             */
+            recordWatchedFinal(item, currentTime, duration) {
+                try {
+                    const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                    const watchedItem = watched.find(w => w.id === item.id);
+                    
+                    if (watchedItem) {
+                        watchedItem.currentTime = currentTime;
+                        watchedItem.duration = duration;
+                        watchedItem.progress = duration > 0 ? Math.round((currentTime / duration) * 100) : 0;
+                        watchedItem.timestamp = Date.now();
+                        
+                        localStorage.setItem('watched_items', JSON.stringify(watched));
+                        console.log('Saved playback position at:', Math.floor(currentTime), 'seconds');
+                    }
+                } catch (error) {
+                    console.warn('Error recording watched item:', error);
+                }
+            }
+
+            /**
+             * Inject player styles
+             */
+            injectPlayerStyles() {
+                if (document.getElementById('dashboard-player-styles')) return;
+                
+                const style = document.createElement('style');
+                style.id = 'dashboard-player-styles';
+                style.textContent = `
+                    .dashboard-player-modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.95);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 9999;
+                    }
+                    
+                    .player-content {
+                        position: relative;
+                        width: 90%;
+                        height: 90%;
+                        background: #000;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    .player-close {
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        width: 40px;
+                        height: 40px;
+                        background: rgba(0, 0, 0, 0.7);
+                        border: none;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        border-radius: 50%;
+                        z-index: 10000;
+                    }
+                    
+                    .resume-notification {
+                        position: absolute;
+                        top: 60px;
+                        left: 20px;
+                        background: rgba(59, 130, 246, 0.9);
+                        color: white;
+                        padding: 12px 16px;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        z-index: 10001;
+                        animation: slideDown 0.3s ease-out;
+                    }
+                    
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                    
+                    .player-info {
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+                        padding: 20px;
+                        color: white;
+                    }
+                    
+                    .player-info h2 {
+                        margin: 0 0 5px 0;
+                        font-size: 18px;
+                    }
+                    
+                    .player-info p {
+                        margin: 0;
+                        opacity: 0.7;
+                        font-size: 14px;
+                    }
+                `;
+                
+                document.head.appendChild(style);
+            }
+
+            /**
+             * Record a watched item
+             */
+            recordWatched(item) {
+                const watched = {
+                    id: item.id,
+                    name: item.name,
+                    logo: item.logo,
+                    group: item.group,
+                    type: item.type,
+                    streamUrl: item.streamUrl,
+                    timestamp: Date.now(),
+                    progress: 0
+                };
+
+                // Remove if already exists
+                this.watchedItems = this.watchedItems.filter(w => w.id !== item.id);
+
+                // Add to front
+                this.watchedItems.unshift(watched);
+
+                // Keep only last 50
+                this.watchedItems = this.watchedItems.slice(0, 50);
+
+                // Save to localStorage
+                localStorage.setItem('watched_items', JSON.stringify(this.watchedItems));
+
+                // Reload current section
+                this.loadSectionContent(this.currentSection);
+
+                // Update separate movie/series sections
+                if (item.type === 'movies') {
+                    this.displayMoviesSection();
+                } else if (item.type === 'series') {
+                    this.displaySeriesSection();
+                }
+            }
+
+            /**
+             * Add to favorites
+             */
+            addToFavorites(item) {
+                const favorite = {
+                    id: item.id,
+                    name: item.name,
+                    logo: item.logo,
+                    group: item.group,
+                    type: item.type,
+                    streamUrl: item.streamUrl,
+                    addedAt: Date.now()
+                };
+
+                // Check if already exists
+                if (this.favoriteItems.find(f => f.id === item.id)) {
+                    return;
+                }
+
+                this.favoriteItems.push(favorite);
+                localStorage.setItem('favorite_items', JSON.stringify(this.favoriteItems));
+
+                this.loadSectionContent(this.currentSection);
+            }
+
+            /**
+             * Remove from favorites
+             */
+            removeFromFavorites(itemId) {
+                this.favoriteItems = this.favoriteItems.filter(f => f.id !== itemId);
+                localStorage.setItem('favorite_items', JSON.stringify(this.favoriteItems));
+
+                this.loadSectionContent(this.currentSection);
+            }
+
+            /**
+             * Display Movies Section
+             */
+            displayMoviesSection() {
+                const carousel = document.getElementById('moviesCarousel');
+                const moviesWatched = this.watchedItems.filter(item => item.type === 'movies');
+                
+                carousel.innerHTML = '';
+                
+                if (moviesWatched.length === 0) {
+                    carousel.innerHTML = '<div class="empty-state">No movies watched</div>';
+                    return;
+                }
+                
+                // Show only last 5 movies
+                moviesWatched.slice(0, 5).forEach(item => {
+                    const itemEl = document.createElement('button');
+                    itemEl.className = 'carousel-item';
+                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                    itemEl.innerHTML = `
+                        <img src="${item.logo || placeholderSvg}" 
+                             alt="${item.name}" class="carousel-item-img" loading="lazy">
+                        <div class="carousel-overlay">
+                            <div class="play-button">
+                                <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${item.progress || 0}%"></div>
+                        </div>
+                    `;
+
+                    // Add image error handler
+                    const img = itemEl.querySelector('.carousel-item-img');
+                    if (img && item.logo) {
+                        img.addEventListener('error', function onImageError() {
+                            if (this.src !== placeholderSvg) {
+                                this.src = placeholderSvg;
+                                this.style.backgroundColor = '#222';
+                            }
+                        }, { once: false });
+                    }
+
+                    itemEl.addEventListener('click', () => {
+                        this.playContent(item);
+                    });
+
+                    carousel.appendChild(itemEl);
+                });
+            }
+
+            /**
+             * Display Series Section
+             */
+            displaySeriesSection() {
+                const carousel = document.getElementById('seriesCarousel');
+                const seriesWatched = this.watchedItems.filter(item => item.type === 'series');
+                
+                carousel.innerHTML = '';
+                
+                if (seriesWatched.length === 0) {
+                    carousel.innerHTML = '<div class="empty-state">No series watched</div>';
+                    return;
+                }
+                
+                // Show only last 5 series
+                seriesWatched.slice(0, 5).forEach(item => {
+                    const itemEl = document.createElement('button');
+                    itemEl.className = 'carousel-item';
+                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                    itemEl.innerHTML = `
+                        <img src="${item.logo || placeholderSvg}" 
+                             alt="${item.name}" class="carousel-item-img" loading="lazy">
+                        <div class="carousel-overlay">
+                            <div class="play-button">
+                                <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white">
+                                    <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${item.progress || 0}%"></div>
+                        </div>
+                    `;
+
+                    // Add image error handler
+                    const img = itemEl.querySelector('.carousel-item-img');
+                    if (img && item.logo) {
+                        img.addEventListener('error', function onImageError() {
+                            if (this.src !== placeholderSvg) {
+                                this.src = placeholderSvg;
+                                this.style.backgroundColor = '#222';
+                            }
+                        }, { once: false });
+                    }
+
+                    itemEl.addEventListener('click', () => {
+                        this.playContent(item);
+                    });
+
+                    carousel.appendChild(itemEl);
+                });
+            }
+
+            /**
+             * Update section titles
+             */
+            updateSectionTitles(section) {
+                const titles = {
+                    'live-tv': 'Recently Watched Channels',
+                    'movies': 'Recently Watched Movies',
+                    'series': 'Recently Watched Series',
+                    'playlists': 'Recently Watched Playlists'
+                };
+
+                document.getElementById('continue-title').textContent = titles[section] || 'Continue Watching';
+                document.getElementById('favorites-title').textContent = `Favorites - ${section}`;
+            }
+
+            /**
+             * Display username
+             */
+            displayUsername() {
+                const username = sessionStorage.getItem('username') || 'Guest';
+                document.getElementById('username-display').textContent = username;
+            }
+
+            /**
+             * Update clock
+             */
+            updateClock() {
+                const now = new Date();
+                
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                const timeString = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+                
+                const options = { weekday: 'long', month: 'long', day: 'numeric' };
+                const dateString = now.toLocaleDateString('en-US', options);
+                
+                document.getElementById('time-display').textContent = timeString;
+                document.getElementById('date-display').textContent = dateString;
+            }
         }
 
-        // Live clock that updates every second
-        function updateClock() {
-            const now = new Date();
-            
-            // Format time as HH:MM AM/PM
-            let hours = now.getHours();
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // 0 should be 12
-            const timeString = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
-            
-            // Format date as Day, Month Date
-            const options = { weekday: 'long', month: 'long', day: 'numeric' };
-            const dateString = now.toLocaleDateString('en-US', options);
-            
-            // Update display
-            document.getElementById('time-display').textContent = timeString;
-            document.getElementById('date-display').textContent = dateString;
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            displayUsername();
-            updateClock();
-            
-            // Update clock every second
-            setInterval(updateClock, 1000);
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            window.dashboard = new DashboardManager();
         });
     </script>
 </body>

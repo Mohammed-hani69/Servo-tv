@@ -198,8 +198,8 @@
             */
             handleRenewal() {
                 console.log('Renewing subscription...');
-                alert('Renewing subscription - Redirect to renewal page');
-                // Add your renewal logic here
+                // Redirect to renewal page
+                window.location.href = '/subscription/renew';
             }
 
             /**
@@ -207,8 +207,15 @@
             */
             handleCheckUpdates() {
                 console.log('Checking for updates...');
-                alert('Checking for updates - Please wait...');
-                // Add your update check logic here
+                // Check for updates (would be implemented on backend)
+                fetch('/api/updates/check')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.hasUpdates) {
+                            console.log('Updates available');
+                        }
+                    })
+                    .catch(e => console.log('Update check failed', e));
             }
 
             /**

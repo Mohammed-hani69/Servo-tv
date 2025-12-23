@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Servo - Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/player.css">
+    <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+</head>
+<body>
+    <div class="player-wrapper" id="playerWrapper">
+        <!-- Video Player -->
+        <video 
+            id="videoPlayer" 
+            class="video-player" 
+            controls 
+            autoplay 
+            playsinline
+            crossorigin="anonymous">
+            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Player Overlay Controls -->
+        <div class="player-overlay" id="playerOverlay">
+            <!-- Top Bar -->
+            <div class="player-top-bar">
+                <button class="player-btn back-btn" id="backBtn" title="Go back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="player-title">
+                    <h3 id="videoTitle">Video Title</h3>
+                    <p id="videoInfo">Loading...</p>
+                </div>
+                <button class="player-btn settings-btn" id="settingsBtn" title="Settings">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="player-bottom-bar">
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                        <input type="range" id="progressSlider" class="progress-slider" min="0" max="100" value="0">
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls-container">
+                    <div class="left-controls">
+                        <button class="player-btn" id="playPauseBtn" title="Play/Pause">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"></path>
+                            </svg>
+                        </button>
+                        <span class="time-display">
+                            <span id="currentTime">0:00</span> / <span id="duration">0:00</span>
+                        </span>
+                    </div>
+
+                    <div class="right-controls">
+                        <button class="player-btn" id="subtitlesBtn" title="Subtitles">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                <line x1="7" y1="10" x2="17" y2="10"></line>
+                                <line x1="7" y1="14" x2="13" y2="14"></line>
+                            </svg>
+                        </button>
+                        <button class="player-btn" id="rotateBtn" title="Rotate">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+                            </svg>
+                        </button>
+                        <button class="player-btn" id="fullscreenBtn" title="Fullscreen">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class MobilePlayer {
+            constructor() {
+                this.video = document.getElementById('videoPlayer');
+                this.overlay = document.getElementById('playerOverlay');
+                this.wrapper = document.getElementById('playerWrapper');
+                this.isLandscape = false;
+                this.hideControlsTimeout = null;
+
+                this.setupEventListeners();
+                this.setupScreenOrientation();
+                this.autoEnableLandscape();
+            }
+
+            setupEventListeners() {
+                const video = this.video;
+                const overlay = this.overlay;
+
+                // Show/hide controls on video click
+                this.wrapper.addEventListener('click', () => this.toggleControls());
+
+                // Update progress bar
+                video.addEventListener('timeupdate', () => this.updateProgress());
+                video.addEventListener('loadedmetadata', () => this.updateDuration());
+
+                // Progress slider
+                document.getElementById('progressSlider').addEventListener('input', (e) => {
+                    video.currentTime = (e.target.value / 100) * video.duration;
+                });
+
+                // Play/Pause
+                document.getElementById('playPauseBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    video.paused ? video.play() : video.pause();
+                });
+
+                // Back button
+                document.getElementById('backBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    history.back();
+                });
+
+                // Fullscreen
+                document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleFullscreen();
+                });
+
+                // Rotate button
+                document.getElementById('rotateBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleOrientation();
+                });
+
+                // Update controls visibility
+                video.addEventListener('play', () => this.showControls());
+                video.addEventListener('pause', () => this.showControls());
+
+                // Update play button icon
+                video.addEventListener('play', () => this.updatePlayIcon());
+                video.addEventListener('pause', () => this.updatePlayIcon());
+            }
+
+            setupScreenOrientation() {
+                // Handle orientation change
+                window.addEventListener('orientationchange', () => {
+                    this.isLandscape = window.innerHeight < window.innerWidth;
+                    this.updatePlayerLayout();
+                });
+
+                // Handle resize
+                window.addEventListener('resize', () => {
+                    this.isLandscape = window.innerHeight < window.innerWidth;
+                    this.updatePlayerLayout();
+                });
+            }
+
+            autoEnableLandscape() {
+                // Auto landscape when video plays
+                this.video.addEventListener('play', () => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape-primary').catch(err => {
+                            console.log('Orientation lock not supported:', err);
+                        });
+                    }
+                });
+
+                // Return to portrait on pause
+                this.video.addEventListener('pause', () => {
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('portrait-primary').catch(err => {
+                            console.log('Orientation lock not supported:', err);
+                        });
+                    }
+                });
+            }
+
+            toggleOrientation() {
+                if (screen.orientation) {
+                    const isPortrait = screen.orientation.type.includes('portrait');
+                    const target = isPortrait ? 'landscape-primary' : 'portrait-primary';
+                    
+                    screen.orientation.lock(target).catch(err => {
+                        console.log('Orientation lock not supported:', err);
+                    });
+                }
+            }
+
+            toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    this.wrapper.requestFullscreen().catch(err => {
+                        console.log('Fullscreen not supported:', err);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            toggleControls() {
+                this.overlay.classList.toggle('hidden');
+                if (!this.overlay.classList.contains('hidden')) {
+                    this.showControls();
+                }
+            }
+
+            showControls() {
+                this.overlay.classList.remove('hidden');
+                clearTimeout(this.hideControlsTimeout);
+                
+                if (!this.video.paused) {
+                    this.hideControlsTimeout = setTimeout(() => {
+                        this.overlay.classList.add('hidden');
+                    }, 4000);
+                }
+            }
+
+            updateProgress() {
+                const progress = (this.video.currentTime / this.video.duration) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressSlider').value = progress;
+                this.updateTimeDisplay();
+            }
+
+            updateDuration() {
+                document.getElementById('duration').textContent = this.formatTime(this.video.duration);
+            }
+
+            updateTimeDisplay() {
+                document.getElementById('currentTime').textContent = this.formatTime(this.video.currentTime);
+            }
+
+            updatePlayIcon() {
+                const btn = document.getElementById('playPauseBtn');
+                if (this.video.paused) {
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"></path>
+                        </svg>
+                    `;
+                } else {
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                        </svg>
+                    `;
+                }
+            }
+
+            updatePlayerLayout() {
+                if (this.isLandscape) {
+                    this.wrapper.classList.add('landscape');
+                } else {
+                    this.wrapper.classList.remove('landscape');
+                }
+            }
+
+            formatTime(seconds) {
+                if (isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Initialize player on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new MobilePlayer();
+        });
+    </script>
+</body>
+</html>

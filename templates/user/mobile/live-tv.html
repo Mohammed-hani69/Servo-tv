@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Servo - Live TV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/mobile/live-tv.css">
+    <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+    <style>
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+            flex-direction: column;
+            gap: 20px;
+            color: rgb(148, 163, 184);
+        }
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgb(148, 163, 184);
+        }
+    </style>
+</head>
+<body>
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
+        <h1>Live TV</h1>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="mobile-main">
+        <!-- CATEGORIES -->
+        <div class="categories-section">
+            <div class="categories-title">📺 Categories</div>
+            <div class="categories-list" id="categoriesList">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <!-- CHANNELS GRID -->
+        <section class="channels-section">
+            <div class="channels-header">
+                <h2 class="channels-title" id="channelsTitle">All Channels</h2>
+                <span class="channels-count" id="channelsCount">Loading...</span>
+            </div>
+
+            <div class="channels-grid" id="channelsGrid">
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Loading channels...</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="bottom-spacer"></div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION COMPONENT -->
+    {% include 'user/mobile/components/bottom-nav.html' %}
+
+    <!-- HLS.js for streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <script>
+        /**
+         * 📺 Mobile Live TV Controller
+         */
+        class MobileLiveTVController {
+            constructor() {
+                this.channels = [];
+                this.categories = new Map();
+                this.favorites = this.loadFavorites();
+                this.currentCategory = 'all';
+                this.hls = null;
+            }
+
+            async init() {
+                console.log('Initializing Mobile Live TV...');
+                try {
+                    await this.loadChannels();
+                    this.groupChannels();
+                    this.renderCategories();
+                    this.renderChannels();
+                    this.setupEventListeners();
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError('Failed to load channels. Verify active subscription.');
+                }
+            }
+
+            async loadChannels() {
+                try {
+                    const tokenResp = await fetch('/api/stream/token', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({})
+                    });
+
+                    const tokenData = await tokenResp.json();
+                    const playlistResp = await fetch(tokenData.playlist_url);
+                    const playlistText = await playlistResp.text();
+                    
+                    // Parse M3U
+                    const lines = playlistText.split('\n');
+                    
+                    for (let i = 0; i < lines.length; i++) {
+                        if (lines[i].startsWith('#EXTINF')) {
+                            const name = lines[i].match(/,(.+)$/)?.[1]?.trim() || 'Unknown';
+                            const logo = lines[i].match(/tvg-logo="([^"]*)"/)?.[1] || '';
+                            const group = lines[i].match(/group-title="([^"]+)"/)?.[1] || 'Other';
+                            const url = lines[i + 1]?.trim();
+                            
+                            if (url && url.startsWith('http')) {
+                                this.channels.push({
+                                    id: name.replace(/\s+/g, '_'),
+                                    name,
+                                    logo,
+                                    group,
+                                    url,
+                                    type: 'live-tv'
+                                });
+                            }
+                        }
+                    }
+                    
+                    console.log(`Loaded ${this.channels.length} channels`);
+                } catch (error) {
+                    console.error('Error loading channels:', error);
+                    throw error;
+                }
+            }
+
+            groupChannels() {
+                this.categories.clear();
+                
+                this.channels.forEach(channel => {
+                    const category = channel.group || 'Other';
+                    
+                    if (!this.categories.has(category)) {
+                        this.categories.set(category, []);
+                    }
+                    
+                    this.categories.get(category).push(channel);
+                });
+            }
+
+            renderCategories() {
+                const categoriesList = document.getElementById('categoriesList');
+                if (!categoriesList) return;
+                
+                let html = `
+                    <button class="category-item active" data-category="all">
+                        <span>All</span>
+                        <span class="count">(${this.channels.length})</span>
+                    </button>
+                    <button class="category-item" data-category="favorites">
+                        <span>♡ Favorites</span>
+                        <span class="count">(${this.favorites.length})</span>
+                    </button>
+                `;
+                
+                this.categories.forEach((channels, category) => {
+                    html += `
+                        <button class="category-item" data-category="${category}">
+                            <span>${category}</span>
+                            <span class="count">(${channels.length})</span>
+                        </button>
+                    `;
+                });
+                
+                categoriesList.innerHTML = html;
+            }
+
+            renderChannels() {
+                const channelsGrid = document.getElementById('channelsGrid');
+                const channelsCount = document.getElementById('channelsCount');
+                const channelsTitle = document.getElementById('channelsTitle');
+                
+                if (!channelsGrid) return;
+                
+                let channelsToShow = [];
+                let titleText = 'جميع القنوات';
+                
+                if (this.currentCategory === 'all') {
+                    channelsToShow = [...this.channels];
+                    titleText = 'جميع القنوات';
+                } else if (this.currentCategory === 'favorites') {
+                    channelsToShow = this.channels.filter(ch => this.isFavorite(ch.id));
+                    titleText = 'القنوات المفضلة';
+                } else {
+                    channelsToShow = this.categories.get(this.currentCategory) || [];
+                    titleText = this.currentCategory;
+                }
+                
+                channelsTitle.textContent = titleText;
+                channelsCount.textContent = `${channelsToShow.length} قناة`;
+                
+                if (channelsToShow.length === 0) {
+                    channelsGrid.innerHTML = `
+                        <div class="empty-state">
+                            <p>لا توجد قنوات في هذه الفئة</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '';
+                channelsToShow.forEach((channel, index) => {
+                    const isFavorite = this.isFavorite(channel.id);
+                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' font-size='10' fill='%23666' text-anchor='middle' dy='.3em'%3ENo Logo%3C/text%3E%3C/svg%3E`;
+                    const logo = channel.logo || placeholderSvg;
+                    
+                    html += `
+                        <div class="channel-card" data-channel-id="${channel.id}" data-index="${index}">
+                            <div class="channel-thumbnail">
+                                <img 
+                                    src="${logo}" 
+                                    alt="${channel.name}"
+                                    loading="lazy"
+                                >
+                                <div class="play-overlay">
+                                    <button class="play-btn" title="تشغيل">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="channel-info">
+                                <h3 class="channel-name">${channel.name}</h3>
+                                <div class="channel-meta">
+                                    <span class="channel-quality">HD</span>
+                                    <span class="channel-category">${channel.group}</span>
+                                </div>
+                            </div>
+                            <button class="channel-favorite ${isFavorite ? 'active' : ''}" data-channel-id="${channel.id}" title="${isFavorite ? 'حذف من المفضلة' : 'إضافة للمفضلة'}">
+                                <svg viewBox="0 0 24 24" fill="${isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                                    <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                channelsGrid.innerHTML = html;
+                this.attachListeners();
+            }
+
+            attachListeners() {
+                // إضافة معالج الأخطاء للصور
+                document.querySelectorAll('.channel-card img').forEach(img => {
+                    if (img.src && !img.src.startsWith('data:')) {
+                        img.addEventListener('error', function onImageError() {
+                            const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' font-size='10' fill='%23666' text-anchor='middle' dy='.3em'%3ENo Logo%3C/text%3E%3C/svg%3E`;
+                            if (this.src !== placeholderSvg) {
+                                this.src = placeholderSvg;
+                                this.style.backgroundColor = '#333';
+                            }
+                        }, { once: false });
+                    }
+                });
+
+                document.querySelectorAll('.channel-card').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (!e.target.closest('.channel-favorite')) {
+                            const channelId = card.dataset.channelId;
+                            const channel = this.channels.find(ch => ch.id === channelId);
+                            if (channel) {
+                                this.playChannel(channel);
+                            }
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('.channel-favorite').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const channelId = btn.dataset.channelId;
+                        this.toggleFavorite(channelId);
+                    });
+                });
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.category-item').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const category = e.target.closest('.category-item').dataset.category;
+                        this.selectCategory(category);
+                    });
+                });
+            }
+
+            selectCategory(category) {
+                this.currentCategory = category;
+                
+                document.querySelectorAll('.category-item').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-category="${category}"]`)?.classList.add('active');
+                
+                this.renderChannels();
+            }
+
+            async playChannel(channel) {
+                try {
+                    console.log('▶️ Playing:', channel.name);
+                    
+                    const response = await fetch('/api/stream/play', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            stream_url: channel.url,
+                            content_id: channel.id,
+                            content_name: channel.name
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success && data.play_token) {
+                        // Record as watched
+                        this.recordWatchedChannel(channel);
+                        
+                        const streamResp = await fetch(`/stream/live?token=${data.play_token}`);
+                        const streamData = await streamResp.json();
+                        
+                        if (streamData.success && streamData.play_url) {
+                            this.openPlayer(channel, streamData.play_url);
+                        } else {
+                            this.showError('خطأ: ' + (streamData.error || 'فشل الحصول على رابط البث'));
+                        }
+                    } else {
+                        this.showError('خطأ: ' + (data.message || 'فشل الحصول على توكن التشغيل'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError('خطأ في التشغيل');
+                }
+            }
+
+            recordWatchedChannel(channel) {
+                try {
+                    const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                    
+                    // Remove if already exists
+                    const filtered = watched.filter(w => w.id !== channel.id);
+                    
+                    // Add to front
+                    const item = {
+                        id: channel.id,
+                        name: channel.name,
+                        logo: channel.logo || '',
+                        group: 'Live TV',
+                        type: 'live-tv',
+                        streamUrl: channel.url,
+                        timestamp: Date.now(),
+                        progress: 0
+                    };
+                    
+                    filtered.unshift(item);
+                    
+                    // Keep only last 50
+                    filtered.splice(50);
+                    
+                    // Save to localStorage
+                    localStorage.setItem('watched_items', JSON.stringify(filtered));
+                    
+                    console.log('✅ تم تسجيل مشاهدة القناة');
+                } catch (error) {
+                    console.warn('⚠️ خطأ في تسجيل المشاهدة:', error);
+                }
+            }
+
+            openPlayer(channel, streamUrl) {
+                let playerDiv = document.getElementById('player-modal');
+                if (playerDiv) playerDiv.remove();
+                
+                playerDiv = document.createElement('div');
+                playerDiv.id = 'player-modal';
+                playerDiv.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.95);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    padding: 0 10px;
+                `;
+                
+                playerDiv.innerHTML = `
+                    <div style="position: relative; width: 100%; height: 100%; background: #000; border-radius: 8px; overflow: hidden;">
+                        <button style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; color: white; font-size: 20px; cursor: pointer; border-radius: 50%; z-index: 10000;" onclick="this.closest('#player-modal').remove()">✕</button>
+                        <video id="video-player" controls autoplay style="width: 100%; height: 100%; background: #000;"></video>
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 20px; color: white;">
+                            <h2 style="margin: 0 0 5px 0;">${channel.name}</h2>
+                            <p style="margin: 0; opacity: 0.7;">${channel.group}</p>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(playerDiv);
+                
+                const video = playerDiv.querySelector('#video-player');
+                this.playStream(streamUrl, video);
+            }
+
+            playStream(streamUrl, videoElement) {
+                if (this.hls) {
+                    this.hls.destroy();
+                }
+
+                if (window.Hls && window.Hls.isSupported()) {
+                    this.hls = new window.Hls();
+                    this.hls.loadSource(streamUrl);
+                    this.hls.attachMedia(videoElement);
+                    this.hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
+                        videoElement.play();
+                    });
+                } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                    videoElement.src = streamUrl;
+                    videoElement.play();
+                }
+            }
+
+            toggleFavorite(channelId) {
+                const index = this.favorites.indexOf(channelId);
+                
+                if (index > -1) {
+                    this.favorites.splice(index, 1);
+                } else {
+                    this.favorites.push(channelId);
+                }
+                
+                this.saveFavorites();
+                this.renderChannels();
+            }
+
+            isFavorite(channelId) {
+                return this.favorites.includes(channelId);
+            }
+
+            saveFavorites() {
+                localStorage.setItem('livetv_favorites', JSON.stringify(this.favorites));
+            }
+
+            loadFavorites() {
+                const saved = localStorage.getItem('livetv_favorites');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.textContent = message;
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    right: 50%;
+                    transform: translateX(-50%);
+                    z-index: 10000;
+                    font-weight: 600;
+                    max-width: 90%;
+                `;
+                
+                document.body.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 4000);
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new MobileLiveTVController();
+            app.init();
+        });
+    </script>
