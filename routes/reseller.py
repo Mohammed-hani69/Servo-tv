@@ -529,6 +529,47 @@ def suspend_user(user_id):
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@reseller_bp.route('/api/users/<int:user_id>/activate', methods=['POST'])
+def activate_user(user_id):
+    """تفعيل مستخدم"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        user = User.query.filter_by(id=user_id, reseller_id=session['reseller_id']).first()
+        if not user:
+            return jsonify({'success': False, 'message': 'User not found'}), 404
+        
+        # تفعيل أكواد المستخدم والأجهزة
+        codes = ActivationCode.query.filter_by(assigned_user_id=user.id).all()
+        now = datetime.now(timezone.utc)
+        for code in codes:
+            # إعادة تعيين تاريخ انتهاء الصلاحية إذا كان قد انتهى
+            if code.expiration_date and safe_datetime_compare(code.expiration_date, now):
+                if code.is_lifetime:
+                    code.expiration_date = now + timedelta(days=365*100)
+                else:
+                    code.expiration_date = now + timedelta(days=365)
+        
+        # تفعيل الأجهزة
+        devices = Device.query.filter_by(user_id=user.id).all()
+        for device in devices:
+            device.is_active = True
+        
+        db.session.commit()
+        
+        # تسجيل الإجراء
+        log_reseller_action(session['reseller_id'], f"Activated user {user.username}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'User activated successfully'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @reseller_bp.route('/api/users/<int:user_id>/change-password', methods=['POST'])
 def change_user_password(user_id):
     """تغيير كلمة مرور المستخدم (يتم من خلال اعادة تفعيل)"""
@@ -1743,4 +1784,207 @@ def get_device_detail(device_id):
         }), 200
     
     except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ========================================================================================
+# 🎵 API للموزع - إدارة البلايليسترات الموصى بها (Reseller Playlists)
+# ========================================================================================
+
+@reseller_bp.route('/api/reseller-playlists', methods=['GET'])
+def get_reseller_playlists():
+    """جلب البلايليسترات الموصى بها من الموزع"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        reseller_id = session['reseller_id']
+        
+        # جلب جميع المستخدمين والأجهزة التابعة للموزع
+        users = User.query.filter_by(reseller_id=reseller_id).all()
+        
+        # جمع البلايليسترات الموصى بها
+        reseller_playlists = []
+        for user in users:
+            devices = Device.query.filter_by(user_id=user.id).all()
+            for device in devices:
+                if device.media_link:
+                    reseller_playlists.append({
+                        'user_id': user.id,
+                        'username': user.username,
+                        'device_id': device.id,
+                        'device_uid': device.device_uid,
+                        'device_name': device.device_name,
+                        'media_link': device.media_link,
+                        'device_type': device.device_type
+                    })
+        
+        return jsonify({
+            'success': True,
+            'data': reseller_playlists,
+            'total': len(reseller_playlists)
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/reseller-playlists', methods=['POST'])
+def add_reseller_playlist():
+    """إضافة بلايليست موصى به من الموزع إلى مستخدم معين"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        reseller_id = session['reseller_id']
+        data = request.get_json()
+        
+        user_id = data.get('user_id')
+        device_id = data.get('device_id')
+        media_link = data.get('media_link', '').strip()
+        
+        if not user_id or (not device_id and not media_link):
+            return jsonify({
+                'success': False,
+                'message': 'يرجى توفير معرف المستخدم والجهاز أو الرابط'
+            }), 400
+        
+        # التحقق من أن المستخدم يتبع الموزع
+        user = User.query.filter_by(id=user_id, reseller_id=reseller_id).first()
+        if not user:
+            return jsonify({
+                'success': False,
+                'message': 'المستخدم غير موجود أو لا يتبعك'
+            }), 404
+        
+        from models import UserPlaylist
+        
+        if device_id:
+            # إضافة بلايليست لجهاز معين
+            device = Device.query.filter_by(id=device_id, user_id=user_id).first()
+            if not device:
+                return jsonify({
+                    'success': False,
+                    'message': 'الجهاز غير موجود'
+                }), 404
+            
+            # إنشاء بلايليست جديد بالرابط من الموزع
+            if media_link:
+                playlist = UserPlaylist(
+                    user_id=user_id,
+                    device_id=device_id,
+                    name=f'Reseller Playlist - {datetime.utcnow().strftime("%Y-%m-%d")}',
+                    media_link=media_link,
+                    reseller_playlist=media_link,
+                    is_active=True
+                )
+                db.session.add(playlist)
+                db.session.commit()
+                
+                log_reseller_action(
+                    actor_type='reseller',
+                    actor_id=reseller_id,
+                    action='add_reseller_playlist',
+                    description=f'إضافة بلايليست موصى به للمستخدم {user.username} على الجهاز {device.device_name}',
+                    resource_type='playlist',
+                    resource_id=playlist.id
+                )
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'تم إضافة البلايليست الموصى به بنجاح',
+                    'data': {
+                        'id': playlist.id,
+                        'user_id': user_id,
+                        'device_id': device_id,
+                        'media_link': media_link
+                    }
+                }), 201
+        else:
+            # في حالة عدم تحديد جهاز - تطبيق البلايليست على جميع أجهزة المستخدم
+            devices = Device.query.filter_by(user_id=user_id).all()
+            playlists_added = []
+            
+            for device in devices:
+                playlist = UserPlaylist(
+                    user_id=user_id,
+                    device_id=device.id,
+                    name=f'Reseller Playlist - {datetime.utcnow().strftime("%Y-%m-%d")}',
+                    media_link=media_link,
+                    reseller_playlist=media_link,
+                    is_active=True
+                )
+                db.session.add(playlist)
+                playlists_added.append(playlist)
+            
+            db.session.commit()
+            
+            log_reseller_action(
+                actor_type='reseller',
+                actor_id=reseller_id,
+                action='add_reseller_playlist_bulk',
+                description=f'إضافة بلايليست موصى به لجميع أجهزة المستخدم {user.username}',
+                resource_type='playlist'
+            )
+            
+            return jsonify({
+                'success': True,
+                'message': f'تم إضافة البلايليست لـ {len(playlists_added)} جهاز',
+                'data': {
+                    'user_id': user_id,
+                    'devices_count': len(playlists_added),
+                    'media_link': media_link
+                }
+            }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@reseller_bp.route('/api/reseller-playlists/<int:playlist_id>', methods=['DELETE'])
+def remove_reseller_playlist(playlist_id):
+    """حذف بلايليست موصى به"""
+    if 'reseller_id' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    
+    try:
+        from models import UserPlaylist
+        
+        playlist = UserPlaylist.query.get(playlist_id)
+        if not playlist:
+            return jsonify({'success': False, 'message': 'البلايليست غير موجود'}), 404
+        
+        # التحقق من أن البلايليست يتبع موزع العملية الحالية
+        user = User.query.get(playlist.user_id)
+        if not user or user.reseller_id != session['reseller_id']:
+            return jsonify({'success': False, 'message': 'غير مصرح'}), 403
+        
+        # التحقق من أنه بلايليست من الموزع
+        if not playlist.reseller_playlist:
+            return jsonify({
+                'success': False,
+                'message': 'هذا البلايليست ليس من الموزع ولا يمكن حذفه'
+            }), 400
+        
+        playlist_name = playlist.name
+        db.session.delete(playlist)
+        db.session.commit()
+        
+        log_reseller_action(
+            actor_type='reseller',
+            actor_id=session['reseller_id'],
+            action='delete_reseller_playlist',
+            description=f'حذف بلايليست موصى به: {playlist_name}',
+            resource_type='playlist',
+            resource_id=playlist_id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم حذف البلايليست بنجاح'
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500

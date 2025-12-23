@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Force Landscape orientation for video player -->
+    <meta name="orientation" content="landscape">
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Servo - Series Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/user/series-details.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        {% include 'user/components/sidebar.html' %}
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Header -->
+            <header class="header">
+                <button id="backBtn" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m15 18-6-6 6-6"></path>
+                    </svg>
+                    Back
+                </button>
+                
+                <div class="header-right">
+                    <div class="notification-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <div class="notification-dot"></div>
+                    </div>
+                    <div class="user-avatar">U</div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Series Header with Poster -->
+                <div class="series-header">
+                    <div class="series-poster-section">
+                        <img id="seriesPoster" src="" alt="Series Poster" class="series-poster">
+                        <button id="playBtn" class="play-button-large" type="button">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="series-header-info">
+                        <h1 id="seriesTitle" class="series-title">Series Title</h1>
+                        <div class="series-metadata">
+                            <span id="seriesCategory" class="metadata-badge">Category</span>
+                            <span id="seriesRating" class="metadata-badge">⭐ 8.0</span>
+                        </div>
+                        <p id="seriesDescription" class="series-description">
+                            No description available
+                        </p>
+                        <div class="series-stats">
+                            <div class="stat">
+                                <span class="stat-label">Episodes:</span>
+                                <span id="episodeCount" class="stat-value">0</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Year:</span>
+                                <span id="seriesYear" class="stat-value">-</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Type:</span>
+                                <span id="seriesType" class="stat-value">Series</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="series-tabs">
+                    <button class="tab-btn active" data-tab="episodes">Episodes</button>
+                    <button class="tab-btn" data-tab="details">Details</button>
+                </div>
+
+                <!-- Episodes Tab -->
+                <div id="episodesTab" class="tab-content active">
+                    <div class="episodes-grid" id="episodesList">
+                        <!-- Episodes will be generated here -->
+                    </div>
+                    <div class="no-content" id="noEpisodes" style="display: none;">
+                        <div style="font-size: 64px; margin-bottom: 1rem;">🎬</div>
+                        <h3>No Episodes Found</h3>
+                        <p>No episodes available for this series</p>
+                    </div>
+                </div>
+
+                <!-- Details Tab -->
+                <div id="detailsTab" class="tab-content" style="display: none;">
+                    <div class="details-grid">
+                        <div class="detail-section">
+                            <h3 class="section-title">📝 Description</h3>
+                            <p id="fullDescription" class="section-content">
+                                No description available
+                            </p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="section-title">⭐ Ratings</h3>
+                            <div id="ratingsContainer" class="ratings-container">
+                                <div class="rating-item">No ratings available</div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3 class="section-title">ℹ️ Additional Info</h3>
+                            <div id="metadataContainer" class="metadata-list">
+                                <!-- Metadata will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 🎬 Video Player Modal -->
+    <div id="videoPlayerModal" class="video-player-modal" style="display: none;">
+        <div class="video-player-container">
+            <button id="closeVideoBtn" class="close-video-btn" type="button">✕</button>
+            
+            <video id="video-player" 
+                   class="hls-video-player"
+                   controls 
+                   autoplay 
+                   playsinline
+                   style="width: 100%; height: 100%; background: #000;">
+                <source type="application/x-mpegURL">
+                Your browser does not support the video tag.
+            </video>
+
+            <div id="videoPlayerInfo" class="video-player-info">
+                <div class="player-info-content">
+                    <h3 id="videoTitle" class="player-title">Now Playing</h3>
+                    <p id="videoSubtitle" class="player-subtitle"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .video-player-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .video-player-modal.active {
+            display: flex;
+        }
+
+        .video-player-container {
+            position: relative;
+            width: 90%;
+            height: 90vh;
+            max-width: 1400px;
+        }
+
+        .hls-video-player {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        .close-video-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 50%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .close-video-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .video-player-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 20px;
+            color: white;
+        }
+
+        .player-info-content {
+            max-width: 1200px;
+        }
+
+        .player-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .player-subtitle {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* 📱 LANDSCAPE MODE - Mobile Devices */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .video-player-container {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
+                border-radius: 0;
+                margin: 0;
+                padding: 0;
+            }
+
+            .hls-video-player {
+                width: 100% !important;
+                height: 100% !important;
+                background: #000;
+            }
+
+            .close-video-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+                top: 8px;
+                right: 8px;
+                z-index: 10001;
+            }
+
+            .video-player-info {
+                position: absolute;
+                bottom: 0;
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+                padding: 12px;
+            }
+
+            .player-title {
+                font-size: 14px;
+                margin: 0;
+            }
+
+            .player-subtitle {
+                font-size: 12px;
+                margin: 3px 0 0 0;
+            }
+        }
+
+        /* 📱 Fullscreen Landscape on small phones */
+        @media (max-width: 600px) and (orientation: landscape) {
+            body {
+                overflow: hidden;
+            }
+
+            .video-player-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #000;
+                display: flex;
+                z-index: 9999;
+            }
+
+            .video-player-container {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .hls-video-player {
+                width: 100% !important;
+                height: 100% !important;
+                background: #000;
+            }
+
+            .close-video-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                top: 5px;
+                right: 5px;
+            }
+
+            .video-player-info {
+                position: absolute;
+                bottom: 0;
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+                padding: 10px;
+            }
+
+            .player-title {
+                font-size: 12px;
+                margin: 0;
+                line-height: 1.2;
+            }
+
+            .player-subtitle {
+                font-size: 11px;
+                margin: 2px 0 0 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .video-player-container {
+                width: 95%;
+                height: 80vh;
+            }
+
+            .close-video-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 20px;
+            }
+        }
+    </style>
+
+    <script src="../../static/js/app-manager.js"></script>
+    <script src="../../static/js/streaming-manager.js"></script>
+    
+    <script>
+        /**
+         * Desktop Series Details App
+         */
+        class DesktopSeriesDetailsApp {
+            constructor() {
+                this.streamingManager = null;
+                this.currentSeries = null;
+                this.currentSeriesItems = [];
+
+                // DOM Elements
+                this.backBtn = document.getElementById('backBtn');
+                this.playBtn = document.getElementById('playBtn');
+                this.seriesPoster = document.getElementById('seriesPoster');
+                this.seriesTitle = document.getElementById('seriesTitle');
+                this.seriesCategory = document.getElementById('seriesCategory');
+                this.seriesRating = document.getElementById('seriesRating');
+                this.seriesDescription = document.getElementById('seriesDescription');
+                this.fullDescription = document.getElementById('fullDescription');
+                this.episodeCount = document.getElementById('episodeCount');
+                this.seriesYear = document.getElementById('seriesYear');
+                this.seriesType = document.getElementById('seriesType');
+                this.episodesList = document.getElementById('episodesList');
+                this.noEpisodes = document.getElementById('noEpisodes');
+                this.metadataContainer = document.getElementById('metadataContainer');
+                this.ratingsContainer = document.getElementById('ratingsContainer');
+
+                // Landscape mode support
+                this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                this.isLandscape = window.matchMedia('(orientation: landscape)').matches;
+
+                this.setupEventListeners();
+                this.init();
+                this.setupLandscapeDetection();
+            }
+
+            /**
+             * 📱 Setup Landscape orientation detection
+             */
+            setupLandscapeDetection() {
+                // Listen for orientation changes
+                window.addEventListener('orientationchange', () => {
+                    this.isLandscape = window.matchMedia('(orientation: landscape)').matches;
+                    console.log('📱 Orientation changed to:', this.isLandscape ? 'Landscape' : 'Portrait');
+                    this.handleOrientationChange();
+                });
+
+                // Listen for screen size changes
+                window.matchMedia('(orientation: landscape)').addEventListener('change', (e) => {
+                    this.isLandscape = e.matches;
+                    console.log('📱 Screen orientation:', this.isLandscape ? 'Landscape' : 'Portrait');
+                    this.handleOrientationChange();
+                });
+            }
+
+            /**
+             * Handle orientation changes
+             */
+            handleOrientationChange() {
+                const videoModal = document.getElementById('videoPlayerModal');
+                if (videoModal && videoModal.classList.contains('active')) {
+                    // Ensure video container is properly sized
+                    const container = videoModal.querySelector('.video-player-container');
+                    if (container) {
+                        if (this.isLandscape) {
+                            container.style.width = '100%';
+                            container.style.height = '100%';
+                        } else {
+                            container.style.width = 'auto';
+                            container.style.height = 'auto';
+                        }
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                // Back button
+                if (this.backBtn) {
+                    this.backBtn.addEventListener('click', () => {
+                        window.history.back();
+                    });
+                }
+
+                // Play button
+                if (this.playBtn) {
+                    this.playBtn.addEventListener('click', () => this.playFirstEpisode());
+                }
+
+                // Tab buttons
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleTabChange(e));
+                });
+
+                // Sidebar menu
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            }
+
+            async init() {
+                console.log('🎬 Loading series details...');
+                try {
+                    // Initialize streaming manager
+                    if (typeof StreamingManager === 'undefined') {
+                        throw new Error('StreamingManager not loaded');
+                    }
+
+                    this.streamingManager = new StreamingManager();
+                    await this.streamingManager.init();
+
+                    // Get series from URL parameter
+                    const params = new URLSearchParams(window.location.search);
+                    const seriesId = params.get('id');
+
+                    if (!seriesId) {
+                        this.showError('No series selected');
+                        return;
+                    }
+
+                    // Get series by ID
+                    const allSeries = this.streamingManager.getContentByType('series');
+                    this.currentSeries = allSeries.find(s => s.id === seriesId);
+
+                    if (!this.currentSeries) {
+                        this.showError('Series not found');
+                        return;
+                    }
+
+                    // Render series details
+                    this.renderSeriesDetails();
+
+                } catch (error) {
+                    console.error('❌ Error loading series details:', error);
+                    this.showError('Failed to load series details');
+                }
+            }
+
+            renderSeriesDetails() {
+                const series = this.currentSeries;
+
+                // Header
+                this.seriesTitle.textContent = series.name || 'Series';
+                this.seriesCategory.textContent = series.group || 'Series';
+                this.seriesRating.textContent = `⭐ ${series.rating || series.imdb || '8.0'}`;
+                this.seriesDescription.textContent = (series.description || series.summary || 'No description available').substring(0, 150);
+                this.fullDescription.textContent = series.description || series.summary || 'No description available';
+
+                // Poster
+                let poster = series.logo;
+                if (!poster || poster.includes('imgur.com')) {
+                    poster = `https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(series.name)}`;
+                }
+                this.seriesPoster.src = poster;
+
+                // Metadata
+                this.episodeCount.textContent = this.getSeriesItems().length;
+                this.seriesYear.textContent = series.year || '-';
+                this.seriesType.textContent = series.type === 'series' ? 'TV Series' : 'Movie';
+
+                // Episodes
+                this.loadSeriesItems();
+
+                // Additional metadata
+                this.renderMetadata();
+
+                // Ratings
+                this.renderRatings();
+            }
+
+            loadSeriesItems() {
+                const items = this.getSeriesItems();
+                this.currentSeriesItems = items;
+
+                if (items.length === 0) {
+                    this.episodesList.innerHTML = '';
+                    this.noEpisodes.style.display = 'block';
+                    return;
+                }
+
+                this.noEpisodes.style.display = 'none';
+                this.episodesList.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+                items.forEach((item, index) => {
+                    const episodeEl = this.createEpisodeCard(item, index);
+                    fragment.appendChild(episodeEl);
+                });
+
+                this.episodesList.appendChild(fragment);
+            }
+
+            createEpisodeCard(item, index) {
+                const card = document.createElement('button');
+                card.className = 'episode-card';
+                card.type = 'button';
+
+                const title = (item.name || `Episode ${index + 1}`).substring(0, 40);
+                let icon = '▶️';
+                let badge = 'Episode';
+
+                if (item.type === 'live-tv') {
+                    icon = '🔴';
+                    badge = 'Live';
+                } else if (item.type === 'channel') {
+                    icon = '📡';
+                    badge = 'Channel';
+                }
+
+                card.innerHTML = `
+                    <div class="episode-number">${index + 1}</div>
+                    <div class="episode-info">
+                        <div class="episode-title">${title}</div>
+                        <div class="episode-badge">${badge}</div>
+                    </div>
+                    <div class="episode-icon">${icon}</div>
+                `;
+
+                card.addEventListener('click', () => this.playItem(item));
+                return card;
+            }
+
+            playItem(item) {
+                console.log('▶️ Playing:', item.name);
+
+                if (!item.streamUrl) {
+                    this.showError(`"${item.name}" has no stream URL`);
+                    return;
+                }
+
+                if (this.streamingManager) {
+                    this.streamingManager.playContent(item);
+                }
+            }
+
+            playFirstEpisode() {
+                if (this.currentSeriesItems.length === 0) {
+                    this.showError('No episodes available');
+                    return;
+                }
+
+                this.playItem(this.currentSeriesItems[0]);
+            }
+
+            getSeriesItems() {
+                if (!this.streamingManager || !this.currentSeries) return [];
+
+                const allContent = this.streamingManager.contentList || [];
+                return allContent.filter(item => {
+                    // Match by group or name
+                    return item.group === this.currentSeries.group ||
+                           item.group === this.currentSeries.name ||
+                           (item.name && item.name.includes(this.currentSeries.name));
+                });
+            }
+
+            renderMetadata() {
+                const series = this.currentSeries;
+                let html = '';
+
+                if (series.group) {
+                    html += `<div class="metadata-item"><span class="label">Category:</span> <span class="value">${series.group}</span></div>`;
+                }
+
+                if (series.year) {
+                    html += `<div class="metadata-item"><span class="label">Year:</span> <span class="value">${series.year}</span></div>`;
+                }
+
+                if (series.language) {
+                    html += `<div class="metadata-item"><span class="label">Language:</span> <span class="value">${series.language}</span></div>`;
+                }
+
+                if (series.country) {
+                    html += `<div class="metadata-item"><span class="label">Country:</span> <span class="value">${series.country}</span></div>`;
+                }
+
+                if (series.genre) {
+                    html += `<div class="metadata-item"><span class="label">Genre:</span> <span class="value">${series.genre}</span></div>`;
+                }
+
+                if (!html) {
+                    html = '<div class="metadata-item">No additional information available</div>';
+                }
+
+                this.metadataContainer.innerHTML = html;
+            }
+
+            renderRatings() {
+                const series = this.currentSeries;
+                let html = '';
+
+                if (series.rating || series.imdb) {
+                    const rating = series.rating || series.imdb;
+                    const stars = this.generateStars(rating);
+                    html = `
+                        <div class="rating-item">
+                            <span class="rating-label">${rating}/10</span>
+                            <span class="rating-stars">${stars}</span>
+                        </div>
+                    `;
+                } else {
+                    html = '<div class="rating-item">No ratings available</div>';
+                }
+
+                this.ratingsContainer.innerHTML = html;
+            }
+
+            generateStars(rating) {
+                const stars = Math.round((rating || 5) / 2);
+                let html = '';
+                for (let i = 0; i < 5; i++) {
+                    html += i < stars ? '⭐' : '☆';
+                }
+                return html;
+            }
+
+            handleTabChange(e) {
+                const tabName = e.target.dataset.tab;
+
+                // Remove active from all tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+
+                // Add active to clicked tab
+                e.target.classList.add('active');
+                document.getElementById(tabName + 'Tab').style.display = 'block';
+            }
+
+            showError(message) {
+                const msg = document.createElement('div');
+                msg.textContent = message;
+                msg.style.cssText = `
+                    position: fixed;
+                    bottom: 30px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #ef4444;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 1000;
+                    animation: slideUp 0.3s ease;
+                `;
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 3000);
+            }
+        }
+
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.seriesDetailsApp = new DesktopSeriesDetailsApp();
+            });
+        } else {
+            window.seriesDetailsApp = new DesktopSeriesDetailsApp();
+        }
+    </script>
+</body>
+</html>

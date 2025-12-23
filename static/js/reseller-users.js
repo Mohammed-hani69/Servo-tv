@@ -172,7 +172,47 @@ async function viewUserProfile(userId) {
     }
 }
 
-async function changeUserCode(userId, username) {
+async function verifyPinBeforeAction(action, userId, username) {
+    return new Promise((resolve) => {
+        // تعيين الإجراء المعلق
+        window.pendingAction = async () => {
+            // تنفيذ الإجراء المطلوب بناءً على نوع الإجراء
+            switch(action) {
+                case 'changeCode':
+                    await performChangeCode(userId, username);
+                    break;
+                case 'suspend':
+                    await performSuspendUser(userId, username);
+                    break;
+                case 'activate':
+                    await performActivateUser(userId, username);
+                    break;
+                case 'delete':
+                    await performDeleteUser(userId, username);
+                    break;
+            }
+            resolve(true);
+        };
+
+        // فتح نافذة PIN (يتم تعريفها في HTML)
+        openPinModal();
+
+        // إذا لم يتم التحقق من PIN أو تم الإلغاء
+        // سيتم إنشاء مستمع للإلغاء
+        const checkCancel = setInterval(() => {
+            const modal = document.getElementById('verifyPinModal');
+            if (modal && modal.classList.contains('hidden')) {
+                clearInterval(checkCancel);
+                if (!window.pinVerified) {
+                    resolve(false);
+                }
+            }
+        }, 100);
+    });
+}
+
+// الدوال المساعدة للإجراءات الفعلية
+async function performChangeCode(userId, username) {
     const modal = document.createElement('div');
     modal.style.cssText = `position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000;`;
     modal.innerHTML = `<div style="background: #1e293b; padding: 2rem; border-radius: 0.5rem; min-width: 350px; color: white;"><h3 style="margin: 0 0 1rem 0; color: #f8fafc;">Assign New Code</h3><p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: #cbd5e1;">Enter new code for ${username}:</p><input type="text" id="new-code-input" placeholder="Enter code" style="width: 100%; padding: 0.5rem; border: 1px solid #334155; border-radius: 0.25rem; background: #0f172a; color: white; margin-bottom: 1rem; box-sizing: border-box;"><div style="display: flex; gap: 0.5rem; justify-content: flex-end;"><button onclick="this.closest('[style*=z-index]').remove()" style="padding: 0.5rem 1rem; background: #475569; border: none; border-radius: 0.25rem; color: white; cursor: pointer;">Cancel</button><button id="confirm-code-btn" style="padding: 0.5rem 1rem; background: #3b82f6; border: none; border-radius: 0.25rem; color: white; cursor: pointer;">Assign</button></div></div>`;
@@ -192,7 +232,7 @@ async function changeUserCode(userId, username) {
     input.addEventListener('keypress', (e) => { if (e.key === 'Enter') modal.querySelector('#confirm-code-btn').click(); });
 }
 
-async function suspendUser(userId, username) {
+async function performSuspendUser(userId, username) {
     try {
         const response = await fetch(`/reseller/api/users/${userId}/suspend`, {
             method: 'POST',
@@ -216,7 +256,7 @@ async function suspendUser(userId, username) {
     }
 }
 
-async function activateUser(userId, username) {
+async function performActivateUser(userId, username) {
     try {
         const response = await fetch(`/reseller/api/users/${userId}/activate`, {
             method: 'POST',
@@ -240,7 +280,7 @@ async function activateUser(userId, username) {
     }
 }
 
-async function deleteUser(userId, username) {
+async function performDeleteUser(userId, username) {
     try {
         const response = await fetch(`/reseller/api/users/${userId}/delete`, {
             method: 'DELETE',
@@ -262,6 +302,26 @@ async function deleteUser(userId, username) {
         console.error('Error:', error);
         showNotification('Connection error', 'error');
     }
+}
+
+async function changeUserCode(userId, username) {
+    // طلب التحقق من PIN أولاً
+    await verifyPinBeforeAction('changeCode', userId, username);
+}
+
+async function suspendUser(userId, username) {
+    // طلب التحقق من PIN أولاً
+    await verifyPinBeforeAction('suspend', userId, username);
+}
+
+async function activateUser(userId, username) {
+    // طلب التحقق من PIN أولاً
+    await verifyPinBeforeAction('activate', userId, username);
+}
+
+async function deleteUser(userId, username) {
+    // طلب التحقق من PIN أولاً
+    await verifyPinBeforeAction('delete', userId, username);
 }
 
 function closeUserProfileModal() {

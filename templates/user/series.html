@@ -37,182 +37,14 @@
             <div class="content">
                 <div class="page-title">Series</div>
 
-                <!-- Filter Section -->
-                <div class="filter-section">
-                    <label class="filter-label">Genre:</label>
-                    <select class="filter-select" id="genreFilter">
-                        <option value="all">All Genres</option>
-                        <option value="action">Action</option>
-                        <option value="drama">Drama</option>
-                        <option value="comedy">Comedy</option>
-                        <option value="thriller">Thriller</option>
-                        <option value="sci-fi">Sci-Fi</option>
-                    </select>
-
-                    <label class="filter-label">Year:</label>
-                    <select class="filter-select" id="yearFilter">
-                        <option value="all">All Years</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                    </select>
+                <!-- Category Filter -->
+                <div class="category-filter">
+                    <button class="category-btn active" data-category="all">All</button>
                 </div>
 
                 <!-- Series Grid -->
                 <div class="series-grid" id="seriesGrid">
-                    <!-- Series 1 -->
-                    <div class="series-card" data-genre="action" data-year="2024">
-                        <div class="series-poster">
-                            <div class="series-poster-image">🎬</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">The Midnight Protocol</div>
-                            <div class="series-meta">
-                                <span class="series-year">2024</span>
-                                <span class="series-rating">⭐ 8.5</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 2 -->
-                    <div class="series-card" data-genre="drama" data-year="2023">
-                        <div class="series-poster">
-                            <div class="series-poster-image">📺</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Heart's Desire</div>
-                            <div class="series-meta">
-                                <span class="series-year">2023</span>
-                                <span class="series-rating">⭐ 9.0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 3 -->
-                    <div class="series-card" data-genre="comedy" data-year="2024">
-                        <div class="series-poster">
-                            <div class="series-poster-image">😂</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Office Chaos</div>
-                            <div class="series-meta">
-                                <span class="series-year">2024</span>
-                                <span class="series-rating">⭐ 8.2</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 4 -->
-                    <div class="series-card" data-genre="thriller" data-year="2023">
-                        <div class="series-poster">
-                            <div class="series-poster-image">🔪</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Dark Secrets</div>
-                            <div class="series-meta">
-                                <span class="series-year">2023</span>
-                                <span class="series-rating">⭐ 8.8</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 5 -->
-                    <div class="series-card" data-genre="sci-fi" data-year="2024">
-                        <div class="series-poster">
-                            <div class="series-poster-image">🚀</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Quantum Leap</div>
-                            <div class="series-meta">
-                                <span class="series-year">2024</span>
-                                <span class="series-rating">⭐ 8.7</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 6 -->
-                    <div class="series-card" data-genre="action" data-year="2022">
-                        <div class="series-poster">
-                            <div class="series-poster-image">⚔️</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Warrior Kings</div>
-                            <div class="series-meta">
-                                <span class="series-year">2022</span>
-                                <span class="series-rating">⭐ 8.4</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 7 -->
-                    <div class="series-card" data-genre="drama" data-year="2024">
-                        <div class="series-poster">
-                            <div class="series-poster-image">💔</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Broken Promises</div>
-                            <div class="series-meta">
-                                <span class="series-year">2024</span>
-                                <span class="series-rating">⭐ 8.6</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Series 8 -->
-                    <div class="series-card" data-genre="comedy" data-year="2023">
-                        <div class="series-poster">
-                            <div class="series-poster-image">🎭</div>
-                            <button class="play-button" title="Play">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="series-info">
-                            <div class="series-title">Laugh Track</div>
-                            <div class="series-meta">
-                                <span class="series-year">2023</span>
-                                <span class="series-rating">⭐ 7.9</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Series cards will be generated by JavaScript -->
                 </div>
 
                 <!-- Empty State (Hidden by default) -->
@@ -225,87 +57,239 @@
         </main>
     </div>
 
+    <script src="../../static/js/app-manager.js"></script>
+    <script src="../../static/js/streaming-manager.js"></script>
+    
     <script>
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        const genreFilter = document.getElementById('genreFilter');
-        const yearFilter = document.getElementById('yearFilter');
-        const seriesGrid = document.getElementById('seriesGrid');
-        const emptyState = document.getElementById('emptyState');
-        const seriesCards = document.querySelectorAll('.series-card');
+        /**
+         * Desktop Series App - يحضر ويشغل المسلسلات
+         */
+        class DesktopSeriesApp {
+            constructor() {
+                this.streamingManager = null;
+                this.allSeries = [];
+                this.filteredSeries = [];
+                this.currentCategory = 'all';
+                this.isInitialized = false;
 
-        function filterSeries() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedGenre = genreFilter.value;
-            const selectedYear = yearFilter.value;
-            let visibleCount = 0;
+                // DOM Elements
+                this.searchInput = document.getElementById('searchInput');
+                this.seriesGrid = document.getElementById('seriesGrid');
+                this.emptyState = document.getElementById('emptyState');
 
-            seriesCards.forEach(card => {
-                const title = card.querySelector('.series-title').textContent.toLowerCase();
-                const genre = card.getAttribute('data-genre');
-                const year = card.getAttribute('data-year');
+                this.setupEventListeners();
+                this.init();
+            }
 
-                const matchesSearch = title.includes(searchTerm);
-                const matchesGenre = selectedGenre === 'all' || genre === selectedGenre;
-                const matchesYear = selectedYear === 'all' || year === selectedYear;
-
-                if (matchesSearch && matchesGenre && matchesYear) {
-                    card.style.display = '';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
+            setupEventListeners() {
+                // Search input
+                if (this.searchInput) {
+                    this.searchInput.addEventListener('input', (e) => this.handleSearch(e));
                 }
-            });
 
-            // Show/hide empty state
-            if (visibleCount === 0) {
-                seriesGrid.style.display = 'none';
-                emptyState.style.display = 'flex';
-            } else {
-                seriesGrid.style.display = 'grid';
-                emptyState.style.display = 'none';
+                // Category filter
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('category-btn')) {
+                        this.handleCategoryChange(e);
+                    }
+                });
+            }
+
+            async init() {
+                console.log('🎬 Loading series...');
+                try {
+                    // Initialize streaming manager
+                    if (typeof StreamingManager === 'undefined') {
+                        throw new Error('StreamingManager not loaded');
+                    }
+
+                    this.streamingManager = new StreamingManager();
+                    await this.streamingManager.init();
+
+                    // Get series from IPTV content
+                    this.allSeries = this.streamingManager.getContentByType('series');
+                    this.filteredSeries = [...this.allSeries];
+
+                    console.log(`✅ Loaded ${this.allSeries.length} series`);
+
+                    // Render immediately
+                    this.render();
+                    this.isInitialized = true;
+
+                } catch (error) {
+                    console.error('❌ Error loading series:', error);
+                    this.showError('Failed to load series');
+                }
+            }
+
+            render() {
+                this.renderCategories();
+                this.renderSeries();
+            }
+
+            renderCategories() {
+                const filterContainer = document.querySelector('.category-filter');
+                if (!filterContainer) return;
+
+                const categories = this.getUniqueCategories();
+
+                let html = `
+                    <button class="category-btn ${this.currentCategory === 'all' ? 'active' : ''}" data-category="all">
+                        All (${this.allSeries.length})
+                    </button>
+                `;
+
+                categories.forEach(category => {
+                    const count = this.getSeriesByCategory(category).length;
+                    html += `
+                        <button class="category-btn ${this.currentCategory === category ? 'active' : ''}" data-category="${category}">
+                            ${category} (${count})
+                        </button>
+                    `;
+                });
+
+                filterContainer.innerHTML = html;
+            }
+
+            renderSeries() {
+                if (!this.seriesGrid) return;
+
+                this.seriesGrid.innerHTML = '';
+
+                if (this.filteredSeries.length === 0) {
+                    this.emptyState.style.display = 'flex';
+                    return;
+                }
+
+                this.emptyState.style.display = 'none';
+
+                const fragment = document.createDocumentFragment();
+                
+                this.filteredSeries.forEach((series, index) => {
+                    const card = this.createSeriesCard(series, index);
+                    fragment.appendChild(card);
+                });
+                
+                this.seriesGrid.appendChild(fragment);
+            }
+
+            createSeriesCard(series, index) {
+                const card = document.createElement('button');
+                card.className = 'series-card';
+                card.dataset.seriesId = series.id;
+                card.type = 'button';
+
+                const title = (series.name || 'Series').substring(0, 30);
+                let poster = series.logo;
+                
+                if (!poster || poster.includes('imgur.com')) {
+                    poster = `https://placehold.co/200x300/1a1a2e/ffffff?text=${encodeURIComponent(title)}`;
+                }
+
+                const group = series.group || 'Uncategorized';
+                const rating = series.rating || series.imdb || '8.0';
+
+                card.innerHTML = `
+                    <div class="series-poster">
+                        <img src="${poster}" alt="${title}" 
+                             onerror="this.src='https://placehold.co/200x300/1a1a2e/ffffff?text=${encodeURIComponent(title)}'">
+                        <button class="play-button" type="button" title="Play">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="series-info">
+                        <div class="series-title">${title}</div>
+                        <div class="series-meta">
+                            <span class="series-year">${group}</span>
+                            <span class="series-rating">⭐ ${rating}</span>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => this.playSeries(series));
+                return card;
+            }
+
+            playSeries(series) {
+                console.log('📂 Opening series details:', series.name);
+                // Navigate to series details page
+                window.location.href = `/series-details?id=${series.id}`;
+            }
+
+            handleSearch(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                this.filteredSeries = this.allSeries.filter(series => {
+                    const matchesSearch = series.name.toLowerCase().includes(searchTerm) ||
+                                        (series.group || '').toLowerCase().includes(searchTerm);
+                    const matchesCategory = this.currentCategory === 'all' || 
+                                          series.group === this.currentCategory;
+                    return matchesSearch && matchesCategory;
+                });
+
+                this.renderSeries();
+            }
+
+            handleCategoryChange(e) {
+                this.currentCategory = e.target.dataset.category;
+                
+                if (this.currentCategory === 'all') {
+                    this.filteredSeries = [...this.allSeries];
+                } else {
+                    this.filteredSeries = this.getSeriesByCategory(this.currentCategory);
+                }
+
+                this.render();
+            }
+
+            getUniqueCategories() {
+                const categories = new Set();
+                this.allSeries.forEach(series => {
+                    if (series.group) {
+                        categories.add(series.group);
+                    }
+                });
+                return Array.from(categories).sort();
+            }
+
+            getSeriesByCategory(category) {
+                return this.allSeries.filter(series => series.group === category);
+            }
+
+            showError(message) {
+                const msg = document.createElement('div');
+                msg.textContent = message;
+                msg.style.cssText = `
+                    position: fixed;
+                    bottom: 100px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #ef4444;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 1000;
+                `;
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 3000);
             }
         }
 
-        console.log('Setting up event listeners...');
-        
-        const searchInput = document.getElementById('searchInput');
-        const genreFilter = document.getElementById('genreFilter');
-        const yearFilter = document.getElementById('yearFilter');
-        const seriesGrid = document.querySelector('.series-cards');
-        const emptyState = document.getElementById('emptyState');
-        
-        // Only attach listeners if elements exist
-        if (searchInput) {
-            searchInput.addEventListener('input', filterSeries);
-        }
-        if (genreFilter) {
-            genreFilter.addEventListener('change', filterSeries);
-        }
-        if (yearFilter) {
-            yearFilter.addEventListener('change', filterSeries);
-        }
-
-        // Play button functionality
-        document.querySelectorAll('.play-button').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const title = this.closest('.series-card').querySelector('.series-title').textContent;
-                console.log(`Playing: ${title}`);
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.desktopSeriesApp = new DesktopSeriesApp();
             });
-        });
-
-        // Series card click
-        document.querySelectorAll('.series-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                if (!e.target.closest('.play-button')) {
-                    const title = this.querySelector('.series-title').textContent;
-                    console.log(`Viewing series: ${title}`);
-                }
-            });
-        });
-
-        // Sidebar menu navigation
+        } else {
+            window.desktopSeriesApp = new DesktopSeriesApp();
+        }
+    </script>
+    
+    <!-- Sidebar menu navigation -->
+    <script>
         document.querySelectorAll('.menu-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
@@ -313,7 +297,7 @@
             });
         });
 
-        // Notification icon click - check if element exists
+        // Notification icon click
         const notificationIcon = document.querySelector('.notification-icon');
         if (notificationIcon) {
             notificationIcon.addEventListener('click', function() {
@@ -321,7 +305,7 @@
             });
         }
 
-        // User avatar click - check if element exists
+        // User avatar click
         const userAvatar = document.querySelector('.user-avatar');
         if (userAvatar) {
             userAvatar.addEventListener('click', function() {
@@ -329,7 +313,7 @@
             });
         }
 
-        // Logout button - check if element exists
+        // Logout button
         const logoutButton = document.querySelector('.logout-button');
         if (logoutButton) {
             logoutButton.addEventListener('click', function() {
@@ -337,14 +321,5 @@
             });
         }
     </script>
-    
-    <!-- App Manager for error handling -->
-    <script src="../../static/js/app-manager.js"></script>
-    
-    <!-- Streaming Manager -->
-    <script src="../../static/js/streaming-manager.js"></script>
-    
-    <!-- Series App -->
-    <script src="../../static/js/series-app.js"></script>
 </body>
 </html>

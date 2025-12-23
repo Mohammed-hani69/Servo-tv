@@ -1,22 +1,62 @@
+# Core
 Flask==2.3.3
+Werkzeug==2.3.7
+Jinja2==3.1.6
+itsdangerous==2.2.0
+MarkupSafe==3.0.3
+python-dotenv==1.0.0
+
+# Database
 Flask-SQLAlchemy==3.0.5
 SQLAlchemy==2.0.21
-Werkzeug==2.3.7
-python-dotenv==1.0.0
-Flask-Login==0.6.2
+psycopg2-binary==2.9.9
+
+# Forms & Auth
 Flask-WTF==1.1.1
 WTForms==3.0.1
-openpyxl==3.1.5
+email-validator==2.1.0
+
+# SocketIO
 Flask-SocketIO==5.3.4
 python-socketio==5.9.0
 python-engineio==4.7.1
-requests==2.31.0
-reportlab==4.0.7
-xhtml2pdf==0.2.15
-celery==5.3.4
+eventlet==0.40.4
+simple-websocket==1.1.0
+
+# Server
+gunicorn==23.0.0
+
+# Celery & Queue
+celery==5.6.0
 redis==5.0.1
-gunicorn==21.2.0
-psycopg2-binary==2.9.9
-Pillow==10.1.0
-email-validator==2.1.0
-cryptography==41.0.7
+kombu==5.6.1
+amqp==5.3.1
+billiard==4.2.4
+vine==5.1.0
+
+# Files & Excel
+openpyxl==3.1.5
+
+# PDF & Reports
+reportlab==4.4.6
+xhtml2pdf==0.2.17
+pycairo==1.29.0
+html5lib==1.1
+cssselect2==0.8.0
+tinycss2==1.5.1
+svglib==1.6.0
+pillow==12.0.0
+python-bidi==0.6.7
+arabic-reshaper==3.0.0
+
+# Utils
+requests==2.32.5
+urllib3==2.6.2
+idna==3.11
+charset-normalizer==3.4.4
+certifi==2025.11.12
+six==1.17.0
+typing_extensions==4.15.0
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+packaging==25.0

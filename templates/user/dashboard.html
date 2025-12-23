@@ -9,7 +9,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.ico">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../static/css/user/dashboard.css">
-    
+    <!-- Preload critical resources -->
+    <link rel="preload" as="script" href="../../static/js/streaming-manager.js">
+    <style>
+        /* Critical CSS for above-the-fold content */
+        body { margin: 0; padding: 0; background: #0f172a; color: #fff; font-family: 'Inter', sans-serif; }
+        .container { display: flex; height: 100vh; }
+        .main-content { flex: 1; overflow-y: auto; }
+        .card { cursor: pointer; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .card:hover { transform: translateY(-4px); }
+        .carousel-item { cursor: pointer; }
+        img { max-width: 100%; height: auto; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -170,24 +181,44 @@
         </main>
     </div>
 
-    <script src="../../static/js/streaming-manager.js"></script>
+    <script async src="../../static/js/streaming-manager.js"></script>
     <script>
         // ============================================
-        // Dashboard Manager
+        // Dashboard Manager - Optimized
         // ============================================
         class DashboardManager {
             constructor() {
                 this.streamingManager = null;
-                this.watchedItems = JSON.parse(localStorage.getItem('watched_items') || '[]');
-                this.favoriteItems = JSON.parse(localStorage.getItem('favorite_items') || '[]');
-                this.currentSection = 'movies'; // Default section
+                this._watchedItems = null;
+                this._favoriteItems = null;
+                this.currentSection = 'movies';
+                this.renderCache = new Map();
                 
                 this.init();
+            }
+
+            // Lazy load watched items from localStorage
+            get watchedItems() {
+                if (this._watchedItems === null) {
+                    this._watchedItems = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                }
+                return this._watchedItems;
+            }
+
+            // Lazy load favorite items from localStorage
+            get favoriteItems() {
+                if (this._favoriteItems === null) {
+                    this._favoriteItems = JSON.parse(localStorage.getItem('favorite_items') || '[]');
+                }
+                return this._favoriteItems;
             }
 
             async init() {
                 console.log('🎬 بدء تهيئة لوحة التحكم...');
                 try {
+                    // Wait for streaming-manager to load
+                    await this.waitForStreamingManager();
+                    
                     // Initialize streaming manager
                     this.streamingManager = new StreamingManager();
                     await this.streamingManager.init();
@@ -197,21 +228,33 @@
                     this.updateClock();
                     setInterval(() => this.updateClock(), 1000);
 
-                    // Setup card listeners BEFORE loading content
+                    // Setup card listeners
                     this.setupCardListeners();
 
-                    // Load initial content (Movies)
-                    this.loadSectionContent('movies');
-
-                    // Display separate Movies and Series sections
-                    this.displayMoviesSection();
-                    this.displaySeriesSection();
+                    // Load all sections in parallel
+                    await Promise.all([
+                        this.displayMoviesSection(),
+                        this.displaySeriesSection(),
+                        this.loadSectionContent('movies')
+                    ]);
 
                     console.log('✅ تم تهيئة لوحة التحكم بنجاح');
 
                 } catch (error) {
                     console.error('❌ خطأ في تهيئة لوحة التحكم:', error);
                 }
+            }
+
+            // Wait for StreamingManager to be available
+            waitForStreamingManager() {
+                return new Promise(resolve => {
+                    const checkInterval = setInterval(() => {
+                        if (typeof StreamingManager !== 'undefined') {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 100);
+                });
             }
 
             /**
@@ -223,44 +266,26 @@
                     'Live TV': '/live-tv',
                     'Movies': '/movies',
                     'Series': '/series',
-                    'my_playlists': '/my-list',
+                    'Playlists': '/my-list',
                 };
 
                 cards.forEach(card => {
-                    // Add hover effect
-                    card.addEventListener('mouseenter', () => {
-                        card.style.transition = 'all 0.3s ease';
-                    });
-
-                    // Click handler
                     card.addEventListener('click', (e) => {
                         e.preventDefault();
                         const title = card.querySelector('.card-title').textContent.trim();
                         const page = pageMap[title] || '/movies';
                         
-                        // Add active state and loading effect
+                        // Add active state
                         cards.forEach(c => c.classList.remove('active'));
                         card.classList.add('active');
                         card.style.opacity = '0.8';
                         
-                        // Add loading indicator
-                        const originalContent = card.innerHTML;
-                        card.innerHTML = `
-                            <div style="position: relative; z-index: 21; display: flex; align-items: center; justify-content: center; height: 100%;">
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                                    <div style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                                    <span style="color: white; font-size: 14px;">جاري التحميل...</span>
-                                </div>
-                            </div>
-                        `;
-                        
                         console.log(`🎯 الانتقال إلى: ${title}`);
-                        console.log(`📍 URL: ${page}`);
                         
                         // Navigate to the page
                         setTimeout(() => {
                             window.location.href = page;
-                        }, 500);
+                        }, 300);
                     });
                 });
 
@@ -277,50 +302,47 @@
              * Load content for a section
              */
             async loadSectionContent(section) {
-                console.log(`📂 جاري تحميل قسم: ${section}`);
                 this.currentSection = section;
 
                 // Get content by type
                 const contentList = this.streamingManager.getContentByType(section);
                 
-                // Get watched items for this section
+                // Filter watched and favorites by section
                 const watchedForSection = this.watchedItems.filter(item => 
                     section === 'playlists' ? item.type === 'playlists' : item.type === section
                 );
                 
-                // Get favorites for this section
                 const favoritesForSection = this.favoriteItems.filter(item => 
                     section === 'playlists' ? item.type === 'playlists' : item.type === section
                 );
 
-                // Sort watched by timestamp (newest first)
+                // Sort watched by timestamp
                 watchedForSection.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
                 // Render sections
                 this.renderContinueWatching(watchedForSection);
                 this.renderFavorites(favoritesForSection);
-
-                // Update section title
-                this.updateSectionTitles(section);
             }
 
             /**
-             * Render continue watching section
+             * Render continue watching section - Optimized
              */
             renderContinueWatching(watched) {
                 const carousel = document.getElementById('continueCarousel');
-                carousel.innerHTML = '';
-
+                
                 if (watched.length === 0) {
                     carousel.innerHTML = '<div class="empty-state">No content watched</div>';
                     return;
                 }
 
+                // Use DocumentFragment for batch DOM operations
+                const fragment = document.createDocumentFragment();
+                const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+
                 // Show only last 5
                 watched.slice(0, 5).forEach(item => {
                     const itemEl = document.createElement('button');
                     itemEl.className = 'carousel-item';
-                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
                     itemEl.innerHTML = `
                         <img src="${item.logo || placeholderSvg}" 
                              alt="${item.name}" class="carousel-item-img" loading="lazy">
@@ -336,42 +358,35 @@
                         </div>
                     `;
 
-                    // Add image error handler
-                    const img = itemEl.querySelector('.carousel-item-img');
-                    if (img && item.logo) {
-                        img.addEventListener('error', function onImageError() {
-                            if (this.src !== placeholderSvg) {
-                                this.src = placeholderSvg;
-                                this.style.backgroundColor = '#222';
-                            }
-                        }, { once: false });
-                    }
-
-                    itemEl.addEventListener('click', () => {
-                        this.playContent(item);
-                    });
-
-                    carousel.appendChild(itemEl);
+                    // Add click handler
+                    itemEl.addEventListener('click', () => this.playContent(item));
+                    
+                    fragment.appendChild(itemEl);
                 });
+
+                carousel.innerHTML = '';
+                carousel.appendChild(fragment);
             }
 
             /**
-             * Render favorites section
+             * Render favorites section - Optimized
              */
             renderFavorites(favorites) {
                 const grid = document.getElementById('favoritesGrid');
-                grid.innerHTML = '';
 
                 if (favorites.length === 0) {
                     grid.innerHTML = '<div class="empty-state">No items were added to the favorites.</div>';
                     return;
                 }
 
+                // Use DocumentFragment for batch DOM operations
+                const fragment = document.createDocumentFragment();
+                const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23222' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+
                 // Show only first 6
                 favorites.slice(0, 6).forEach(item => {
                     const itemEl = document.createElement('button');
                     itemEl.className = 'grid-item';
-                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23222' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
                     itemEl.innerHTML = `
                         <div class="grid-item-img-container">
                             <img src="${item.logo || placeholderSvg}" 
@@ -384,44 +399,30 @@
                         </div>
                     `;
 
-                    // Add image error handler
-                    const img = itemEl.querySelector('.grid-item-img');
-                    if (img && item.logo) {
-                        img.addEventListener('error', function onImageError() {
-                            if (this.src !== placeholderSvg) {
-                                this.src = placeholderSvg;
-                                this.style.backgroundColor = '#222';
-                            }
-                        }, { once: false });
-                    }
-
-                    itemEl.addEventListener('click', () => {
-                        this.playContent(item);
-                    });
-
-                    grid.appendChild(itemEl);
+                    itemEl.addEventListener('click', () => this.playContent(item));
+                    fragment.appendChild(itemEl);
                 });
+
+                grid.innerHTML = '';
+                grid.appendChild(fragment);
             }
 
             /**
-             * Play content and record it as watched
+             * Play content
              */
             playContent(item) {
                 console.log('▶️ تشغيل:', item.name);
-                
-                // Open player in a modal or new window
                 this.openPlayer(item);
             }
 
             /**
-             * Open player modal with resume capability
+             * Open player modal
              */
             openPlayer(item) {
                 const modal = document.createElement('div');
                 modal.id = 'dashboard-player-modal';
                 modal.className = 'dashboard-player-modal';
                 
-                // Get saved playback position
                 const startTime = item.currentTime || 0;
                 const resumeMessage = startTime > 0 ? `⏱️ استئناف من الدقيقة ${Math.floor(startTime / 60)}:${String(Math.floor(startTime % 60)).padStart(2, '0')}` : '';
                 
@@ -443,37 +444,37 @@
                 document.body.appendChild(modal);
                 this.injectPlayerStyles();
                 
-                // Set playback position after video loads
                 const video = document.getElementById('dashboard-video-player');
                 if (startTime > 0) {
                     video.addEventListener('loadedmetadata', () => {
                         video.currentTime = startTime;
-                        console.log('⏪ استئناف التشغيل من:', startTime, 'ثانية');
                     }, { once: true });
                 }
                 
-                // Save playback position periodically
-                const saveInterval = setInterval(() => {
-                    if (!document.getElementById('dashboard-player-modal')) {
-                        clearInterval(saveInterval);
-                        return;
-                    }
-                    this.updateWatchedTime(item, video.currentTime, video.duration);
-                }, 5000);
+                let saveInterval;
+                const startSaving = () => {
+                    saveInterval = setInterval(() => {
+                        if (document.getElementById('dashboard-player-modal')) {
+                            this.updateWatchedTime(item, video.currentTime, video.duration);
+                        } else {
+                            clearInterval(saveInterval);
+                        }
+                    }, 5000);
+                };
+
+                video.addEventListener('play', startSaving, { once: true });
                 
-                // Close button
-                modal.querySelector('.player-close').addEventListener('click', () => {
+                const closeHandler = () => {
                     clearInterval(saveInterval);
                     this.recordWatchedFinal(item, video.currentTime, video.duration);
                     this.closePlayer();
-                });
+                };
                 
-                // Close on Escape
+                modal.querySelector('.player-close').addEventListener('click', closeHandler);
+                
                 const closeOnEscape = (e) => {
                     if (e.key === 'Escape') {
-                        clearInterval(saveInterval);
-                        this.recordWatchedFinal(item, video.currentTime, video.duration);
-                        this.closePlayer();
+                        closeHandler();
                         document.removeEventListener('keydown', closeOnEscape);
                     }
                 };
@@ -481,7 +482,7 @@
             }
 
             /**
-             * Close player modal
+             * Close player
              */
             closePlayer() {
                 const modal = document.getElementById('dashboard-player-modal');
@@ -493,11 +494,11 @@
             }
 
             /**
-             * Update watched time without reloading
+             * Update watched time
              */
             updateWatchedTime(item, currentTime, duration) {
                 try {
-                    const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                    const watched = this.watchedItems;
                     const watchedItem = watched.find(w => w.id === item.id);
                     
                     if (watchedItem) {
@@ -518,7 +519,7 @@
              */
             recordWatchedFinal(item, currentTime, duration) {
                 try {
-                    const watched = JSON.parse(localStorage.getItem('watched_items') || '[]');
+                    const watched = this.watchedItems;
                     const watchedItem = watched.find(w => w.id === item.id);
                     
                     if (watchedItem) {
@@ -528,7 +529,6 @@
                         watchedItem.timestamp = Date.now();
                         
                         localStorage.setItem('watched_items', JSON.stringify(watched));
-                        console.log('Saved playback position at:', Math.floor(currentTime), 'seconds');
                     }
                 } catch (error) {
                     console.warn('Error recording watched item:', error);
@@ -633,97 +633,23 @@
             }
 
             /**
-             * Record a watched item
-             */
-            recordWatched(item) {
-                const watched = {
-                    id: item.id,
-                    name: item.name,
-                    logo: item.logo,
-                    group: item.group,
-                    type: item.type,
-                    streamUrl: item.streamUrl,
-                    timestamp: Date.now(),
-                    progress: 0
-                };
-
-                // Remove if already exists
-                this.watchedItems = this.watchedItems.filter(w => w.id !== item.id);
-
-                // Add to front
-                this.watchedItems.unshift(watched);
-
-                // Keep only last 50
-                this.watchedItems = this.watchedItems.slice(0, 50);
-
-                // Save to localStorage
-                localStorage.setItem('watched_items', JSON.stringify(this.watchedItems));
-
-                // Reload current section
-                this.loadSectionContent(this.currentSection);
-
-                // Update separate movie/series sections
-                if (item.type === 'movies') {
-                    this.displayMoviesSection();
-                } else if (item.type === 'series') {
-                    this.displaySeriesSection();
-                }
-            }
-
-            /**
-             * Add to favorites
-             */
-            addToFavorites(item) {
-                const favorite = {
-                    id: item.id,
-                    name: item.name,
-                    logo: item.logo,
-                    group: item.group,
-                    type: item.type,
-                    streamUrl: item.streamUrl,
-                    addedAt: Date.now()
-                };
-
-                // Check if already exists
-                if (this.favoriteItems.find(f => f.id === item.id)) {
-                    return;
-                }
-
-                this.favoriteItems.push(favorite);
-                localStorage.setItem('favorite_items', JSON.stringify(this.favoriteItems));
-
-                this.loadSectionContent(this.currentSection);
-            }
-
-            /**
-             * Remove from favorites
-             */
-            removeFromFavorites(itemId) {
-                this.favoriteItems = this.favoriteItems.filter(f => f.id !== itemId);
-                localStorage.setItem('favorite_items', JSON.stringify(this.favoriteItems));
-
-                this.loadSectionContent(this.currentSection);
-            }
-
-            /**
              * Display Movies Section
              */
             displayMoviesSection() {
                 const carousel = document.getElementById('moviesCarousel');
                 const moviesWatched = this.watchedItems.filter(item => item.type === 'movies');
                 
-                carousel.innerHTML = '';
-                
                 if (moviesWatched.length === 0) {
                     carousel.innerHTML = '<div class="empty-state">No movies watched</div>';
                     return;
                 }
                 
-                // Show only last 5 movies
+                const fragment = document.createDocumentFragment();
+                const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                
                 moviesWatched.slice(0, 5).forEach(item => {
                     const itemEl = document.createElement('button');
                     itemEl.className = 'carousel-item';
-                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
                     itemEl.innerHTML = `
                         <img src="${item.logo || placeholderSvg}" 
                              alt="${item.name}" class="carousel-item-img" loading="lazy">
@@ -739,23 +665,12 @@
                         </div>
                     `;
 
-                    // Add image error handler
-                    const img = itemEl.querySelector('.carousel-item-img');
-                    if (img && item.logo) {
-                        img.addEventListener('error', function onImageError() {
-                            if (this.src !== placeholderSvg) {
-                                this.src = placeholderSvg;
-                                this.style.backgroundColor = '#222';
-                            }
-                        }, { once: false });
-                    }
-
-                    itemEl.addEventListener('click', () => {
-                        this.playContent(item);
-                    });
-
-                    carousel.appendChild(itemEl);
+                    itemEl.addEventListener('click', () => this.playContent(item));
+                    fragment.appendChild(itemEl);
                 });
+
+                carousel.innerHTML = '';
+                carousel.appendChild(fragment);
             }
 
             /**
@@ -765,18 +680,17 @@
                 const carousel = document.getElementById('seriesCarousel');
                 const seriesWatched = this.watchedItems.filter(item => item.type === 'series');
                 
-                carousel.innerHTML = '';
-                
                 if (seriesWatched.length === 0) {
                     carousel.innerHTML = '<div class="empty-state">No series watched</div>';
                     return;
                 }
                 
-                // Show only last 5 series
+                const fragment = document.createDocumentFragment();
+                const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                
                 seriesWatched.slice(0, 5).forEach(item => {
                     const itemEl = document.createElement('button');
                     itemEl.className = 'carousel-item';
-                    const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23222' width='400' height='225'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
                     itemEl.innerHTML = `
                         <img src="${item.logo || placeholderSvg}" 
                              alt="${item.name}" class="carousel-item-img" loading="lazy">
@@ -792,38 +706,12 @@
                         </div>
                     `;
 
-                    // Add image error handler
-                    const img = itemEl.querySelector('.carousel-item-img');
-                    if (img && item.logo) {
-                        img.addEventListener('error', function onImageError() {
-                            if (this.src !== placeholderSvg) {
-                                this.src = placeholderSvg;
-                                this.style.backgroundColor = '#222';
-                            }
-                        }, { once: false });
-                    }
-
-                    itemEl.addEventListener('click', () => {
-                        this.playContent(item);
-                    });
-
-                    carousel.appendChild(itemEl);
+                    itemEl.addEventListener('click', () => this.playContent(item));
+                    fragment.appendChild(itemEl);
                 });
-            }
 
-            /**
-             * Update section titles
-             */
-            updateSectionTitles(section) {
-                const titles = {
-                    'live-tv': 'Recently Watched Channels',
-                    'movies': 'Recently Watched Movies',
-                    'series': 'Recently Watched Series',
-                    'playlists': 'Recently Watched Playlists'
-                };
-
-                document.getElementById('continue-title').textContent = titles[section] || 'Continue Watching';
-                document.getElementById('favorites-title').textContent = `Favorites - ${section}`;
+                carousel.innerHTML = '';
+                carousel.appendChild(fragment);
             }
 
             /**

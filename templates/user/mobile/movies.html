@@ -149,9 +149,13 @@
                 const movieName = (movie.name || 'Movie').substring(0, 15);
                 const title = movie.name || 'Unknown Movie';
                 const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='450'%3E%3Crect fill='%23222' width='300' height='450'/%3E%3Ctext x='50%25' y='50%25' font-size='14' fill='%23888' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+                
+                // استخدام خدمة بديلة بدل imgur و via.placeholder.com
+                let moviePoster = movie.logo || placeholderSvg;
+                if (moviePoster && moviePoster.includes('imgur.com')) {
+                    moviePoster = `https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(title)}`;\n                }
 
-                card.innerHTML = `
-                    <img src="${movie.logo || placeholderSvg}" alt="${title.replace(/"/g, '&quot;')}" class="movie-image" loading="lazy">
+                card.innerHTML = `\n                    <img src="${moviePoster}" alt="${title.replace(/"/g, '&quot;')}" class="movie-image" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(title)}'">
                     <div class="new-badge">NEW</div>
                     <div class="movie-info">
                         <div class="movie-info-content">

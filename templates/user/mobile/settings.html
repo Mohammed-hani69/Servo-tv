@@ -9,38 +9,67 @@
     <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
 </head>
 <body>
-    <header class="mobile-header"><h1>Settings</h1></header>
+    <header class="mobile-header">
+        <h1>Settings</h1>
+    </header>
+    
     <main class="mobile-main">
+
+        <!-- Device Information -->
+        <section class="settings-section">
+            <h2>Device Info</h2>
+            <div class="info-item">
+                <span class="info-label">Device ID</span>
+                <span class="info-value" id="deviceId">Loading...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">App Version</span>
+                <span class="info-value">v1.0.2 (Beta)</span>
+            </div>
+        </section>
+
+        <!-- Language Settings -->
+        <section class="settings-section">
+            <h2>Language</h2>
+            <div class="language-buttons">
+                <button class="language-btn active" data-lang="en">🇺🇸 English</button>
+                <button class="language-btn" data-lang="ar">🇸🇦 Arabic</button>
+            </div>
+        </section>
+
+        <!-- Playback Settings -->
         <section class="settings-section">
             <h2>Playback</h2>
             <div class="setting-item">
                 <span>Quality</span>
-                <select>
-                    <option>Auto</option>
-                    <option>720p</option>
-                    <option>480p</option>
-                </select>
+                <div class="quality-options">
+                    <button class="quality-btn active" data-quality="auto">Auto</button>
+                    <button class="quality-btn" data-quality="720">720p</button>
+                    <button class="quality-btn" data-quality="480">480p</button>
+                    <button class="quality-btn" data-quality="360">360p</button>
+                </div>
             </div>
             <div class="setting-item">
-                <span>Subtitles</span>
-                <input type="checkbox" checked>
+                <span>Auto-play</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoplay" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>Remember Position</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="rememberPosition" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
         </section>
 
+        <!-- Account Settings -->
         <section class="settings-section">
             <h2>Account</h2>
             <div class="setting-item">
-                <button onclick="window.location.href='/settings/email'">Change Email</button>
-            </div>
-            <div class="setting-item">
-                <button onclick="window.location.href='/settings/password'">Change Password</button>
-            </div>
-        </section>
-
-        <section class="settings-section">
-            <h2>Other</h2>
-            <div class="setting-item">
-                <button onclick="window.location.href='/logout'">Logout</button>
+                <button class="btn btn-secondary" onclick="window.location.href='/logout'">Logout</button>
             </div>
         </section>
 
@@ -49,5 +78,7 @@
     
     <!-- BOTTOM NAVIGATION COMPONENT -->
     {% include 'user/mobile/components/bottom-nav.html' %}
+
+    <script src="../../static/js/mobile/settings.js"></script>
 </body>
 </html>

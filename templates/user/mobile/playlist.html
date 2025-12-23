@@ -3,34 +3,751 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Servo - Playlist</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Servo - Playlists</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../static/css/user/mobile/playlist.css">
     <link rel="stylesheet" href="../../static/css/user/mobile/components/bottom-nav.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://i.pinimg.com/736x/19/8b/2f/198b2f01e73b905772279616eccc7c65.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: rgb(248, 250, 252);
+            overflow: hidden;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ============ MOBILE HEADER ============ */
+        .mobile-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.97) 0%, rgba(15, 23, 42, 0.92) 100%);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 0;
+            padding-top: max(env(safe-area-inset-top), 6px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .mobile-header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            padding: 12px 16px;
+            letter-spacing: -0.5px;
+        }
+
+        /* ============ MOBILE MAIN ============ */
+        .mobile-main {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 70px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px;
+            padding-bottom: 20px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-main::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .mobile-main::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .mobile-main::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 3px;
+        }
+
+        /* ============ ADD BUTTON ============ */
+        .add-playlist-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .add-playlist-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+
+        /* ============ PLAYLISTS CONTAINER ============ */
+        .playlists-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .playlist-card {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.6) 0%, rgba(20, 29, 67, 0.6) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .playlist-card:active {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.8) 0%, rgba(20, 29, 67, 0.8) 100%);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .playlist-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .playlist-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .playlist-link {
+            font-size: 12px;
+            color: rgb(148, 163, 184);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .status-inactive {
+            background: rgba(107, 114, 128, 0.2);
+            color: rgb(148, 163, 184);
+        }
+
+        .playlist-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-right: 8px;
+        }
+
+        /* ============ TOGGLE SWITCH ============ */
+        .toggle-btn {
+            width: 44px;
+            height: 26px;
+            border-radius: 13px;
+            border: none;
+            background: rgb(71, 85, 105);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .toggle-btn::after {
+            content: '';
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-btn.active::after {
+            transform: translateX(18px);
+        }
+
+        /* ============ DELETE BUTTON ============ */
+        .delete-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:active {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        /* ============ EMPTY STATE ============ */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgb(148, 163, 184);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgb(248, 250, 252);
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            font-size: 13px;
+            color: rgb(148, 163, 184);
+        }
+
+        /* ============ MODAL ============ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding-bottom: 70px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(20, 29, 67, 0.95) 100%);
+            width: 100%;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+            backdrop-filter: blur(12px);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: rgb(148, 163, 184);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ============ FORM ============ */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: rgb(225, 231, 239);
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: rgb(100, 116, 139);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            background: rgba(15, 23, 42, 0.7);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: rgb(100, 116, 139);
+            margin-top: 4px;
+        }
+
+        /* ============ BUTTONS ============ */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.1);
+            color: rgb(147, 197, 253);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-secondary:active {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            right: 16px;
+            left: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+            animation: slideUp 0.3s ease;
+            z-index: 999;
+            border: 1px solid;
+        }
+
+        .toast.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+        }
+
+        .toast.error {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        .toast.info {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: rgb(147, 197, 253);
+        }
+
+        .bottom-spacer {
+            height: 20px;
+        }
+    </style>
 </head>
 <body>
-    <header class="mobile-header"><h1>My Playlist</h1></header>
+    <header class="mobile-header">
+        <h1>My Playlists</h1>
+    </header>
+
     <main class="mobile-main">
-        <div class="playlist-items">
-            <button class="playlist-item" onclick="console.log('Playing item')">
-                <img src="https://picsum.photos/300/450?random=1" alt="Item">
-                <div class="item-info">
-                    <div class="item-title">Playlist Item 1</div>
-                    <div class="item-duration">45 min</div>
-                </div>
-            </button>
-            <button class="playlist-item" onclick="console.log('Playing item')">
-                <img src="https://picsum.photos/300/450?random=2" alt="Item">
-                <div class="item-info">
-                    <div class="item-title">Playlist Item 2</div>
-                    <div class="item-duration">120 min</div>
-                </div>
-            </button>
+        <button class="add-playlist-btn" id="addBtn">
+            <span>➕</span> Add Playlist
+        </button>
+
+        <div id="playlistsContainer" class="playlists-container">
+            <!-- Playlists will be loaded here -->
         </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-icon">📱</div>
+            <div class="empty-title">No Playlists Yet</div>
+            <div class="empty-text">Add your first playlist to get started</div>
+        </div>
+
         <div class="bottom-spacer"></div>
     </main>
-    
+
+    <!-- Modal: Add Playlist -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add New Playlist</h2>
+                <button class="modal-close" id="closeModal">✕</button>
+            </div>
+
+            <form id="playlistForm">
+                <div class="form-group">
+                    <label class="form-label">Playlist Name</label>
+                    <input 
+                        type="text" 
+                        id="playlistName" 
+                        class="form-input"
+                        placeholder="e.g., Premium IPTV"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Playlist URL</label>
+                    <textarea 
+                        id="playlistLink" 
+                        class="form-textarea"
+                        placeholder="Paste M3U or M3U8 URL here..."
+                        required
+                    ></textarea>
+                    <div class="form-hint">Supports: M3U, M3U8, or Xtream Codes API</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn-primary" id="submitBtn">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- BOTTOM NAVIGATION COMPONENT -->
     {% include 'user/mobile/components/bottom-nav.html' %}
+
+    <script>
+        let playlists = [];
+
+        // DOM Elements
+        const addBtn = document.getElementById('addBtn');
+        const addModal = document.getElementById('addModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const playlistForm = document.getElementById('playlistForm');
+        const playlistsContainer = document.getElementById('playlistsContainer');
+        const emptyState = document.getElementById('emptyState');
+        const playlistName = document.getElementById('playlistName');
+        const playlistLink = document.getElementById('playlistLink');
+
+        // Load playlists
+        async function loadPlaylists() {
+            try {
+                const response = await fetch('/api/playlists');
+                const data = await response.json();
+                
+                if (data.success) {
+                    playlists = data.data || [];
+                    renderPlaylists();
+                } else {
+                    showToast('Error loading playlists', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Connection error', 'error');
+            }
+        }
+
+        // Render playlists
+        function renderPlaylists() {
+            playlistsContainer.innerHTML = '';
+
+            if (playlists.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            playlists.forEach(playlist => {
+                const card = document.createElement('div');
+                card.className = 'playlist-card';
+
+                const statusClass = playlist.is_active ? 'status-active' : 'status-inactive';
+                const statusText = playlist.is_active ? '🟢 Active' : '⚫ Inactive';
+                const toggleActive = playlist.is_active ? 'active' : '';
+
+                card.innerHTML = `
+                    <div class="playlist-info">
+                        <div class="playlist-name">${escapeHtml(playlist.name)}</div>
+                        <div class="playlist-link">${escapeHtml(playlist.media_link.substring(0, 40))}...</div>
+                        <div class="playlist-status ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="playlist-actions">
+                        <button type="button" class="toggle-btn ${toggleActive}" data-id="${playlist.id}" onclick="togglePlaylist(${playlist.id}, event)"></button>
+                        <button type="button" class="delete-btn" data-id="${playlist.id}" onclick="deletePlaylist(${playlist.id}, event)">🗑️</button>
+                    </div>
+                `;
+
+                playlistsContainer.appendChild(card);
+            });
+        }
+
+        // Toggle playlist
+        async function togglePlaylist(id, e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const playlist = playlists.find(p => p.id === id);
+            if (!playlist) return;
+
+            // تغيير الحالة فوراً للمستخدم
+            const previousState = playlist.is_active;
+            playlist.is_active = !playlist.is_active;
+            renderPlaylists();
+            
+            try {
+                const response = await fetch(`/api/playlists/${id}/toggle`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast(
+                        playlist.is_active ? '✓ Playlist Activated' : '✓ Playlist Deactivated', 
+                        'success'
+                    );
+                } else {
+                    // إرجاع للحالة السابقة في حالة الخطأ
+                    playlist.is_active = previousState;
+                    renderPlaylists();
+                    showToast(data.message || 'Error toggling status', 'error');
+                }
+            } catch (error) {
+                // إرجاع للحالة السابقة في حالة الخطأ
+                playlist.is_active = previousState;
+                renderPlaylists();
+                console.error('Toggle error:', error);
+                showToast('Error toggling status', 'error');
+            }
+        }
+
+        // Delete playlist
+        async function deletePlaylist(id, e) {
+            e.preventDefault();
+            
+            if (!confirm('Delete this playlist?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/playlists/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    playlists = playlists.filter(p => p.id !== id);
+                    renderPlaylists();
+                    showToast('Playlist deleted', 'success');
+                }
+            } catch (error) {
+                showToast('Error deleting playlist', 'error');
+            }
+        }
+
+        // Open modal
+        function openModal() {
+            playlistName.value = '';
+            playlistLink.value = '';
+            addModal.classList.add('active');
+        }
+
+        // Close modal
+        function closePlaylistModal() {
+            addModal.classList.remove('active');
+        }
+
+        // Add playlist
+        playlistForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = playlistName.value.trim();
+            const link = playlistLink.value.trim();
+
+            if (!name || !link) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/playlists', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        media_link: link
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    closePlaylistModal();
+                    loadPlaylists();
+                    showToast('Playlist added', 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('Error adding playlist', 'error');
+            }
+        });
+
+        // Button events
+        addBtn.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closePlaylistModal);
+        cancelBtn.addEventListener('click', closePlaylistModal);
+
+        addModal.addEventListener('click', (e) => {
+            if (e.target === addModal) closePlaylistModal();
+        });
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Show toast
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Load on init
+        loadPlaylists();
+
+        // Reload every 30 seconds
+        setInterval(loadPlaylists, 30000);
+    </script>
 </body>
 </html>

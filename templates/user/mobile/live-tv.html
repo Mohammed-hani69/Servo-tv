@@ -133,9 +133,14 @@
                     for (let i = 0; i < lines.length; i++) {
                         if (lines[i].startsWith('#EXTINF')) {
                             const name = lines[i].match(/,(.+)$/)?.[1]?.trim() || 'Unknown';
-                            const logo = lines[i].match(/tvg-logo="([^"]*)"/)?.[1] || '';
+                            let logo = lines[i].match(/tvg-logo="([^"]*)"/)?.[1] || '';
                             const group = lines[i].match(/group-title="([^"]+)"/)?.[1] || 'Other';
                             const url = lines[i + 1]?.trim();
+                            
+                            // تجاهل صور imgur لتجنب أخطاء 403
+                            if (logo && logo.includes('imgur.com')) {
+                                logo = '';
+                            }
                             
                             if (url && url.startsWith('http')) {
                                 this.channels.push({
@@ -235,7 +240,12 @@
                 channelsToShow.forEach((channel, index) => {
                     const isFavorite = this.isFavorite(channel.id);
                     const placeholderSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' font-size='10' fill='%23666' text-anchor='middle' dy='.3em'%3ENo Logo%3C/text%3E%3C/svg%3E`;
-                    const logo = channel.logo || placeholderSvg;
+                    
+                    // استخدام خدمة بديلة بدل imgur و via.placeholder.com
+                    let logo = channel.logo || placeholderSvg;
+                    if (logo && !logo.startsWith('data:') && logo.includes('imgur.com')) {
+                        logo = `https://placehold.co/100x100/1a1a2e/ffffff?text=${encodeURIComponent(channel.name)}`;
+                    }
                     
                     html += `
                         <div class="channel-card" data-channel-id="${channel.id}" data-index="${index}">
@@ -244,6 +254,7 @@
                                     src="${logo}" 
                                     alt="${channel.name}"
                                     loading="lazy"
+                                    onerror="this.src='https://placehold.co/100x100/1a1a2e/ffffff?text=${encodeURIComponent(channel.name)}'"
                                 >
                                 <div class="play-overlay">
                                     <button class="play-btn" title="تشغيل">

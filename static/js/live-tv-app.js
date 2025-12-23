@@ -108,13 +108,19 @@ class LiveTVApp {
         
         this.filteredChannels.forEach((channel, index) => {
             const isFavorite = this.isFavorite(channel.id);
-            const logoUrl = channel.logo || `https://via.placeholder.com/100?text=${encodeURIComponent(channel.name)}`;
+            const logoUrl = channel.logo || `https://placehold.co/100x100/1a1a2e/ffffff?text=${encodeURIComponent(channel.name)}`;
+            
+            // تجاهل صور imgur
+            const finalLogoUrl = (logoUrl && logoUrl.includes('imgur.com')) 
+                ? `https://placehold.co/100x100/1a1a2e/ffffff?text=${encodeURIComponent(channel.name)}`
+                : logoUrl;
             
             html += `
                 <div class="channel-card" data-channel-id="${channel.id}" data-index="${index}">
                     <div class="channel-thumbnail">
-                        <img src="${logoUrl}" 
+                        <img src="${finalLogoUrl}" 
                              alt="${channel.name}"
+                             loading="lazy"
                              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23333%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2214%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3EChannel%3C/text%3E%3C/svg%3E'">
                         <div class="play-button">
                             <svg viewBox="0 0 24 24" fill="currentColor">

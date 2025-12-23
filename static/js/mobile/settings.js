@@ -1,33 +1,34 @@
 /**
- * Settings Page - Interactive Features
- * Handles settings management, language selection, and playback preferences
+ * Mobile Settings Page - Interactive Features
+ * Handles settings management for mobile devices
  */
 
-class SettingsManager {
+class MobileSettingsManager {
     constructor() {
-        this.navButtons = document.querySelectorAll('.nav-btn');
         this.playlistInput = document.getElementById('playlistUrl');
         this.savePlaylistBtn = document.getElementById('savePlaylistBtn');
         this.languageButtons = document.querySelectorAll('.language-btn');
         this.qualityButtons = document.querySelectorAll('.quality-btn');
+        this.deviceIdElement = document.getElementById('deviceId');
+        
         this.toggles = {
             autoplay: document.getElementById('autoplay'),
             rememberPosition: document.getElementById('rememberPosition')
         };
+
         this.currentLanguage = 'en';
         this.currentQuality = 'auto';
+        
         this.init();
     }
 
     init() {
         this.loadSettings();
         this.loadSettingsFromBackend();
-        this.setupNavigation();
         this.setupPlaylistHandling();
         this.setupLanguageSelection();
         this.setupQualitySelection();
         this.setupToggles();
-        this.setupKeyboardNavigation();
     }
 
     /**
@@ -46,8 +47,8 @@ class SettingsManager {
 
             if (data.success && data.data) {
                 // Update device ID display
-                if (document.getElementById('deviceId')) {
-                    document.getElementById('deviceId').textContent = data.data.device_id || 'Unknown';
+                if (this.deviceIdElement) {
+                    this.deviceIdElement.textContent = data.data.device_id || 'Unknown';
                 }
 
                 // Update media link if available
@@ -57,7 +58,6 @@ class SettingsManager {
             }
         } catch (error) {
             console.error('Error loading settings from backend:', error);
-            // Continue with local settings if backend fails
         }
     }
 
@@ -67,57 +67,26 @@ class SettingsManager {
     loadSettings() {
         const saved = localStorage.getItem('appSettings');
         if (saved) {
-            const settings = JSON.parse(saved);
-            this.currentLanguage = settings.language || 'en';
-            this.currentQuality = settings.quality || 'auto';
-            
-            if (this.playlistInput) {
-                this.playlistInput.value = settings.playlistUrl || '';
-            }
-            
-            if (this.toggles.autoplay) {
-                this.toggles.autoplay.checked = settings.autoplay !== false;
-            }
-            
-            if (this.toggles.rememberPosition) {
-                this.toggles.rememberPosition.checked = settings.rememberPosition !== false;
+            try {
+                const settings = JSON.parse(saved);
+                this.currentLanguage = settings.language || 'en';
+                this.currentQuality = settings.quality || 'auto';
+                
+                if (this.playlistInput) {
+                    this.playlistInput.value = settings.playlistUrl || '';
+                }
+                
+                if (this.toggles.autoplay) {
+                    this.toggles.autoplay.checked = settings.autoplay !== false;
+                }
+                
+                if (this.toggles.rememberPosition) {
+                    this.toggles.rememberPosition.checked = settings.rememberPosition !== false;
+                }
+            } catch (error) {
+                console.error('Error loading settings from localStorage:', error);
             }
         }
-    }
-
-    /**
-     * Save settings to localStorage
-     */
-    saveSettings() {
-        const settings = {
-            language: this.currentLanguage,
-            quality: this.currentQuality,
-            playlistUrl: this.playlistInput?.value || '',
-            autoplay: this.toggles.autoplay?.checked || false,
-            rememberPosition: this.toggles.rememberPosition?.checked || false
-        };
-        localStorage.setItem('appSettings', JSON.stringify(settings));
-        this.showNotification('Settings saved successfully');
-    }
-
-    /**
-     * Setup navigation buttons
-     */
-    setupNavigation() {
-        this.navButtons.forEach((button, index) => {
-            button.addEventListener('click', (e) => {
-                this.handleNavClick(e, index);
-            });
-        });
-    }
-
-    /**
-     * Handle navigation button clicks
-     */
-    handleNavClick(event, index) {
-        this.navButtons.forEach(btn => btn.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        console.log(`Navigation clicked: ${event.currentTarget.title}`);
     }
 
     /**
@@ -168,14 +137,13 @@ class SettingsManager {
             const data = await response.json();
 
             if (data.success) {
-                this.showNotification('تم حفظ رابط البلايليست بنجاح', 'success');
-                this.animateButton(this.savePlaylistBtn);
+                this.showNotification('Playlist saved successfully', 'success');
             } else {
-                this.showNotification(data.message || 'فشل حفظ البلايليست', 'error');
+                this.showNotification(data.message || 'Failed to save playlist', 'error');
             }
         } catch (error) {
             console.error('Error saving playlist:', error);
-            this.showNotification('حدث خطأ في الاتصال بالخادم', 'error');
+            this.showNotification('Connection error', 'error');
         } finally {
             this.savePlaylistBtn.disabled = false;
         }
@@ -226,13 +194,13 @@ class SettingsManager {
 
             if (data.success) {
                 this.applyLanguage(lang);
-                this.showNotification('تم تحديث اللغة', 'success');
+                this.showNotification('Language updated', 'success');
             } else {
-                this.showNotification(data.message || 'فشل تحديث اللغة', 'error');
+                this.showNotification(data.message || 'Failed to update language', 'error');
             }
         } catch (error) {
             console.error('Error saving language:', error);
-            this.applyLanguage(lang); // Apply locally even if server fails
+            this.applyLanguage(lang);
         }
     }
 
@@ -240,11 +208,12 @@ class SettingsManager {
      * Apply language to interface
      */
     applyLanguage(lang) {
-        console.log(`Language changed to: ${lang}`);
         if (lang === 'ar') {
             document.documentElement.dir = 'rtl';
+            document.documentElement.lang = 'ar';
         } else {
             document.documentElement.dir = 'ltr';
+            document.documentElement.lang = 'en';
         }
     }
 
@@ -280,13 +249,13 @@ class SettingsManager {
             const data = await response.json();
 
             if (data.success) {
-                this.showNotification(`تم تعيين جودة الفيديو إلى ${quality}`, 'success');
+                this.showNotification(`Quality set to ${quality}`, 'success');
             } else {
-                this.showNotification(data.message || 'فشل تعديل الجودة', 'error');
+                this.showNotification(data.message || 'Failed to update quality', 'error');
             }
         } catch (error) {
             console.error('Error saving quality:', error);
-            this.showNotification('حدث خطأ في الاتصال', 'error');
+            this.showNotification('Connection error', 'error');
         }
     }
 
@@ -323,7 +292,6 @@ class SettingsManager {
             const data = await response.json();
 
             if (data.success) {
-                // Save to localStorage as well for offline functionality
                 const settings = {
                     language: this.currentLanguage,
                     quality: this.currentQuality,
@@ -332,8 +300,6 @@ class SettingsManager {
                     rememberPosition: this.toggles.rememberPosition?.checked || false
                 };
                 localStorage.setItem('appSettings', JSON.stringify(settings));
-            } else {
-                console.warn('Failed to save playback settings:', data.message);
             }
         } catch (error) {
             console.error('Error saving playback settings:', error);
@@ -341,131 +307,34 @@ class SettingsManager {
     }
 
     /**
-     * Setup keyboard navigation
-     */
-    setupKeyboardNavigation() {
-        document.addEventListener('keydown', (e) => {
-            this.handleKeyPress(e);
-        });
-    }
-
-    /**
-     * Handle keyboard press
-     */
-    handleKeyPress(event) {
-        const focusableElements = document.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
-        const activeElement = document.activeElement;
-        const currentIndex = Array.from(focusableElements).indexOf(activeElement);
-
-        switch (event.key) {
-            case 'ArrowUp':
-                event.preventDefault();
-                this.focusElement(currentIndex - 1, focusableElements);
-                break;
-            case 'ArrowDown':
-                event.preventDefault();
-                this.focusElement(currentIndex + 1, focusableElements);
-                break;
-            case 'ArrowLeft':
-                event.preventDefault();
-                this.focusElement(currentIndex - 1, focusableElements);
-                break;
-            case 'ArrowRight':
-                event.preventDefault();
-                this.focusElement(currentIndex + 1, focusableElements);
-                break;
-            case 'Enter':
-                if (activeElement && activeElement.tagName === 'BUTTON') {
-                    event.preventDefault();
-                    activeElement.click();
-                }
-                break;
-        }
-    }
-
-    /**
-     * Focus an element by index
-     */
-    focusElement(index, elements) {
-        if (index >= 0 && index < elements.length) {
-            elements[index].focus();
-        }
-    }
-
-    /**
      * Show notification message
      */
     showNotification(message, type = 'success') {
-        console.log(`[${type.toUpperCase()}] ${message}`);
-        
-        // Create a simple notification
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
         notification.style.cssText = `
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 80px;
+            left: 10px;
+            right: 10px;
             background-color: ${type === 'error' ? '#dc2626' : '#22c55e'};
             color: white;
-            padding: 12px 24px;
+            padding: 12px 16px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             z-index: 1000;
-            animation: slideIn 0.3s ease-out;
+            animation: slideUp 0.3s ease-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         `;
 
         document.body.appendChild(notification);
 
         setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease-in';
+            notification.style.animation = 'slideDown 0.3s ease-in';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
-    }
-
-    /**
-     * Animate button click
-     */
-    animateButton(button) {
-        if (!button) return;
-        button.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            button.style.transform = '';
-        }, 150);
-    }
-
-    /**
-     * Get current settings
-     */
-    getSettings() {
-        return {
-            language: this.currentLanguage,
-            quality: this.currentQuality,
-            playlistUrl: this.playlistInput?.value || '',
-            autoplay: this.toggles.autoplay?.checked || false,
-            rememberPosition: this.toggles.rememberPosition?.checked || false
-        };
-    }
-
-    /**
-     * Update settings
-     */
-    updateSettings(newSettings) {
-        if (newSettings.language) {
-            this.currentLanguage = newSettings.language;
-            this.applyLanguage(newSettings.language);
-        }
-
-        if (newSettings.quality) {
-            this.currentQuality = newSettings.quality;
-        }
-
-        if (newSettings.playlistUrl && this.playlistInput) {
-            this.playlistInput.value = newSettings.playlistUrl;
-        }
-
-        this.saveSettings();
     }
 }
 
@@ -475,24 +344,24 @@ class SettingsManager {
 function addAnimationStyles() {
     const style = document.createElement('style');
     style.textContent = `
-        @keyframes slideIn {
+        @keyframes slideUp {
             from {
-                transform: translateX(400px);
+                transform: translateY(100px);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateY(0);
                 opacity: 1;
             }
         }
 
-        @keyframes slideOut {
+        @keyframes slideDown {
             from {
-                transform: translateX(0);
+                transform: translateY(0);
                 opacity: 1;
             }
             to {
-                transform: translateX(400px);
+                transform: translateY(100px);
                 opacity: 0;
             }
         }
@@ -505,22 +374,11 @@ function addAnimationStyles() {
  */
 document.addEventListener('DOMContentLoaded', () => {
     addAnimationStyles();
-    window.settingsManager = new SettingsManager();
-    console.log('Settings page initialized');
+    window.mobileSettingsManager = new MobileSettingsManager();
+    console.log('Mobile settings page initialized');
 });
-
-/**
- * Handle logout
- */
-function handleLogout() {
-    console.log('Logging out...');
-    // window.location.href = '/logout';
-}
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        SettingsManager,
-        handleLogout
-    };
+    module.exports = MobileSettingsManager;
 }

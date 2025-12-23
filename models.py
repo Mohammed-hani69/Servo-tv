@@ -132,6 +132,7 @@ class Device(BaseModel):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     device_uid = db.Column(db.String(100), unique=True, nullable=False)
+    device_name = db.Column(db.String(100), nullable=True)
     device_type = db.Column(db.String(50), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
 
@@ -143,6 +144,27 @@ class Device(BaseModel):
 
     # Relationships
     user = db.relationship('User', back_populates='devices')
+    playlists = db.relationship('UserPlaylist', back_populates='device', cascade="all, delete-orphan")
+
+# ----------------------
+# User Playlists (البلايليست المتعددة للمستخدم)
+# ----------------------
+class UserPlaylist(BaseModel):
+    __tablename__ = 'user_playlists'
+
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    device_id = db.Column(db.Integer, db.ForeignKey('devices.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    media_link = db.Column(db.Text, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    reseller_playlist = db.Column(db.Text, nullable=True)  # البلايليست الاختياري من الموزع
+
+    # Relationships
+    user = db.relationship('User', back_populates='playlists')
+    device = db.relationship('Device', back_populates='playlists')
+
+# إضافة العلاقة مع User
+User.playlists = db.relationship('UserPlaylist', back_populates='user', cascade="all, delete-orphan")
 
 # ----------------------
 # Support Tickets (تذاكر الدعم)

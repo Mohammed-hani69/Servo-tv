@@ -194,9 +194,9 @@ class MoviesApp {
         });
         
         // البحث
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+        const moviesSearchInput = document.getElementById('searchInput');
+        if (moviesSearchInput) {
+            moviesSearchInput.addEventListener('input', (e) => {
                 this.search(e.target.value);
             });
         }

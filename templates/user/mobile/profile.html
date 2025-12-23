@@ -24,7 +24,7 @@
         <!-- PROFILE CARD -->
         <div class="profile-card">
             <div class="profile-avatar">D</div>
-            <div class="profile-name">Demo User</div>
+            <div class="profile-name username-display">Demo User</div>
             <div class="profile-email">demo@tvapp.com</div>
             <div class="profile-status">
                 <span class="status-badge premium">
@@ -48,22 +48,25 @@
             <div class="info-content">
                 <div class="info-row">
                     <span class="info-label">Status</span>
-                    <span class="info-value active">Active</span>
+                    <span class="info-value sub-status active">Active</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Type</span>
-                    <span class="info-value">Premium</span>
+                    <span class="info-value sub-plan">Premium</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Code Activation</span>
+                    <span class="info-value sub-code">XXXXXX</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Expiry Date</span>
-                    <span class="info-value">Dec 22, 2025</span>
+                    <span class="info-value sub-expiry">Dec 22, 2025</span>
                 </div>
-                <div class="info-row">
+                <div class="info-row days-left-row" style="display: none;">
                     <span class="info-label">Days Left</span>
-                    <span class="info-value">365 days</span>
+                    <span class="info-value sub-days-left">365 days</span>
                 </div>
             </div>
-            <button class="btn btn-primary" onclick="window.location.href='/subscription'">Manage Subscription</button>
         </section>
 
         <!-- DEVICES SECTION -->
@@ -79,25 +82,14 @@
                 <div class="device-item">
                     <div class="device-icon">📱</div>
                     <div class="device-info">
-                        <div class="device-name">iPhone 12</div>
+                        <div class="device-name device-display">iPhone 12</div>
                         <div class="device-status">Active</div>
                     </div>
                     <div class="device-actions">
                         <button class="device-btn" title="Manage">⋮</button>
                     </div>
                 </div>
-                <div class="device-item">
-                    <div class="device-icon">💻</div>
-                    <div class="device-info">
-                        <div class="device-name">MacBook Pro</div>
-                        <div class="device-status">Inactive</div>
-                    </div>
-                    <div class="device-actions">
-                        <button class="device-btn" title="Manage">⋮</button>
-                    </div>
-                </div>
             </div>
-            <button class="btn btn-secondary" onclick="window.location.href='/devices'">Manage Devices</button>
         </section>
 
         <!-- ACCOUNT SECTION -->
@@ -111,19 +103,18 @@
             </div>
             <div class="info-content">
                 <div class="info-row">
-                    <span class="info-label">Email</span>
-                    <span class="info-value">demo@tvapp.com</span>
+                    <span class="info-label">Device ID</span>
+                    <span class="info-value device-id-display">dev-123</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">User ID</span>
-                    <span class="info-value">u-123</span>
+                    <span class="info-label">Distributor</span>
+                    <span class="info-value distributor-display">N/A</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Join Date</span>
-                    <span class="info-value">Jan 15, 2024</span>
+                    <span class="info-value join-date-display">Jan 15, 2024</span>
                 </div>
             </div>
-            <button class="btn btn-secondary" onclick="window.location.href='/settings/password'">Change Password</button>
         </section>
 
         <!-- SPACER -->
@@ -132,5 +123,163 @@
 
     <!-- BOTTOM NAVIGATION COMPONENT -->
     {% include 'user/mobile/components/bottom-nav.html' %}
+
+    <script>
+        class MobileProfileManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.loadProfileData();
+            }
+
+            /**
+             * Load profile data from backend
+             */
+            async loadProfileData() {
+                try {
+                    const [profileRes, subscriptionRes] = await Promise.all([
+                        fetch('/api/profile'),
+                        fetch('/api/profile/subscription')
+                    ]);
+
+                    const profileData = await profileRes.json();
+                    const subscriptionData = await subscriptionRes.json();
+
+                    if (profileData.success) {
+                        this.updateProfileUI(profileData.data);
+                    }
+
+                    if (subscriptionData.success) {
+                        this.updateSubscriptionUI(subscriptionData.data);
+                    }
+                } catch (error) {
+                    console.error('Error loading profile data:', error);
+                }
+            }
+
+            /**
+             * Update profile UI with data
+             */
+            updateProfileUI(data) {
+                // Update username
+                const usernameElement = document.querySelector('.username-display');
+                if (usernameElement) {
+                    usernameElement.textContent = data.username || 'User';
+                }
+
+                // Update device name
+                const deviceElement = document.querySelector('.device-display');
+                if (deviceElement) {
+                    deviceElement.textContent = data.device_name || 'Device';
+                }
+
+                // Update device ID
+                const deviceIdElement = document.querySelector('.device-id-display');
+                if (deviceIdElement) {
+                    deviceIdElement.textContent = data.device_id || 'N/A';
+                }
+
+                // Update distributor
+                const distributorElement = document.querySelector('.distributor-display');
+                if (distributorElement) {
+                    distributorElement.textContent = data.distributor || 'N/A';
+                }
+
+                // Update join date
+                const joinDateElement = document.querySelector('.join-date-display');
+                if (joinDateElement && data.first_login_at) {
+                    const joinDate = new Date(data.first_login_at);
+                    joinDateElement.textContent = joinDate.toLocaleDateString();
+                }
+
+                // Update profile avatar
+                const profileAvatar = document.querySelector('.profile-avatar');
+                if (profileAvatar && data.username) {
+                    profileAvatar.textContent = data.username.charAt(0).toUpperCase();
+                }
+            }
+
+            /**
+             * Update subscription UI with data
+             */
+            updateSubscriptionUI(data) {
+                // Status
+                const statusElement = document.querySelector('.sub-status');
+                if (statusElement) {
+                    statusElement.textContent = data.status === 'active' ? 'Active' : 'Inactive';
+                    statusElement.className = `info-value sub-status ${data.status === 'active' ? 'active' : ''}`;
+                }
+
+                // Plan
+                const planElement = document.querySelector('.sub-plan');
+                if (planElement) {
+                    const planText = data.plan || 'No Plan';
+                    const durationText = data.is_lifetime ? ' (Lifetime)' : (data.duration_months ? ` (${data.duration_months} Months)` : '');
+                    planElement.textContent = planText + durationText;
+                }
+
+                // Code
+                const codeElement = document.querySelector('.sub-code');
+                if (codeElement) {
+                    codeElement.textContent = data.plan || 'N/A';
+                }
+
+                // Expiration Date
+                const expiryElement = document.querySelector('.sub-expiry');
+                if (expiryElement) {
+                    if (data.is_lifetime) {
+                        expiryElement.textContent = 'Lifetime';
+                        expiryElement.style.color = '#4CAF50';
+                        expiryElement.style.fontWeight = 'bold';
+                    } else if (data.expiration_date) {
+                        const expiryDate = new Date(data.expiration_date);
+                        expiryElement.textContent = expiryDate.toLocaleDateString();
+                    } else {
+                        expiryElement.textContent = 'N/A';
+                    }
+                }
+
+                // Days left - إظهار فقط للاشتراكات غير lifetime
+                const daysLeftRow = document.querySelector('.days-left-row');
+                const daysLeftElement = document.querySelector('.sub-days-left');
+                
+                if (!data.is_lifetime && data.expiration_date) {
+                    if (daysLeftRow) daysLeftRow.style.display = '';
+                    if (daysLeftElement) {
+                        const remaining = this.calculateRemainingDays(data.expiration_date);
+                        daysLeftElement.textContent = remaining + ' day' + (remaining !== 1 ? 's' : '');
+                    }
+                } else if (daysLeftRow) {
+                    daysLeftRow.style.display = 'none';
+                }
+            }
+
+            /**
+             * Calculate remaining days
+             */
+            calculateRemainingDays(expiryDate) {
+                const today = new Date();
+                const expiry = new Date(expiryDate);
+                
+                today.setHours(0, 0, 0, 0);
+                expiry.setHours(0, 0, 0, 0);
+                
+                const timeDiff = expiry - today;
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                return daysDiff > 0 ? daysDiff : 0;
+            }
+        }
+
+        /**
+         * Initialize mobile profile manager when DOM is ready
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            window.mobileProfileManager = new MobileProfileManager();
+            console.log('Mobile profile page initialized');
+        });
+    </script>
 </body>
 </html>

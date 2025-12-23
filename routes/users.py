@@ -9,6 +9,11 @@ import string
 import random
 import secrets
 from audit_helper import log_user_action
+from performance_helper import (
+    SessionCache, get_device_with_user, get_device_with_activation,
+    get_activation_for_user, monitor_performance, serialize_device
+)
+from sqlalchemy.orm import joinedload
 
 #=============================================================
 #=============================================================
@@ -21,7 +26,7 @@ users_bp = Blueprint('users', __name__)
 def safe_datetime_compare(dt1, dt2):
     """
     مقارنة آمنة للتواريخ تتعامل مع naive و aware datetimes
-    dt1 > dt2 = True إذا كان dt1 أكبر من dt2
+    يعود True إذا كان dt1 < dt2 (dt1 قبل dt2)
     """
     if dt1 is None or dt2 is None:
         return False
@@ -306,33 +311,52 @@ def get_template_path(template_name):
     Returns:
         المسار الكامل للقالب المناسب
     """
+    import os
+    
     if is_mobile_device():
-        return f'user/mobile/{template_name}'
+        mobile_path = f'user/mobile/{template_name}'
+        # تحقق من وجود ملف الموبايل
+        if os.path.exists(os.path.join('templates', mobile_path)):
+            return mobile_path
+        # إذا لم يوجد ملف موبايل، استخدم نسخة سطح المكتب
+    
     return f'user/{template_name}'
+
+@users_bp.route('/landing')
+def user_landing():
+    """صفحة اختيار الدور - الموبايل والويب"""
+    template = get_template_path('landing.html')
+    return render_template(template)
 
 @users_bp.route('/dashboard')
 @user_login_required
+@monitor_performance
 def dashboard():
     """صفحة لوحة تحكم المستخدم"""
     device_uid = session.get('device_uid')
-    device = Device.query.filter_by(device_uid=device_uid).first()
+    
+    # استخدام eager loading لجلب البيانات المرتبطة (Query واحد بدل 2+)
+    device = get_device_with_user(device_uid, is_active=False)
     
     template = get_template_path('dashboard.html')
     return render_template(template, device=device)
 
 @users_bp.route('/player')
 @user_login_required
+@monitor_performance
 def player():
     """صفحة مشغل الفيديو المتقدمة"""
     try:
         device_uid = session.get('device_uid')
-        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        # جلب الجهاز مع كل البيانات المرتبطة في query واحد (بدل 3+ queries)
+        device = get_device_with_activation(device_uid, is_active=True)
         
         if not device:
             return redirect(url_for('users.login'))
         
         # التحقق من الاشتراك
-        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        activation = get_activation_for_user(device.user_id)
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
             template = get_template_path('player.html')
@@ -350,20 +374,152 @@ def player():
 
 @users_bp.route('/profile')
 @user_login_required
+@monitor_performance
 def profile():
     """صفحة ملف المستخدم"""
     device_uid = session.get('device_uid')
-    device = Device.query.filter_by(device_uid=device_uid).first()
+    device = get_device_with_user(device_uid, is_active=False)
     
     template = get_template_path('profile.html')
     return render_template(template, device=device)
 
+
+@users_bp.route('/api/profile', methods=['GET'])
+@user_login_required
+def get_profile():
+    """الحصول على بيانات ملف المستخدم"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        user = device.user
+        reseller = user.reseller
+        
+        # الحصول على الاشتراك الحالي للمستخدم
+        activation_code = ActivationCode.query.filter_by(assigned_user_id=user.id).first()
+        
+        # الحصول على كود تفعيل الجهاز
+        device_activation = DeviceActivationCode.query.filter_by(device_id=device.device_uid).order_by(DeviceActivationCode.created_at.desc()).first()
+        
+        profile_data = {
+            'device_id': device.device_uid,
+            'device_name': device.device_name or 'جهاز',
+            'device_type': device.device_type or 'unknown',
+            'user_id': user.id,
+            'username': user.username,
+            'first_login_at': device.first_login_at.isoformat() if device.first_login_at else None,
+            'last_login_at': device.last_login_at.isoformat() if device.last_login_at else None,
+            'is_active': device.is_active,
+            'distributor': reseller.name if reseller else 'N/A',
+            'distributor_id': reseller.id if reseller else None,
+            'expiration_date': activation_code.expiration_date.isoformat() if activation_code and activation_code.expiration_date else None,
+            'device_activation_code': device_activation.activation_code if device_activation else None,
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': profile_data
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في الحصول على ملف المستخدم: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/profile/update-device-name', methods=['POST'])
+@user_login_required
+def update_device_name():
+    """تحديث اسم الجهاز"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        data = request.get_json()
+        device_name = data.get('device_name', '').strip()
+        
+        if not device_name:
+            return jsonify({'success': False, 'message': 'اسم الجهاز لا يمكن أن يكون فارغاً'}), 400
+        
+        if len(device_name) > 100:
+            return jsonify({'success': False, 'message': 'اسم الجهاز طويل جداً'}), 400
+        
+        device.device_name = device_name
+        db.session.commit()
+        
+        log_user_action(device.user_id, action='update_device_name',
+                       description=f'تحديث اسم الجهاز إلى {device_name}', resource_type='device', resource_id=device.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث اسم الجهاز بنجاح',
+            'data': {'device_name': device.device_name}
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في تحديث اسم الجهاز: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/profile/subscription', methods=['GET'])
+@user_login_required
+def get_subscription_info():
+    """الحصول على معلومات الاشتراك"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        user = device.user
+        # البحث عن كود التفعيل الخاص بهذا المستخدم
+        activation_code = ActivationCode.query.filter_by(assigned_user_id=user.id).first()
+        
+        # حساب حالة الاشتراك
+        is_active = False
+        if activation_code:
+            if activation_code.is_lifetime:
+                is_active = True
+            elif activation_code.expiration_date:
+                # الحصول على التاريخ الحالي
+                current_time = datetime.now(timezone.utc) if activation_code.expiration_date.tzinfo else datetime.utcnow()
+                # التاريخ الحالي يجب أن يكون قبل تاريخ الانتهاء
+                is_active = safe_datetime_compare(current_time, activation_code.expiration_date)
+        
+        subscription_data = {
+            'status': 'active' if is_active else 'inactive',
+            'plan': activation_code.code if activation_code else 'No Plan',
+            'is_lifetime': activation_code.is_lifetime if activation_code else False,
+            'duration_months': activation_code.duration_months if activation_code else 0,
+            'activated_at': activation_code.activated_at.isoformat() if activation_code and activation_code.activated_at else None,
+            'expiration_date': activation_code.expiration_date.isoformat() if activation_code and activation_code.expiration_date else None,
+            'max_devices': activation_code.max_devices if activation_code else 0,
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': subscription_data
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في الحصول على معلومات الاشتراك: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @users_bp.route('/series')
 @user_login_required
+@monitor_performance
 def series():
     """صفحة سلسلة البرامج"""
     device_uid = session.get('device_uid')
-    device = Device.query.filter_by(device_uid=device_uid).first()
+    device = get_device_with_user(device_uid, is_active=False)
     
     template = get_template_path('series.html')
     return render_template(template, device=device)
@@ -371,10 +527,11 @@ def series():
 
 @users_bp.route('/movies')
 @user_login_required
+@monitor_performance
 def movies():
     """صفحة الأفلام"""
     device_uid = session.get('device_uid')
-    device = Device.query.filter_by(device_uid=device_uid).first()
+    device = get_device_with_user(device_uid, is_active=False)
     
     template = get_template_path('movies.html')
     return render_template(template, device=device)
@@ -382,13 +539,368 @@ def movies():
 
 @users_bp.route('/settings')
 @user_login_required
+@monitor_performance
 def settings():
     """صفحة إعدادات المستخدم"""
     device_uid = session.get('device_uid')
-    device = Device.query.filter_by(device_uid=device_uid).first()
+    device = get_device_with_user(device_uid, is_active=False)
     
     template = get_template_path('settings.html')
     return render_template(template, device=device)
+
+
+@users_bp.route('/api/settings', methods=['GET'])
+@user_login_required
+def get_user_settings():
+    """الحصول على إعدادات المستخدم"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        settings_data = {
+            'device_id': device.device_uid,
+            'device_name': device.device_name or 'جهاز',
+            'media_link': device.media_link or '',
+            'device_type': device.device_type or 'unknown',
+            'first_login_at': device.first_login_at.isoformat() if device.first_login_at else None,
+            'last_login_at': device.last_login_at.isoformat() if device.last_login_at else None,
+        }
+        
+        return jsonify({
+            'success': True,
+            'data': settings_data
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في الحصول على الإعدادات: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/settings/playlist', methods=['POST'])
+@user_login_required
+def save_playlist_settings():
+    """حفظ رابط البلايليست"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        data = request.get_json()
+        playlist_url = data.get('playlistUrl', '').strip()
+        
+        if not playlist_url:
+            return jsonify({'success': False, 'message': 'يرجى إدخال رابط صحيح'}), 400
+        
+        # تحديث رابط البلايليست في قاعدة البيانات
+        device.media_link = playlist_url
+        db.session.commit()
+        
+        log_user_action(device.user_id, action='update_playlist', 
+                       description=f'تحديث رابط البلايليست', resource_type='device', resource_id=device.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم حفظ رابط البلايليست بنجاح',
+            'data': {'media_link': device.media_link}
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في حفظ البلايليست: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+# ========================================================================================
+# 🎵 API للـ User Playlists (نظام البلايليست المتعددة)
+# ========================================================================================
+
+@users_bp.route('/api/playlists', methods=['GET'])
+@user_login_required
+def get_user_playlists():
+    """جلب جميع البلايليسترات للمستخدم الحالي"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        # استيراد UserPlaylist من models
+        from models import UserPlaylist
+        
+        # جلب جميع البلايليسترات
+        playlists = UserPlaylist.query.filter_by(user_id=device.user_id).all()
+        
+        playlists_data = [{
+            'id': p.id,
+            'name': p.name,
+            'media_link': p.media_link,
+            'is_active': p.is_active,
+            'created_at': p.created_at.isoformat() if p.created_at else None,
+            'updated_at': p.updated_at.isoformat() if p.updated_at else None
+        } for p in playlists]
+        
+        return jsonify({
+            'success': True,
+            'data': playlists_data,
+            'total': len(playlists_data)
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في جلب البلايليسترات: {str(e)}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/playlists', methods=['POST'])
+@user_login_required
+def add_playlist():
+    """إضافة بلايليست جديد"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        from models import UserPlaylist
+        
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        media_link = data.get('media_link', '').strip()
+        
+        if not name or not media_link:
+            return jsonify({'success': False, 'message': 'يرجى إدخال الاسم والرابط'}), 400
+        
+        # إنشاء بلايليست جديد
+        playlist = UserPlaylist(
+            user_id=device.user_id,
+            device_id=device.id,
+            name=name,
+            media_link=media_link,
+            is_active=True
+        )
+        
+        db.session.add(playlist)
+        db.session.commit()
+        
+        log_user_action(
+            user_id=device.user_id,
+            action='add_playlist',
+            description=f'إضافة بلايليست: {name}',
+            resource_type='playlist',
+            resource_id=playlist.id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم إضافة البلايليست بنجاح',
+            'data': {
+                'id': playlist.id,
+                'name': playlist.name,
+                'media_link': playlist.media_link,
+                'is_active': playlist.is_active,
+                'created_at': playlist.created_at.isoformat() if playlist.created_at else None
+            }
+        }), 201
+    
+    except Exception as e:
+        print(f"❌ خطأ في إضافة البلايليست: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/playlists/<int:playlist_id>/toggle', methods=['PUT'])
+@user_login_required
+def toggle_playlist_status(playlist_id):
+    """تفعيل/تعطيل بلايليست"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        from models import UserPlaylist
+        
+        # التحقق من أن البلايليست ينتمي للمستخدم الحالي
+        playlist = UserPlaylist.query.filter_by(
+            id=playlist_id,
+            user_id=device.user_id
+        ).first()
+        
+        if not playlist:
+            return jsonify({'success': False, 'message': 'البلايليست غير موجود'}), 404
+        
+        # تفعيل/تعطيل
+        playlist.is_active = not playlist.is_active
+        db.session.commit()
+        
+        log_user_action(
+            device.user_id,
+            action='toggle_playlist',
+            description=f'{"تفعيل" if playlist.is_active else "تعطيل"}: {playlist.name}',
+            resource_type='playlist',
+            resource_id=playlist.id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': f'تم {"تفعيل" if playlist.is_active else "تعطيل"} البلايليست',
+            'data': {
+                'id': playlist.id,
+                'is_active': playlist.is_active
+            }
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في تغيير حالة البلايليست: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/playlists/<int:playlist_id>', methods=['DELETE'])
+@user_login_required
+def delete_playlist(playlist_id):
+    """حذف بلايليست"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        from models import UserPlaylist
+        
+        # التحقق من أن البلايليست ينتمي للمستخدم الحالي
+        playlist = UserPlaylist.query.filter_by(
+            id=playlist_id,
+            user_id=device.user_id
+        ).first()
+        
+        if not playlist:
+            return jsonify({'success': False, 'message': 'البلايليست غير موجود'}), 404
+        
+        playlist_name = playlist.name
+        db.session.delete(playlist)
+        db.session.commit()
+        
+        log_user_action(
+            user_id=device.user_id,
+            action='delete_playlist',
+            description=f'حذف بلايليست: {playlist_name}',
+            resource_type='playlist',
+            resource_id=playlist_id
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم حذف البلايليست بنجاح'
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في حذف البلايليست: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/settings/quality', methods=['POST'])
+@user_login_required
+def save_quality_settings():
+    """حفظ إعدادات جودة الفيديو"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        data = request.get_json()
+        quality = data.get('quality', 'auto')
+        
+        # يمكن حفظ الجودة في قاعدة البيانات إذا كان هناك حقل خاص بها
+        # أو حفظها في localStorage بجانب العميل
+        
+        log_user_action(device.user_id, action='update_quality',
+                       description=f'تغيير جودة الفيديو إلى {quality}', resource_type='device', resource_id=device.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث جودة الفيديو',
+            'data': {'quality': quality}
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في حفظ إعدادات الجودة: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/settings/language', methods=['POST'])
+@user_login_required
+def save_language_settings():
+    """حفظ إعدادات اللغة"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        data = request.get_json()
+        language = data.get('language', 'en')
+        
+        log_user_action(device.user_id, action='update_language',
+                       description=f'تغيير اللغة إلى {language}', resource_type='device', resource_id=device.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث اللغة',
+            'data': {'language': language}
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في حفظ إعدادات اللغة: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@users_bp.route('/api/settings/playback', methods=['POST'])
+@user_login_required
+def save_playback_settings():
+    """حفظ إعدادات التشغيل"""
+    try:
+        device_uid = session.get('device_uid')
+        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        
+        if not device:
+            return jsonify({'success': False, 'message': 'جهاز غير صحيح'}), 403
+        
+        data = request.get_json()
+        autoplay = data.get('autoplay', False)
+        remember_position = data.get('rememberPosition', False)
+        
+        log_user_action(device.user_id, action='update_playback_settings',
+                       description=f'تحديث إعدادات التشغيل - autoplay: {autoplay}, rememberPosition: {remember_position}',
+                       resource_type='device', resource_id=device.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم حفظ إعدادات التشغيل',
+            'data': {
+                'autoplay': autoplay,
+                'rememberPosition': remember_position
+            }
+        }), 200
+    
+    except Exception as e:
+        print(f"❌ خطأ في حفظ إعدادات التشغيل: {str(e)}")
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @users_bp.route('/my-list', methods=['GET'])
@@ -544,8 +1056,24 @@ def device_login():
         db.session.commit()
         
         # ============================================================================
-        # 8️⃣ إرجاع البيانات
+        # 8️⃣ إرجاع البيانات (مع البلايليسترات المفعلة فقط)
         # ============================================================================
+        
+        # جلب جميع البلايليسترات المفعلة فقط
+        from models import UserPlaylist
+        playlists = UserPlaylist.query.filter_by(
+            user_id=user_id,
+            is_active=True
+        ).all()
+        
+        playlists_data = [{
+            'id': p.id,
+            'name': p.name,
+            'media_link': p.media_link,
+            'is_active': p.is_active,
+            'is_reseller_playlist': bool(p.reseller_playlist),
+            'created_at': p.created_at.isoformat() if p.created_at else None
+        } for p in playlists]
         
         return jsonify({
             'success': True,
@@ -555,7 +1083,8 @@ def device_login():
                 'user_id': user_id,
                 'username': user.username,
                 'device_id': device.device_uid,
-                'media_link': device.media_link,
+                'media_link': device.media_link,  # للتوافقية مع الأجهزة القديمة
+                'playlists': playlists_data,  # البلايليسترات الجديدة
                 'subscription': {
                     'duration_months': activation_code.duration_months,
                     'max_devices': activation_code.max_devices,
@@ -605,24 +1134,44 @@ def get_stream_token():
         data = request.get_json() or {}
         device_uid = data.get('device_id') or session.get('device_uid')
         
+        print(f"📌 Token request - device_uid: {device_uid}, session keys: {list(session.keys())}")
+        
         if not device_uid:
+            print('❌ No device_uid found in request or session')
             return jsonify({'success': False, 'message': 'Device ID required'}), 400
         
         # ✅ التحقق من الجهاز والاشتراك
         device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
         
-        if not device or not device.user_id:
+        if not device:
+            print(f'❌ Device not found: {device_uid}')
             return jsonify({'success': False, 'message': 'Device not found or inactive'}), 403
+            
+        if not device.user_id:
+            print(f'❌ Device {device_uid} has no user_id')
+            return jsonify({'success': False, 'message': 'Device not linked to user'}), 403
         
         user = User.query.get(device.user_id)
         if not user:
+            print(f'❌ User not found for device {device_uid}')
             return jsonify({'success': False, 'message': 'User not found'}), 404
         
         # التحقق من صلاحية الاشتراك
         activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
         now = datetime.now(timezone.utc)
-        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+        
+        if not activation:
+            print(f'❌ No activation code for user {device.user_id}')
+            return jsonify({'success': False, 'message': 'No active subscription'}), 403
+            
+        if activation.expiration_date and safe_datetime_compare(activation.expiration_date, now):
+            print(f'❌ Subscription expired for user {device.user_id}: {activation.expiration_date}')
             return jsonify({'success': False, 'message': 'Subscription expired'}), 403
+        
+        # ✅ التحقق من وجود media_link
+        if not device.media_link:
+            print(f'❌ Device {device_uid} has no media_link')
+            return jsonify({'success': False, 'message': 'Device has no media link configured'}), 403
         
         # 🔐 توليد توكن Stream (صلاحية 24 ساعة)
         stream_token = secrets.token_urlsafe(32)
@@ -631,78 +1180,151 @@ def get_stream_token():
         session[f'stream_token_{device_uid}'] = stream_token
         session.permanent = True
         
+        playlist_url = f"{request.host_url.rstrip('/')}/stream/playlist?token={stream_token}"
+        
+        print(f"✅ Token generated for device {device_uid}: {stream_token[:20]}...")
+        print(f"✅ Playlist URL: {playlist_url}")
+        
         return jsonify({
             'success': True,
             'status': 'active',
-            'playlist_url': f"{request.host_url.rstrip('/')}/stream/playlist?token={stream_token}",
+            'playlist_url': playlist_url,
             'token': stream_token,
             'token_expires': 86400  # 24 hours
         }), 200
     
     except Exception as e:
         print(f"❌ خطأ في إصدار stream token: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @users_bp.route('/stream/playlist', methods=['GET'])
 def stream_playlist():
     """
-    المرحلة 2: جلب ملف M3U من Device.media_link بأمان
+    المرحلة 2: جلب ملف M3U من البلايليسترات المفعلة فقط
     
     🔐 التحقق من:
     1. التوكن صحيح
     2. الجهاز مفعل
     3. الاشتراك ساري
+    4. البلايليستات المفعلة فقط
     
     🎯 العملية:
-    1. جلب Device.media_link من DB
-    2. تحميل ملف M3U
-    3. إعادته مباشرة للتطبيق (Proxy)
+    1. جلب البلايليسترات المفعلة من DB
+    2. دمج محتوى M3U من جميع البلايليسترات النشطة فقط
+    3. إعادة الملف الموحد للتطبيق
     """
     try:
         token = request.args.get('token')
         
         if not token:
+            print('❌ No token provided')
             return jsonify({'success': False, 'message': 'Token required'}), 401
         
-        # 🔍 البحث عن الجهاز المرتبط بالتوكن
-        # (في حالة الإنتاج، استخدم Redis أو DB للتوكنات)
-        device = None
-        for key in session:
-            if key.startswith('stream_token_') and session.get(key) == token:
-                device_uid = key.replace('stream_token_', '')
-                device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
-                break
+        print(f"🔍 Validating token: {token[:20]}..., session keys: {list(session.keys())}")
         
-        if not device or not device.media_link:
-            return jsonify({'success': False, 'message': 'Invalid token or no media link'}), 403
+        # 🔍 البحث عن الجهاز المرتبط بالتوكن
+        device = None
+        device_uid = None
+        try:
+            for key in list(session.keys()):
+                if key.startswith('stream_token_') and session.get(key) == token:
+                    device_uid = key.replace('stream_token_', '')
+                    print(f"✅ Token matched to device_uid: {device_uid}")
+                    device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+                    if device:
+                        print(f"✅ Device found: {device_uid}")
+                        break
+        except Exception as e:
+            print(f'❌ Error searching session for token: {str(e)}')
+        
+        if not device:
+            print(f'❌ Device not found for token or device is inactive. Token: {token[:20]}...')
+            return jsonify({'success': False, 'message': 'Invalid token or device not found'}), 403
         
         # التحقق من صلاحية الاشتراك
         activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            print(f'❌ Subscription not active for user {device.user_id}')
             return jsonify({'success': False, 'message': 'Subscription expired'}), 403
         
-        # ✅ جلب ملف M3U من الرابط الأصلي
-        import requests
-        try:
-            response = requests.get(device.media_link, timeout=10)
-            response.raise_for_status()
-            
-            # إرجاع ملف M3U مباشرة
+        # ============================================================================
+        # جلب البلايليسترات المفعلة فقط
+        # ============================================================================
+        
+        from models import UserPlaylist
+        active_playlists = UserPlaylist.query.filter_by(
+            user_id=device.user_id,
+            is_active=True
+        ).all()
+        
+        if not active_playlists:
+            print(f'❌ No active playlists for user {device.user_id}')
+            # إرجاع ملف M3U فارغ
             from flask import Response
             return Response(
-                response.content,
+                '#EXTM3U\n',
                 mimetype='application/vnd.apple.mpegurl',
                 headers={'Content-Disposition': 'attachment; filename=playlist.m3u8'}
             )
         
-        except requests.RequestException as e:
-            print(f"❌ خطأ في جلب M3U من {device.media_link}: {str(e)}")
-            return jsonify({'success': False, 'message': 'Failed to fetch playlist'}), 500
+        # ============================================================================
+        # دمج محتوى M3U من جميع البلايليسترات النشطة
+        # ============================================================================
+        
+        import requests
+        
+        merged_m3u = '#EXTM3U\n'
+        playlist_count = 0
+        
+        for playlist in active_playlists:
+            try:
+                print(f"📥 Fetching playlist from: {playlist.media_link}")
+                response = requests.get(playlist.media_link, timeout=10)
+                response.raise_for_status()
+                
+                # إزالة سطر #EXTM3U الأول إن وجد
+                content = response.text
+                if content.startswith('#EXTM3U'):
+                    content = content[7:].lstrip('\n')
+                
+                merged_m3u += f'\n# Playlist: {playlist.name}\n'
+                merged_m3u += content
+                playlist_count += 1
+                
+                print(f"✅ Playlist '{playlist.name}' added successfully ({len(response.content)} bytes)")
+                
+            except requests.RequestException as e:
+                print(f"⚠️ تحذير: فشل جلب البلايليست '{playlist.name}' من {playlist.media_link}: {str(e)}")
+                # متابعة مع البلايليسترات الأخرى
+                continue
+        
+        if playlist_count == 0:
+            print(f'⚠️ Failed to fetch any active playlists for user {device.user_id}')
+            from flask import Response
+            return Response(
+                '#EXTM3U\n',
+                mimetype='application/vnd.apple.mpegurl',
+                headers={'Content-Disposition': 'attachment; filename=playlist.m3u8'}
+            )
+        
+        print(f"✅ Merged {playlist_count} active playlists successfully")
+        
+        # إرجاع ملف M3U الموحد
+        from flask import Response
+        return Response(
+            merged_m3u,
+            mimetype='application/vnd.apple.mpegurl',
+            headers={'Content-Disposition': 'attachment; filename=playlist.m3u8'}
+        )
     
     except Exception as e:
         print(f"❌ خطأ في stream playlist: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
@@ -1018,17 +1640,18 @@ def stream_live():
 
 @users_bp.route('/live-tv', methods=['GET'])
 @user_login_required
+@monitor_performance
 def live_tv_page():
     """صفحة Live TV مع تكامل IPTV"""
     try:
         device_uid = session.get('device_uid')
-        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        device = get_device_with_activation(device_uid, is_active=True)
         
         if not device:
             return redirect(url_for('users.login'))
         
         # التحقق من الاشتراك
-        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        activation = get_activation_for_user(device.user_id)
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
             template = get_template_path('live-tv.html')
@@ -1047,17 +1670,18 @@ def live_tv_page():
 
 @users_bp.route('/movies', methods=['GET'])
 @user_login_required
+@monitor_performance
 def movies_page():
     """صفحة Movies مع تكامل IPTV"""
     try:
         device_uid = session.get('device_uid')
-        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        device = get_device_with_activation(device_uid, is_active=True)
         
         if not device:
             return redirect(url_for('users.login'))
         
         # التحقق من الاشتراك
-        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        activation = get_activation_for_user(device.user_id)
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
             template = get_template_path('movies.html')
@@ -1074,19 +1698,52 @@ def movies_page():
         return render_template(template, error=str(e))
 
 
-@users_bp.route('/series', methods=['GET'])
+@users_bp.route('/series-details', methods=['GET'])
 @user_login_required
-def series_page():
-    """صفحة Series مع تكامل IPTV"""
+@monitor_performance
+def series_details_page():
+    """صفحة تفاصيل المسلسل مع الحلقات"""
     try:
         device_uid = session.get('device_uid')
-        device = Device.query.filter_by(device_uid=device_uid, is_active=True).first()
+        series_id = request.args.get('id')  # الحصول على معرف المسلسل من الـ URL
+        
+        device = get_device_with_activation(device_uid, is_active=True)
         
         if not device:
             return redirect(url_for('users.login'))
         
         # التحقق من الاشتراك
-        activation = ActivationCode.query.filter_by(assigned_user_id=device.user_id).first()
+        activation = get_activation_for_user(device.user_id)
+        now = datetime.now(timezone.utc)
+        if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
+            template = get_template_path('series-details.html')
+            return render_template(template, error='Subscription expired')
+        
+        log_user_action(device.user_id, 'SERIES_DETAILS_VIEWED', f'فتح صفحة تفاصيل المسلسل: {series_id}')
+        
+        template = get_template_path('series-details.html')
+        return render_template(template, device=device, series_id=series_id)
+    
+    except Exception as e:
+        print(f"❌ خطأ في صفحة تفاصيل المسلسل: {str(e)}")
+        template = get_template_path('series-details.html')
+        return render_template(template, error=str(e))
+
+
+@users_bp.route('/series', methods=['GET'])
+@user_login_required
+@monitor_performance
+def series_page():
+    """صفحة Series مع تكامل IPTV"""
+    try:
+        device_uid = session.get('device_uid')
+        device = get_device_with_activation(device_uid, is_active=True)
+        
+        if not device:
+            return redirect(url_for('users.login'))
+        
+        # التحقق من الاشتراك
+        activation = get_activation_for_user(device.user_id)
         now = datetime.now(timezone.utc)
         if not activation or (activation.expiration_date and safe_datetime_compare(activation.expiration_date, now)):
             template = get_template_path('series.html')

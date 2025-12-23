@@ -91,17 +91,17 @@ class SeriesApp {
      * Display series
      */
     renderSeries() {
-        let seriesContainer = document.querySelector('.series-list-container');
-        if (!seriesContainer) {
+        let seriesListContainer = document.querySelector('.series-list-container');
+        if (!seriesListContainer) {
             const mainContent = document.querySelector('main .content') || document.querySelector('main');
             if (!mainContent) return;
-            seriesContainer = document.createElement('div');
-            seriesContainer.className = 'series-list-container';
-            mainContent.appendChild(seriesContainer);
+            seriesListContainer = document.createElement('div');
+            seriesListContainer.className = 'series-list-container';
+            mainContent.appendChild(seriesListContainer);
         }
         
         if (this.filteredSeries.length === 0) {
-            seriesContainer.innerHTML = `
+            seriesListContainer.innerHTML = `
                 <div class="no-content" style="
                     display: flex;
                     flex-direction: column;
@@ -112,8 +112,8 @@ class SeriesApp {
                     color: #aaa;
                 ">
                     <div style="font-size: 64px; margin-bottom: 20px; opacity: 0.5;">📺</div>
-                    <h2 style="margin: 0 0 10px 0; font-size: 24px;">No Series Found</h2>
-                    <p style="margin: 0; font-size: 14px; opacity: 0.7;">No series match your current filter</p>
+                    <h2 style="margin: 0 0 10px 0; font-size: 24px;">لا توجد مسلسلات</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.7;">لم يتم العثور على مسلسلات تطابق معايير البحث الحالية</p>
                 </div>
             `;
             return;
@@ -128,9 +128,9 @@ class SeriesApp {
             html += `
                 <div class="series-item tv-focus" data-series-id="${series.id}">
                     <div class="series-poster">
-                        <img src="${series.logo || 'https://via.placeholder.com/150x225?text=' + series.name}" 
+                        <img src="${series.logo || 'https://placehold.co/150x225/1a1a2e/ffffff?text=' + encodeURIComponent(series.name)}" 
                              alt="${series.name}"
-                             onerror="this.src='https://via.placeholder.com/150x225?text=Series'">
+                             onerror="this.src='https://placehold.co/150x225/1a1a2e/ffffff?text=Series'">
                         <div class="play-overlay">
                             <button class="play-btn" data-series-id="${series.id}">
                                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -159,15 +159,8 @@ class SeriesApp {
         
         html += '</div>';
         
-        // إنشاء container إذا لم يكن موجوداً
-        let seriesContainer = document.querySelector('.series-container');
-        if (!seriesContainer) {
-            seriesContainer = document.createElement('div');
-            seriesContainer.className = 'series-container';
-            container.appendChild(seriesContainer);
-        }
-        
-        seriesContainer.innerHTML = html;
+        // Append to the container we found/created earlier
+        seriesListContainer.innerHTML = html;
         
         this.attachSeriesListeners();
         this.attachPlayButtons();
@@ -274,9 +267,9 @@ class SeriesApp {
         });
         
         // Search
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+        const seriesSearchInput = document.getElementById('searchInput');
+        if (seriesSearchInput) {
+            seriesSearchInput.addEventListener('input', (e) => {
                 this.search(e.target.value);
             });
         }

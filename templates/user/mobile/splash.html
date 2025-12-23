@@ -336,15 +336,15 @@
             }
 
             transitionToLogin() {
-                console.log('🔄 Transitioning to login...');
+                console.log('🔄 انتقال إلى اختيار الدور...');
                 
                 // Add hide animation
                 this.splashContainer.classList.add('hide');
                 
                 // Wait for animation to complete
                 setTimeout(() => {
-                    // Redirect to login page
-                    window.location.href = '/user/mobile/login';
+                    // Redirect to role selection page
+                    window.location.href = '/landing';
                 }, 600);
             }
         }

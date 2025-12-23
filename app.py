@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, current_app, session
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from sqlalchemy import text
 from config import DEBUG, TESTING, SQLALCHEMY_TRACK_MODIFICATIONS
 from models import db, User, Reseller, Admin, Device, ActivationCode, DeviceActivationCode, AuditLog, SupportTicket, TicketMessage
 from datetime import datetime
@@ -44,7 +45,23 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 # مسار الصفحة الرئيسية
 @app.route('/')
 def index():
-    return render_template('landingpage.html')
+    """الصفحة الرئيسية - تعيد صفحة موبايل أو ويب بناءً على نوع الجهاز"""
+    # التحقق من نوع الجهاز
+    user_agent = request.user_agent
+    is_mobile = (
+        user_agent.platform in ['android', 'iphone', 'ipad'] or
+        'mobile' in user_agent.string.lower() or
+        'android' in user_agent.string.lower() or
+        'iphone' in user_agent.string.lower() or
+        'ipad' in user_agent.string.lower()
+    )
+    
+    if is_mobile:
+        # إذا كان جهاز موبايل، افتح الصفحة الأولى للموبايل (السبلاش)
+        return render_template('user/mobile/splash.html')
+    else:
+        # وإلا افتح صفحة الويب الرئيسية
+        return render_template('landingpage.html')
 
 
 # مسار الـ Favicon
@@ -56,7 +73,9 @@ def favicon():
         <rect width="100" height="100" fill="#1f2937"/>
         <text x="50" y="60" font-size="60" fill="#3b82f6" font-weight="bold" text-anchor="middle">S</text>
     </svg>'''
-    return send_file(BytesIO(svg_data), mimetype='image/svg+xml', cache_timeout=3600)
+    response = send_file(BytesIO(svg_data), mimetype='image/svg+xml')
+    response.headers['Cache-Control'] = 'max-age=3600, public'
+    return response
 
 
 # معالج صحة التطبيق
@@ -65,12 +84,14 @@ def health():
     """فحص صحة التطبيق والاتصال بقاعدة البيانات"""
     try:
         # التحقق من الاتصال بقاعدة البيانات
-        db.session.execute('SELECT 1')
+        db.session.execute(text('SELECT 1'))
+        db.session.commit()
         return jsonify({
             'status': 'healthy',
             'message': 'التطبيق يعمل بشكل طبيعي'
         }), 200
     except Exception as e:
+        print(f"❌ Health check error: {str(e)}")
         return jsonify({
             'status': 'unhealthy',
             'message': str(e)
