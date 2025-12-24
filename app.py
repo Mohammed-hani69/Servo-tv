@@ -40,7 +40,7 @@ db.init_app(app)
 csrf = CSRFProtect(app)
 
 # تهيئة Socket.IO
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # مسار الصفحة الرئيسية
 @app.route('/')
