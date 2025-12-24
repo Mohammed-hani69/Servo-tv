@@ -153,9 +153,11 @@
                 // استخدام خدمة بديلة بدل imgur و via.placeholder.com
                 let moviePoster = movie.logo || placeholderSvg;
                 if (moviePoster && moviePoster.includes('imgur.com')) {
-                    moviePoster = `https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(title)}`;\n                }
+                    moviePoster = `https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(title)}`;
+                }
 
-                card.innerHTML = `\n                    <img src="${moviePoster}" alt="${title.replace(/"/g, '&quot;')}" class="movie-image" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(title)}'">
+                card.innerHTML = `
+                    <img src="${moviePoster}" alt="${title.replace(/"/g, '&quot;')}" class="movie-image" loading="lazy" onerror="this.src='https://placehold.co/300x450/1a1a2e/ffffff?text=${encodeURIComponent(title)}'">
                     <div class="new-badge">NEW</div>
                     <div class="movie-info">
                         <div class="movie-info-content">
